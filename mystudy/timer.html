@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Songtudy 프로젝트 팀">
+  <meta name="team-member" content="담당: 팀원B - 학습 타이머">
+  <meta name="description" content="과목별 공부 시간을 측정하고 학습 기록을 남기는 Songtudy 학습 타이머">
+  <title>학습 타이머 | Songtudy</title>
+  <link rel="stylesheet" href="00_mystudy_common.css">
+  <link rel="stylesheet" href="timer.css">
+  <script src="00_mystudy_common.js" defer></script>
+  <script src="../common/00_mystudy_store.js" defer></script>
+  <script src="timer-model.js" defer></script>
+  <script src="timer.js" defer></script>
+</head>
+<body data-page="timer" data-addr="timer">
+  <a class="skip-link" href="#main">본문 바로가기</a>
+  <div class="window">
+    <header class="window-tabs" data-nav></header>
+    <div class="window-frame">
+      <div class="window-bar" data-addr-bar></div>
+      <main class="window-body timer-page" id="main">
+        <div class="page-head"><div><h1 class="page-title">학습 타이머</h1><p class="timer-intro">한 번에 한 과목씩, 나의 속도로 집중해요.</p></div><a class="btn" href="weekly.html"><svg class="icon" aria-hidden="true"><use href="#i-calendar"></use></svg>주간 플래너</a></div>
+        <div class="empty" id="loadError" role="alert" hidden><p>과목을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</p><button class="btn" id="retryBtn" type="button">다시 불러오기</button></div>
+        <div class="skeleton timer-loading" id="loading" role="status" aria-label="학습 타이머 불러오는 중"></div>
+
+        <div class="timer-layout" id="timerApp" hidden>
+          <section class="timer-paper" aria-labelledby="focusTitle">
+            <div class="timer-paper-head"><p class="timer-eyebrow">나의 집중 시간</p><span class="timer-state-label" id="timerStateLabel">시작 전</span></div>
+            <h2 class="timer-focus-title" id="focusTitle">어떤 과목을 공부할까요?</h2>
+            <div class="timer-selection">
+              <label class="field" for="studySubject">과목 <span class="timer-select"><select class="select" id="studySubject"></select></span></label>
+              <label class="field" for="studyTask">함께 할 일 <span class="timer-select"><select class="select" id="studyTask"></select></span></label>
+            </div>
+
+            <div class="timer-controls-row"><div class="timer-mode" role="group" aria-label="시간 측정 방식"><button type="button" data-mode="stopwatch" aria-pressed="true">스톱워치</button><button type="button" data-mode="focus" aria-pressed="false">집중 타이머</button></div><div class="sound-control"><button class="sound-toggle" id="soundToggle" type="button" aria-label="사운드 선택" aria-expanded="false" aria-controls="soundMenu"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4Zm12.5-1.5a6 6 0 0 1 0 9M19 5a10 10 0 0 1 0 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="sound-menu" id="soundMenu" role="group" aria-label="배경 사운드" hidden><button type="button" data-sound="fire" aria-label="장작 타는 소리" title="장작 타는 소리"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21c4 0 7-2.7 7-6.5 0-2.7-1.5-4.7-3.7-6.3.1 2-1 3.2-2.2 3.9.2-3.8-1.8-6.6-4.6-8.1.4 3.2-2.5 5.1-2.5 8.2C6 18.2 8.7 21 12 21Z"/><path d="M12 18.5c1.7 0 3-1.1 3-2.7 0-1-.5-1.8-1.2-2.5-.1 1-.7 1.5-1.3 1.8 0-1.5-.8-2.5-1.7-3.2 0 1.5-1.1 2.2-1.1 3.6 0 1.7.9 3 2.3 3Z"/></svg></button><button type="button" data-sound="rain" aria-label="빗소리" title="빗소리"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 16.5h10a4 4 0 0 0 .4-8 5.7 5.7 0 0 0-10.8 1A3.5 3.5 0 0 0 7 16.5Z"/><path d="m8 19-1 2m5-2-1 2m5-2-1 2"/></svg></button><button type="button" data-sound="cafe" aria-label="카페" title="카페"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9h10v5a4 4 0 0 1-4 4H10a4 4 0 0 1-4-4V9Zm10 2h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8 5c0 1-1 1-1 2m5-2c0 1-1 1-1 2m5-2c0 1-1 1-1 2M4 21h14"/></svg></button><button type="button" data-sound="white-noise" aria-label="백색소음" title="백색소음"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 18v-4m5 4V9m5 9V5m5 13v-7"/></svg></button></div></div></div>
+            <div class="focus-settings" id="focusSettings" hidden><div class="focus-presets" role="group" aria-label="집중 시간"><button class="btn btn-sm" type="button" data-duration="25" aria-pressed="true">25분</button><button class="btn btn-sm" type="button" data-duration="50" aria-pressed="false">50분</button></div><label class="custom-duration">직접 설정 <input class="input" id="customDuration" type="number" min="1" max="180" step="1" value="25" aria-label="집중 시간(분)">분</label></div>
+
+            <div class="timer-clock-area">
+              <svg class="timer-orbit" viewBox="0 0 300 300" aria-hidden="true"><circle class="orbit-track" cx="150" cy="150" r="138"/><circle class="orbit-value" id="timerOrbit" cx="150" cy="150" r="138" pathLength="1"/></svg>
+              <div class="timer-clock-content"><p class="clock-caption" id="clockCaption">오늘도, 차근차근</p><output class="timer-digits num" id="timerDisplay" aria-label="학습 시간" aria-live="off">00:00:00</output><p class="timer-clock-sub" id="timerClockSub">시작 버튼을 누르면 기록이 시작돼요.</p></div>
+            </div>
+            <p class="timer-announcement sr-only" id="timerAnnouncement" role="status" aria-live="polite"></p>
+            <div class="timer-actions"><button class="btn btn-primary timer-start" type="button" id="startPauseBtn"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 10 7-10 7z"/></svg><span>시작하기</span></button><button class="btn" type="button" id="finishBtn" disabled><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg>기록하기</button></div>
+            <button class="link-btn timer-reset" id="resetTimerBtn" type="button" disabled>기록 없이 초기화</button>
+            <p class="timer-help" id="timerHelp">공부를 마치면 ‘기록하기’를 눌러 시간을 남겨 주세요.</p>
+          </section>
+
+          <aside class="timer-records" aria-label="학습 기록">
+            <section class="card today-total" aria-labelledby="todayTitle"><div class="today-total-head"><h2 class="card-title" id="todayTitle">오늘의 공부</h2><span class="badge badge-plain" id="todayDate"></span></div><p class="today-duration num" id="todayDuration">0분</p><p class="today-count" id="todayCount">아직 기록한 공부 시간이 없어요.</p><div class="today-subjects" id="todaySubjects"></div></section>
+            <section class="card session-section" aria-labelledby="sessionTitle"><div class="session-section-head"><h2 class="card-title" id="sessionTitle">오늘의 기록</h2><span class="num" id="sessionCount">0회</span></div><ul class="session-list" id="sessionList"></ul><div class="session-empty" id="sessionEmpty"><svg class="icon" aria-hidden="true"><use href="#i-book"></use></svg><p>집중한 시간을<br>이곳에 모아 드릴게요.</p></div></section>
+            <p class="timer-record-note"><svg class="icon" aria-hidden="true"><use href="#i-heart"></use></svg>조금씩 쌓인 시간도 소중한 기록이에요.</p>
+          </aside>
+        </div>
+        <noscript><p>타이머를 사용하려면 브라우저의 JavaScript를 켜 주세요.</p></noscript>
+      </main>
+    </div>
+  </div>
+  <footer class="site-footer"><p>Songtudy 웹프로그래밍 기말 프로젝트</p></footer>
+  <dialog class="modal" id="resetDialog" aria-labelledby="resetTitle"><div class="modal-head"><h2 class="modal-title" id="resetTitle">측정 시간을 초기화할까요?</h2></div><div class="modal-body"><p>아직 저장하지 않은 공부 시간은 사라져요. 시간을 남기려면 먼저 ‘기록하기’를 눌러 주세요.</p></div><div class="modal-foot"><button class="btn" type="button" id="cancelResetBtn">돌아가기</button><button class="btn btn-danger" type="button" id="confirmResetBtn">초기화</button></div></dialog>
+</body>
+</html>
