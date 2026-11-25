@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "month": "2026-11",
+  "subjects": [
+    { "id": "subject-math1", "name": "공학수학1", "color": "#e8b23a", "memo": "", "exams": [] },
+    { "id": "subject-programming", "name": "프로그래밍방법론", "color": "#a58bd6", "memo": "", "exams": [] },
+    { "id": "subject-web", "name": "웹프로그래밍", "color": "#e5508c", "memo": "", "exams": [] },
+    { "id": "subject-ai", "name": "인공지능입문", "color": "#5fb89a", "memo": "", "exams": [] },
+    { "id": "subject-database", "name": "데이터베이스", "color": "#5ba7d9", "memo": "", "exams": [] }
+  ],
+  "tasks": [
+    { "id": "task-math1-assignment-3", "subjectId": "subject-math1", "category": "assignment", "title": "과제3", "dueDate": "2026-11-18", "done": false },
+
+    { "id": "task-programming-week-10", "subjectId": "subject-programming", "category": "assignment", "title": "10주차 과제", "dueDate": "2026-11-05", "done": false },
+    { "id": "task-programming-week-11", "subjectId": "subject-programming", "category": "assignment", "title": "11주차 과제", "dueDate": "2026-11-12", "done": false },
+    { "id": "task-programming-week-12", "subjectId": "subject-programming", "category": "assignment", "title": "12주차 과제", "dueDate": "2026-11-19", "done": false },
+    { "id": "task-programming-week-13", "subjectId": "subject-programming", "category": "assignment", "title": "13주차 과제", "dueDate": "2026-11-26", "done": false },
+
+    { "id": "task-web-week-9", "subjectId": "subject-web", "category": "assignment", "title": "9주차 실습과제", "dueDate": "2026-11-05", "done": false },
+    { "id": "task-web-week-11", "subjectId": "subject-web", "category": "assignment", "title": "11주차 과제", "dueDate": "2026-11-16", "done": false },
+    { "id": "task-web-week-12", "subjectId": "subject-web", "category": "assignment", "title": "12주차 과제", "dueDate": "2026-11-23", "done": false },
+    { "id": "task-web-final-project", "subjectId": "subject-web", "category": "assignment", "title": "기말 프로젝트 과제", "dueDate": "2026-11-30", "done": false },
+
+    { "id": "task-ai-week-9", "subjectId": "subject-ai", "category": "assignment", "title": "w9 강의 자료 요약", "dueDate": "2026-11-02", "done": false },
+    { "id": "task-ai-week-10", "subjectId": "subject-ai", "category": "assignment", "title": "w10 강의 자료 요약", "dueDate": "2026-11-09", "done": false },
+    { "id": "task-ai-week-11", "subjectId": "subject-ai", "category": "assignment", "title": "w11 강의 자료 요약", "dueDate": "2026-11-16", "done": false },
+    { "id": "task-ai-week-12", "subjectId": "subject-ai", "category": "assignment", "title": "w12 강의 자료 요약", "dueDate": "2026-11-23", "done": false },
+    { "id": "task-ai-week-13", "subjectId": "subject-ai", "category": "assignment", "title": "w13 강의 자료 요약", "dueDate": "2026-11-30", "done": false },
+
+    { "id": "task-database-isql-30", "subjectId": "subject-database", "category": "assignment", "title": "ISQL 과제30", "dueDate": "2026-11-04", "done": false },
+    { "id": "task-database-quiz-2", "subjectId": "subject-database", "category": "assignment", "title": "퀴즈 #2", "dueDate": "2026-11-18", "done": false },
+    { "id": "task-database-esql", "subjectId": "subject-database", "category": "assignment", "title": "ESQL 과제", "dueDate": "", "done": false }
+  ]
+}
