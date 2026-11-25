@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="인공지능공학부 2511329 이예랑" />
+    <title>Songtudy</title>
+    <link rel="stylesheet" href="00_mystudy_common.css" />
+    <link rel="stylesheet" href="9_songstudy_home.css" />
+    <script src="00_mystudy_common.js" defer></script>
+    <script src="../common/00_mystudy_store.js" defer></script>
+    <script src="9_songstudy_home.js" defer></script>
+  </head>
+  <body class="home-page" data-page="home" data-addr="home">
+    <a class="skip-link" href="#main">본문 바로가기</a>
+    <!-- 배경, 창 프레임, 내비게이션은 팀 공통 CSS/JS를 그대로 사용합니다. -->
+    <div class="window">
+      <header class="window-tabs" data-nav></header>
+      <div class="window-frame">
+        <div class="window-bar" data-addr-bar></div>
+        <main class="window-body home-main" id="main">
+          <div class="home-intro">
+            <div>
+              <p class="home-eyebrow">MY STUDY, MY PACE</p>
+              <h1 class="page-title">오늘도, 나의 속도로.</h1>
+              <p class="home-intro-copy">
+                작은 집중이 모여 나만의 공부가 되는 곳
+              </p>
+            </div>
+            <time class="home-date" id="todayDate"></time>
+          </div>
+
+          <div class="home-error" id="loadError" role="alert" hidden>
+            <p id="loadErrorText">학습 데이터를 불러오지 못했어요.</p>
+            <button class="btn btn-sm" id="retryLoad" type="button">
+              다시 불러오기
+            </button>
+          </div>
+          <noscript
+            ><p class="home-error">
+              타이머와 학습 기록을 사용하려면 브라우저의 JavaScript를 켜 주세요.
+            </p></noscript
+          >
+
+          <section
+            class="home-section"
+            id="study-timer"
+            aria-labelledby="timerTitle"
+          >
+            <div class="home-section-head">
+              <h2 id="timerTitle">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-clock"></use></svg
+                >학습 타이머 <span>STUDY TIMER</span>
+              </h2>
+            </div>
+            <div class="card home-timer-card">
+              <div class="home-timer-options">
+                <label class="home-option" for="timerSubject"
+                  >공부할 과목
+                  <select class="select" id="timerSubject" disabled>
+                    <option value="">과목 불러오는 중</option>
+                  </select>
+                </label>
+                <label class="home-option" for="timerDuration"
+                  >집중 시간
+                  <select class="select" id="timerDuration" disabled>
+                    <option value="15">15분</option>
+                    <option value="25" selected>25분</option>
+                    <option value="50">50분</option>
+                  </select>
+                </label>
+              </div>
+              <p class="home-timer-state" id="timerState">
+                공부할 과목을 고르고 시작해 보세요
+              </p>
+              <div
+                class="home-timer-digits num"
+                id="timerDisplay"
+                role="timer"
+                aria-label="남은 집중 시간"
+                aria-live="off"
+              >
+                25:00
+              </div>
+              <div class="home-timer-track" aria-hidden="true">
+                <span id="timerTrack"></span>
+              </div>
+              <div class="home-timer-actions">
+                <button
+                  class="btn btn-primary home-start"
+                  id="timerStart"
+                  type="button"
+                  disabled
+                >
+                  <span id="timerStartLabel">집중 시작</span>
+                </button>
+                <button class="btn" id="timerReset" type="button" disabled>
+                  다시 설정
+                </button>
+              </div>
+              <p class="sr-only" id="timerAnnouncement" role="status"></p>
+            </div>
+          </section>
+
+          <div class="home-overview">
+            <section
+              class="home-section"
+              id="subject-checklist"
+              aria-labelledby="subjectsTitle"
+            >
+              <div class="home-section-head">
+                <h2 id="subjectsTitle">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-book"></use></svg
+                  >과목별 할 일 <span>MY SUBJECTS</span>
+                </h2>
+                <button
+                  class="link-btn"
+                  id="toggleDone"
+                  type="button"
+                  aria-pressed="false"
+                >
+                  완료 숨기기
+                </button>
+              </div>
+              <div class="card home-subject-card">
+                <div class="home-card-top">
+                  <p id="taskSummary" aria-live="polite">
+                    할 일을 불러오고 있어요.
+                  </p>
+                  <button
+                    class="btn btn-sm"
+                    id="addTask"
+                    type="button"
+                    disabled
+                  >
+                    <svg class="icon" aria-hidden="true">
+                      <use href="#i-plus"></use></svg
+                    >할 일 추가
+                  </button>
+                </div>
+                <div
+                  class="home-subject-list"
+                  id="subjectList"
+                  aria-busy="true"
+                >
+                  <div class="skeleton home-loading" aria-hidden="true"></div>
+                </div>
+                <a class="home-card-link" href="00_mystudy_subjects.html"
+                  >과목 관리에서 자세히 보기</a
+                >
+              </div>
+            </section>
+
+            <section
+              class="home-section"
+              id="study-report"
+              aria-labelledby="reportTitle"
+            >
+              <div class="home-section-head">
+                <h2 id="reportTitle">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-chart"></use></svg
+                  >학습 리포트 <span>STUDY REPORT</span>
+                </h2>
+                <span class="home-section-note" id="reportMonth"></span>
+              </div>
+              <div class="card home-report-card">
+                <div class="home-stat-grid">
+                  <div class="home-stat">
+                    <span>오늘의 집중</span
+                    ><strong class="num" id="todayStudy">0분</strong>
+                  </div>
+                  <div class="home-stat">
+                    <span>이번 달 집중</span
+                    ><strong class="num" id="monthStudy">0분</strong>
+                  </div>
+                  <div class="home-stat">
+                    <span>이번 주 할 일</span
+                    ><strong class="num" id="weekCompletion">0%</strong>
+                  </div>
+                </div>
+                <div class="home-report-heading">
+                  <h3>과목별 집중 시간</h3>
+                  <span>이번 달 누적</span>
+                </div>
+                <ul
+                  class="home-report-list"
+                  id="reportList"
+                  aria-label="이번 달 과목별 학습 시간"
+                ></ul>
+                <p class="home-report-note" id="reportNote">
+                  타이머로 첫 집중 시간을 기록해 보세요.
+                </p>
+              </div>
+            </section>
+          </div>
+
+          <section
+            class="home-section home-week-section"
+            id="weekly-planner"
+            aria-labelledby="plannerTitle"
+          >
+            <div class="home-section-head home-week-heading">
+              <h2 id="plannerTitle">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-calendar"></use></svg
+                >주간 플래너 <span>WEEKLY PLANNER</span>
+              </h2>
+              <div class="home-week-controls">
+                <button
+                  class="btn btn-sm"
+                  id="prevWeek"
+                  type="button"
+                  aria-label="이전 주 보기"
+                >
+                  이전 주
+                </button>
+                <p class="num" id="weekRange" aria-live="polite"></p>
+                <button
+                  class="btn btn-sm"
+                  id="nextWeek"
+                  type="button"
+                  aria-label="다음 주 보기"
+                >
+                  다음 주
+                </button>
+                <button class="btn btn-sm" id="thisWeek" type="button">
+                  이번 주
+                </button>
+              </div>
+            </div>
+            <div class="home-week-grid" id="weekGrid" aria-busy="true"></div>
+            <div class="home-week-footer">
+              <p>
+                할 일은 마감일 기준으로 표시돼요. 체크하면 과목별 목록에도 함께
+                반영돼요.
+              </p>
+              <span id="unscheduledCount"></span>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <footer class="site-footer home-footer">
+      <p>Songtudy · 오늘의 작은 집중을 응원해요.</p>
+      <span>웹프로그래밍 기말 프로젝트</span>
+    </footer>
+
+    <dialog class="modal" id="taskModal" aria-labelledby="taskModalTitle">
+      <form id="taskForm">
+        <div class="modal-head">
+          <h2 class="modal-title" id="taskModalTitle">새로운 할 일</h2>
+          <button
+            class="icon-btn"
+            id="closeTaskModal"
+            type="button"
+            aria-label="닫기"
+          >
+            <svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <label class="field" for="taskSubject"
+            >과목<select
+              class="select"
+              name="subjectId"
+              id="taskSubject"
+              required
+            ></select
+          ></label>
+          <label class="field" for="taskTitle"
+            >할 일<input
+              class="input"
+              name="title"
+              id="taskTitle"
+              type="text"
+              maxlength="40"
+              placeholder="예: DOM 실습 복습하기"
+              required
+          /></label>
+          <label class="field" for="taskDue"
+            >마감일<input class="input" name="dueDate" id="taskDue" type="date"
+          /></label>
+          <p class="home-form-note">
+            마감일을 비워 두면 마감 미정으로 저장돼요.
+          </p>
+          <p class="form-error" id="taskError" role="alert"></p>
+        </div>
+        <div class="modal-foot">
+          <button class="btn" id="cancelTask" type="button">취소</button
+          ><button class="btn btn-primary" type="submit">할 일 저장</button>
+        </div>
+      </form>
+    </dialog>
+  </body>
+</html>
