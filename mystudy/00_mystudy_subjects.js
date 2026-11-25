@@ -63,9 +63,13 @@ function cardHTML(subject, tasks) {
 
   return `
     <li class="card subject-card" data-id="${esc(subject.id)}" style="--subject-color: ${esc(subject.color)}">
-      <div class="subject-card-head">
+      <div class="subject-title">
         <h3 class="subject-name">${esc(subject.name)}</h3>
-        ${exam ? `<span class="${exam.dd.className}">${exam.dd.label}</span>` : ""}
+        <!-- 수정은 과목 상세 페이지의 수정 창 하나로 통일 (edit=1이면 열자마자 수정 창) -->
+        <span class="subject-tools">
+          <a class="icon-btn" href="${detailURL}&edit=1" aria-label="${esc(subject.name)} 수정" title="수정">${icon("edit")}</a>
+          <button class="icon-btn" type="button" data-action="delete" aria-label="${esc(subject.name)} 삭제" title="삭제">${icon("trash")}</button>
+        </span>
       </div>
 
       <p class="subject-exam">
@@ -85,12 +89,12 @@ function cardHTML(subject, tasks) {
         </div>
       </div>
 
-      <div class="subject-card-foot">
-        <a class="btn btn-sm" href="${detailURL}">할 일 보기</a>
-        <!-- 수정은 과목 상세 페이지의 수정 창 하나로 통일 (edit=1이면 열자마자 수정 창) -->
-        <a class="icon-btn" href="${detailURL}&edit=1" aria-label="${esc(subject.name)} 수정" title="수정">${icon("edit")}</a>
-        <button class="icon-btn" type="button" data-action="delete" aria-label="${esc(subject.name)} 삭제" title="삭제">${icon("trash")}</button>
+      <div class="subject-end">
+        ${exam ? `<span class="${exam.dd.className}">${exam.dd.label}</span>` : ""}
+        <!-- 자세히 보기: 카드 어디를 눌러도 이동 (수정·삭제 버튼은 제외) -->
+        <a class="icon-btn subject-more" href="${detailURL}" aria-label="${esc(subject.name)} 자세히 보기" title="자세히 보기">${icon("chevron-right")}</a>
       </div>
+
     </li>`;
 }
 
