@@ -223,7 +223,7 @@
     els.grid.innerHTML = week.days.map((day, i) => {
       const tasks = day.tasks.filter(matchesSubject);
       return `<section class="planner-day ${day.date === today ? "is-today" : ""} ${i > 4 ? "is-weekend" : ""}" data-planner-date="${day.date}" aria-label="${MyStudy.formatDate(day.date)}">
-        <header class="day-heading"><h3><button class="day-select" type="button" data-select-day="${day.date}" aria-label="${MyStudy.formatDate(day.date)} 선택" aria-expanded="false" aria-controls="day-actions-${day.date}"><span class="day-number num">${toDate(day.date).getDate()}</span><span class="day-name">${weekdays[i]}요일</span></button></h3>${day.date === today ? '<span class="day-today">오늘</span>' : ""}</header>
+        <header class="day-heading"><h3><button class="day-select" type="button" data-select-day="${day.date}" aria-label="${MyStudy.formatDate(day.date)} 선택" aria-expanded="false" aria-controls="day-actions-${day.date}"><span class="day-number num">${toDate(day.date).getDate()}</span><span class="day-name">${weekdays[i]}요일</span></button></h3><div class="day-heading-actions">${day.date === today ? '<span class="day-today">오늘</span>' : ""}<button class="icon-btn day-quick-add" type="button" data-add-date="${day.date}" aria-label="${MyStudy.formatDate(day.date)} 할 일 추가" title="할 일 추가">${MyUI.icon("plus")}</button></div></header>
         <ul class="day-list">${tasks.length ? tasks.map(taskHTML).join("") : '<li class="day-empty"><span>마감 일정이 없어요.</span></li>'}</ul>
         <div class="day-actions" id="day-actions-${day.date}" hidden><button class="day-add" type="button" data-add-date="${day.date}" aria-label="${MyStudy.formatDate(day.date)} 할 일 추가">${MyUI.icon("plus")}할 일 추가</button></div>
       </section>`;

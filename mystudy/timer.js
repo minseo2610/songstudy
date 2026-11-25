@@ -6,9 +6,9 @@
   const $ = (id) => document.getElementById(id);
   const els = {
     app: $("timerApp"), error: $("loadError"), loading: $("loading"), subject: $("studySubject"), task: $("studyTask"),
-    focusTitle: $("focusTitle"), stateLabel: $("timerStateLabel"), display: $("timerDisplay"), caption: $("clockCaption"),
-    sub: $("timerClockSub"), orbit: $("timerOrbit"), settings: $("focusSettings"), custom: $("customDuration"),
-    start: $("startPauseBtn"), finish: $("finishBtn"), reset: $("resetTimerBtn"), help: $("timerHelp"), announcement: $("timerAnnouncement"),
+    focusTitle: $("focusTitle"), display: $("timerDisplay"),
+    orbit: $("timerOrbit"), settings: $("focusSettings"), custom: $("customDuration"),
+    start: $("startPauseBtn"), finish: $("finishBtn"), reset: $("resetTimerBtn"), announcement: $("timerAnnouncement"),
     date: $("todayDate"), todayDuration: $("todayDuration"), todayCount: $("todayCount"), todaySubjects: $("todaySubjects"),
     soundToggle: $("soundToggle"), soundMenu: $("soundMenu"),
     sessionCount: $("sessionCount"), sessions: $("sessionList"), empty: $("sessionEmpty"), resetDialog: $("resetDialog"),
@@ -103,7 +103,7 @@
     const section = document.createElement("section");
     section.className = "card timeline-section";
     section.setAttribute("aria-labelledby", "timelineTitle");
-    section.innerHTML = '<div class="session-section-head"><h2 class="card-title" id="timelineTitle">오늘의 타임테이블</h2><span class="num">10분 단위</span></div><div class="timeline-table-wrap"><table class="study-timetable" aria-label="오늘 00시부터 24시까지 공부 시간"><thead><tr><th scope="col">시간</th><th scope="col">00</th><th scope="col">10</th><th scope="col">20</th><th scope="col">30</th><th scope="col">40</th><th scope="col">50</th></tr></thead><tbody class="study-timeline"></tbody></table></div><div class="timeline-legend"><span class="timeline-legend-item"><span class="timeline-legend-empty"></span><span>공부하지 않은 시간</span></span><span class="timeline-legend-item"><span class="timeline-legend-filled"></span><span>공부한 시간</span></span></div>';
+    section.innerHTML = '<div class="session-section-head"><h2 class="card-title" id="timelineTitle"></h2></div><div class="timeline-table-wrap"><table class="study-timetable" aria-label="오늘 00시부터 24시까지 공부 시간"><thead><tr><th scope="col">시간</th><th scope="col">00</th><th scope="col">10</th><th scope="col">20</th><th scope="col">30</th><th scope="col">40</th><th scope="col">50</th></tr></thead><tbody class="study-timeline"></tbody></table></div><div class="timeline-legend"><span class="timeline-legend-item"><span class="timeline-legend-empty"></span><span>공부하지 않은 시간</span></span><span class="timeline-legend-item"><span class="timeline-legend-filled"></span><span>공부한 시간</span></span></div>';
     els.sessions.closest(".session-section").before(section);
     timeline = section.querySelector(".study-timeline");
     return timeline;
@@ -111,6 +111,7 @@
 
   function renderTimeline(records) {
     const container = ensureTimeline();
+    $("timelineTitle").textContent = `${lastDay.slice(5).replace("-", "/")} \uD0C0\uC784\uD14C\uC774\uBE14`;
     const dayStart = new Date(`${lastDay}T00:00:00`).getTime();
     const dayEnd = dayStart + 24 * 60 * 60 * 1000;
     const intervals = records.map((record) => ({
@@ -171,8 +172,11 @@
 
   function renderControls() {
     const subjects = MyStudy.getSubjects();
-    const locked = state.startedAt !== null;
-    if (!locked && !subjects.some((subject) => subject.id === state.subjectId)) {
+    // 측정 중일 때만 설정을 잠근다. 일시정지 중에는 바꿀 수 있고, 바꾸기 전에 측정한 시간을 기록한다.
+    const started = state.startedAt !== null;
+    const locked = state.runningSince !== null;
+    const lockHint = locked ? "일시정지하면 바꿀 수 있어요" : "";
+    if (!started && !subjects.some((subject) => subject.id === state.subjectId)) {
       const first = subjects[0];
       state = { ...state, subjectId: first?.id || "", subjectName: first?.name || "", taskId: "", taskTitle: "" };
     }
@@ -181,18 +185,20 @@
     els.subject.value = state.subjectId;
     const tasks = MyStudy.getTasksOf(state.subjectId);
     const selected = tasks.find((task) => task.id === state.taskId);
-    if (!locked && !selected) state = { ...state, taskId: "", taskTitle: "" };
-    els.task.innerHTML = '<option value="">과목만 기록하기</option>' + tasks.map((task) => `<option value="${esc(task.id)}">${esc(task.title)}${task.done ? " (완료)" : ""}</option>`).join("") + (locked && state.taskId && !selected ? `<option value="${esc(state.taskId)}">${esc(state.taskTitle || "삭제된 할 일")}</option>` : "");
+    if (!started && !selected) state = { ...state, taskId: "", taskTitle: "" };
+    els.task.innerHTML = '<option value="">과목만 기록하기</option>' + tasks.map((task) => `<option value="${esc(task.id)}">${esc(task.title)}${task.done ? " (완료)" : ""}</option>`).join("") + (started && state.taskId && !selected ? `<option value="${esc(state.taskId)}">${esc(state.taskTitle || "삭제된 할 일")}</option>` : "");
     els.task.value = state.taskId;
-    els.subject.disabled = locked;
+    els.subject.disabled = locked || !subjects.length;
     els.task.disabled = locked || !subjects.length;
     els.start.disabled = !state.subjectId;
+    const settingControls = [els.subject, els.task, els.custom, ...document.querySelectorAll("[data-mode], [data-duration]")];
+    settingControls.forEach((control) => { if (lockHint) control.title = lockHint; else control.removeAttribute("title"); });
     document.querySelectorAll("[data-mode]").forEach((button) => { button.disabled = locked; button.setAttribute("aria-pressed", button.dataset.mode === state.mode); });
     document.querySelectorAll("[data-duration]").forEach((button) => { button.disabled = locked; button.setAttribute("aria-pressed", Number(button.dataset.duration) * 60 === state.durationSeconds); });
     els.custom.disabled = locked;
     els.custom.value = state.durationSeconds / 60;
     els.settings.hidden = state.mode !== "focus";
-    els.focusTitle.textContent = state.subjectId ? `${subjectFor(state).name}에 집중하는 시간` : "과목 관리에서 과목을 먼저 추가해 주세요.";
+    els.focusTitle.textContent = state.subjectId ? subjectFor(state).name : "과목 관리에서 과목을 먼저 추가해 주세요.";
     renderClock();
   }
 
@@ -205,22 +211,17 @@
     const display = TimerModel.format(state.mode === "focus" ? Math.ceil(remaining) : Math.floor(elapsed / 1000), state.mode !== "focus");
     if (els.display.textContent !== display) els.display.textContent = display;
     els.display.setAttribute("aria-label", `${state.mode === "focus" ? "남은" : "학습"} 시간 ${display}`);
-    document.title = started ? `${display} · ${running ? "집중 중" : "일시정지"} | Songtudy` : "학습 타이머 | Songtudy";
-    els.stateLabel.textContent = running ? "집중 중" : started ? "일시정지" : "시작 전";
-    els.stateLabel.classList.toggle("is-running", running);
-    els.caption.textContent = state.mode === "focus" ? `${state.durationSeconds / 60}분 집중하기` : "오늘도, 차근차근";
-    els.sub.textContent = running ? state.taskTitle || "지금, 나를 위한 시간을 쌓고 있어요." : started ? "잠깐 쉬어 가도 괜찮아요." : "시작 버튼을 누르면 기록이 시작돼요.";
+    document.title = started ? `${display} · ${running ? "집중 중" : "일시정지"} | Songtudy` : "타이머 | Songtudy";
     els.orbit.style.setProperty("--value", state.mode === "focus" ? elapsed / (state.durationSeconds * 1000) : elapsed > 0 ? (elapsed % 3600000) / 3600000 : 0);
     const label = running ? "일시정지" : started ? "다시 시작" : "시작하기";
     els.start.innerHTML = `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${running ? '<path d="M8 5v14M16 5v14"/>' : '<path d="m9 5 10 7-10 7z"/>'}</svg><span>${label}</span>`;
     els.finish.disabled = elapsed < 1000;
     els.reset.disabled = !started;
-    els.help.textContent = started ? "과목과 측정 방식은 기록을 마친 뒤 바꿀 수 있어요." : "공부를 마치면 ‘기록하기’를 눌러 시간을 남겨 주세요.";
   }
 
   function recordSession(automatic = false) {
     const record = TimerModel.toSession(state);
-    if (!record) return;
+    if (!record) return false;
     try {
       const list = sessions();
       if (!list.some((item) => item.id === record.id)) localStorage.setItem(SESSION_KEY, JSON.stringify([...list, record]));
@@ -231,34 +232,41 @@
       const message = automatic ? "집중 시간을 다 채웠어요. 학습 기록을 저장했어요." : `${durationLabel(record.durationSeconds)}의 학습 기록을 저장했어요.`;
       els.announcement.textContent = message;
       MyUI.toast(message);
+      return true;
     } catch {
       state = TimerModel.pause(state);
       renderControls();
       els.announcement.textContent = "기록을 저장하지 못했어요. 기록하기를 눌러 다시 시도해 주세요.";
       MyUI.toast("기록을 저장하지 못했어요. ‘기록하기’로 다시 시도해 주세요.");
+      return false;
     }
   }
 
-  els.subject.addEventListener("change", () => {
-    if (state.startedAt !== null) return;
-    const subject = MyStudy.getSubject(els.subject.value);
-    saveState({ ...state, subjectId: subject?.id || "", subjectName: subject?.name || "", taskId: "", taskTitle: "" });
+  // 과목·할 일·측정 방식·집중 시간 변경. 일시정지 중이던 시간은 먼저 기록하고 새 측정으로 바꾼다.
+  function changeSettings(patch) {
+    if (state.runningSince !== null) { renderControls(); return; }
+    if (Object.entries(patch).every(([key, value]) => state[key] === value)) { renderControls(); return; }
+    if (state.startedAt !== null) {
+      if (TimerModel.elapsed(state) >= 1000) { if (!recordSession()) return; }
+      else state = TimerModel.create(state);
+    }
+    saveState(TimerModel.create({ ...state, ...patch }));
     renderControls();
+  }
+
+  els.subject.addEventListener("change", () => {
+    const subject = MyStudy.getSubject(els.subject.value);
+    changeSettings({ subjectId: subject?.id || "", subjectName: subject?.name || "", taskId: "", taskTitle: "" });
   });
   els.task.addEventListener("change", () => {
-    if (state.startedAt !== null) return;
     const task = MyStudy.getTasksOf(state.subjectId).find((item) => item.id === els.task.value);
-    saveState({ ...state, taskId: task?.id || "", taskTitle: task?.title || "" });
-    renderControls();
+    changeSettings({ taskId: task?.id || "", taskTitle: task?.title || "" });
   });
-  document.querySelectorAll("[data-mode]").forEach((button) => button.addEventListener("click", () => {
-    if (state.startedAt !== null) return;
-    saveState(TimerModel.create({ ...state, mode: button.dataset.mode })); renderControls();
-  }));
+  document.querySelectorAll("[data-mode]").forEach((button) => button.addEventListener("click", () => changeSettings({ mode: button.dataset.mode })));
   function setDuration(minutes) {
-    if (state.startedAt !== null) return;
+    if (state.runningSince !== null) return;
     if (!Number.isInteger(minutes) || minutes < 1 || minutes > 180) { MyUI.toast("집중 시간은 1~180분으로 설정해 주세요."); els.custom.value = state.durationSeconds / 60; return; }
-    saveState({ ...state, durationSeconds: minutes * 60 }); renderControls();
+    changeSettings({ durationSeconds: minutes * 60 });
   }
   document.querySelectorAll("[data-duration]").forEach((button) => button.addEventListener("click", () => setDuration(Number(button.dataset.duration))));
   els.custom.addEventListener("change", () => setDuration(Number(els.custom.value)));
