@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 팀원 정보: 실제 이름·학번으로 바꿔 주세요 -->
+  <meta name="author" content="팀명 | 팀원A(학번), 팀원B(학번), 팀원C(학번)">
+  <meta name="team-member" content="담당: 팀원A - 과목 관리 페이지">
+  <meta name="description" content="Songtudy 과목 관리: 과목 추가·수정·삭제, 과목 색상, 시험 일정 등록">
+  <title>과목 관리 | Songtudy</title>
+  <link rel="stylesheet" href="00_mystudy_common.css">
+  <link rel="stylesheet" href="00_mystudy_subjects.css">
+  <script src="00_mystudy_common.js" defer></script>
+  <script src="00_mystudy_store.js" defer></script>
+  <script src="00_mystudy_subjects.js" defer></script>
+</head>
+<body data-page="subjects" data-addr="subjects">
+  <a class="skip-link" href="#main">본문 바로가기</a>
+
+  <div class="window">
+    <header class="window-tabs" data-nav></header>
+
+    <div class="window-frame">
+      <div class="window-bar" data-addr-bar></div>
+
+      <main class="window-body" id="main">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">과목 관리</h1>
+            <p class="page-stats" id="summary" aria-live="polite"></p>
+          </div>
+          <div class="toolbar">
+            <label class="field">정렬
+              <select class="select" id="sortSelect">
+                <option value="exam">시험 임박순</option>
+                <option value="name">이름순</option>
+                <option value="left">남은 할 일 많은 순</option>
+              </select>
+            </label>
+            <button class="btn btn-primary" type="button" data-action="add">과목 추가</button>
+          </div>
+        </div>
+
+        <div class="subjects-layout">
+          <section class="subjects-main" aria-labelledby="listTitle">
+            <h2 class="sr-only" id="listTitle">과목 목록</h2>
+            <ul class="subject-grid" id="subjectGrid" aria-busy="true">
+              <!-- 불러오는 동안 보이는 자리 표시: JS가 목록으로 교체 -->
+              <li class="skeleton skeleton-card" aria-hidden="true"></li>
+              <li class="skeleton skeleton-card" aria-hidden="true"></li>
+              <li class="skeleton skeleton-card" aria-hidden="true"></li>
+              <li class="skeleton skeleton-card" aria-hidden="true"></li>
+            </ul>
+            <div class="empty" id="emptyState" hidden>
+              <p>아직 등록한 과목이 없어요.</p>
+              <button class="btn btn-primary" type="button" data-action="add">첫 과목 추가하기</button>
+            </div>
+          </section>
+
+          <aside class="subjects-side">
+            <section class="card" aria-labelledby="examTitle">
+              <h2 class="card-title" id="examTitle">다가오는 시험</h2>
+              <ul class="exam-list" id="examList">
+                <li class="exam-item" aria-hidden="true"><span class="skeleton-line exam-skeleton"></span></li>
+              </ul>
+            </section>
+          </aside>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <p>Songtudy 웹프로그래밍 기말 프로젝트</p>
+    <button class="link-btn" type="button" id="resetBtn">예시 데이터로 초기화</button>
+  </footer>
+
+  <!-- 과목 추가·수정 모달 -->
+  <dialog class="modal modal-wide" id="subjectModal" aria-labelledby="modalTitle">
+    <form id="subjectForm" novalidate>
+      <div class="modal-head">
+        <h2 class="modal-title" id="modalTitle">과목 추가</h2>
+        <button class="icon-btn" type="button" data-close aria-label="닫기"><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg></button>
+      </div>
+
+      <div class="modal-body">
+        <p class="form-guide"><span class="req" aria-hidden="true">*</span> 표시는 꼭 입력해야 하는 항목이에요.</p>
+
+        <!-- 과목명: 왼쪽 항목 이름 / 오른쪽 입력칸 + 글자 수 -->
+        <div class="form-row">
+          <label class="form-row-label" for="subjectName">과목명 <span class="req" aria-hidden="true">*</span></label>
+          <div class="form-row-field">
+            <input class="input" type="text" id="subjectName" name="name" maxlength="20"
+                   placeholder="예: 웹프로그래밍" required aria-required="true" aria-describedby="nameCount nameError">
+            <span class="count count-end" id="nameCount" aria-live="polite"><b>0</b>/20</span>
+            <p class="form-error" id="nameError"></p>
+          </div>
+        </div>
+
+        <!-- 과목 색상 -->
+        <div class="form-row">
+          <span class="form-row-label" id="colorLabel">과목 색상</span>
+          <div class="form-row-field">
+            <fieldset class="swatches" id="colorPicker" aria-labelledby="colorLabel"></fieldset>
+          </div>
+        </div>
+
+        <!-- 메모 -->
+        <div class="form-row">
+          <label class="form-row-label" for="subjectMemo">메모</label>
+          <div class="form-row-field">
+            <textarea class="input textarea" id="subjectMemo" name="memo" maxlength="100" rows="3"
+                      placeholder="예: 김OO 교수님, 공학관 301호, 화·목 10시" aria-describedby="memoCount"></textarea>
+            <span class="count count-end" id="memoCount" aria-live="polite"><b>0</b>/100</span>
+          </div>
+        </div>
+
+        <!-- 시험 일정: 블록 단위로 추가·삭제 (알바몬 경력 추가 방식) -->
+        <section class="exam-section-form" aria-labelledby="examFormTitle">
+          <h3 class="exam-section-title" id="examFormTitle">
+            시험 일정 <span class="count" id="examCount"><b>0</b>/5</span>
+          </h3>
+          <div class="exam-blocks" id="examRows"></div>
+          <button class="btn add-block-btn" type="button" id="addExamRow">
+            <svg class="icon" aria-hidden="true"><use href="#i-plus"></use></svg>시험 추가
+          </button>
+        </section>
+
+        <p class="form-error" id="formError" role="alert"></p>
+      </div>
+
+      <div class="modal-foot">
+        <button class="btn" type="button" data-close>취소</button>
+        <button class="btn btn-primary" type="submit">저장</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- 확인 모달 (과목 삭제, 데이터 초기화에 함께 사용) -->
+  <dialog class="modal" id="confirmModal" aria-labelledby="confirmTitle" aria-describedby="confirmText">
+    <div class="modal-head">
+      <h2 class="modal-title" id="confirmTitle">과목 삭제</h2>
+    </div>
+    <div class="modal-body">
+      <p id="confirmText"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" type="button" data-close>취소</button>
+      <button class="btn btn-danger" type="button" id="confirmOk">삭제</button>
+    </div>
+  </dialog>
+
+</body>
+</html>
