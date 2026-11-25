@@ -15,8 +15,8 @@ const MyUI = (() => {
   const PAGES = [
     { key: "home", label: "홈", short: "홈", href: "00_mystudy_index.html", icon: "home" },
     { key: "subjects", label: "과목 관리", short: "과목", href: "00_mystudy_subjects.html", icon: "book" },
-    { key: "planner", label: "주간 플래너", short: "플래너", href: "00_mystudy_planner.html", icon: "calendar" },
-    { key: "timer", label: "학습 타이머", short: "타이머", href: "00_mystudy_timer.html", icon: "clock" },
+    { key: "planner", label: "주간 플래너", short: "플래너", href: "weekly.html", icon: "calendar" },
+    { key: "timer", label: "학습 타이머", short: "타이머", href: "timer.html", icon: "clock" },
     { key: "report", label: "통계 리포트", short: "리포트", href: "00_mystudy_report.html", icon: "chart" },
   ];
 
