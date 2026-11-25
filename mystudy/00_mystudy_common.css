@@ -24,7 +24,7 @@
    [규칙]
    - 색, 글꼴, 간격, 모서리는 아래 변수(--*)만 사용합니다. (색상 코드 직접 쓰기 X)
    - 인라인 style 속성은 쓰지 않습니다.
-     예외: JS가 넣는 --subject-color(과목 색), --value(진행률 0~1), --at(산책 게이지 점 위치), --donut(성적 원형 그래프)
+     예외: JS가 넣는 --subject-color(과목 색), --value(진행률 0~1), --at(산책 게이지 점 위치), --donut(성적 원형 그래프), --tile(산책 배경 한 장 너비)
    ========================================================= */
 
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");

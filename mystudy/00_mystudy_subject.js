@@ -239,9 +239,10 @@ function renderWalk(subject, tasks) {
   els.walkLane.setAttribute("aria-valuetext", `할 일 ${p.total}개 중 ${p.done}개 완료`);
 
   const taskLine = p.total ? `할 일 ${p.done}/${p.total} 완료` : "할 일을 추가하면 기니피그가 출발해요";
+  // 말풍선은 짧게: 시험 이름 / 큰 D-day (할 일 수는 아래 게이지에)
   els.walkBubble.innerHTML = next
-    ? `<strong>${esc(next.name)}까지 ${next.dd.label}</strong><span>${taskLine}</span>`
-    : `<strong>${p.total && p.left === 0 ? "할 일을 모두 끝냈어요!" : taskLine}</strong><span>시험 추가하기</span>`;
+    ? `<span class="bubble-label">${esc(next.name)}</span><strong class="num">${next.dd.label}</strong>`
+    : `<span class="bubble-label">다가오는 시험 없음</span><strong class="bubble-add">시험 추가하기</strong>`;
   els.walkBubble.dataset.exam = next ? next.id : "";
   els.walkBubble.setAttribute("aria-label", next
     ? `${next.name}까지 ${next.dd.label}, ${taskLine}. 시험 일정으로 이동`
@@ -274,6 +275,14 @@ function flashExam(id) {
   chip.classList.remove("is-flash");
   void chip.offsetWidth; // 연달아 눌러도 다시 깜빡이게
   chip.classList.add("is-flash");
+}
+
+// 흘러가는 배경 한 장 너비 = 배너 높이 × 확대(1.12) × 그림 비율(2560/400)
+// 배너 크기가 바뀔 때마다 다시 계산해 이음새가 어긋나지 않게
+const BG_RATIO = 2560 / 400;
+const BG_ZOOM = 1.12;
+function syncWalkTile() {
+  els.walk.style.setProperty("--tile", `${Math.round(els.walk.offsetHeight * BG_ZOOM * BG_RATIO)}px`);
 }
 
 /* ---------- 시험 일정 ---------- */
@@ -973,6 +982,7 @@ function bindEvents() {
 /* ---------- 시작 ---------- */
 document.addEventListener("DOMContentLoaded", async () => {
   bindEvents();
+  new ResizeObserver(syncWalkTile).observe(els.walk);
   try {
     await MyStudy.init();
   } catch (err) {

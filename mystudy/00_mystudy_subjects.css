@@ -260,15 +260,33 @@
    글씨는 그림 위 하늘 부분, 게이지는 그림 아래 길(바닥) 부분 */
 .walk {
   --walk: 0;                         /* 0 ~ 1: JS가 준비 진행률로 채움 */
-  position: relative;
+  --bg-zoom: 1.12;                   /* 배경 확대 (바닥 기준) */
+  --tile: 2600px;                    /* 반복 그림 한 장 너비: JS가 (배너 높이 × 확대 × 2560/400)으로 채움 */
+  position: relative; isolation: isolate; overflow: hidden;
   width: 100%; aspect-ratio: 16 / 5; min-height: 300px;
-  background: var(--pink-100) url("00_mystudy_walk_bg.jpg") center bottom / cover no-repeat;
+  background: var(--pink-100);
 }
+/* 배경은 왼쪽으로 천천히 흘러감 → 기니피그가 앞으로 걸어가는 느낌
+   한 장 너비만큼 이동하면 처음과 똑같은 모습이라 끊김 없이 반복 */
+.walk-bg {
+  position: absolute; left: 0; bottom: 0; z-index: 0;
+  width: calc(var(--tile) * 2); height: calc(100% * var(--bg-zoom));
+  background: url("00_mystudy_walk_bg_loop.jpg") left bottom / auto 100% repeat-x;
+  animation: walk-pan 70s linear infinite;
+  will-change: transform;
+}
+@keyframes walk-pan {
+  to { transform: translateX(calc(var(--tile) * -1)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .walk-bg { animation: none; }
+}
+.walk-top, .walk-ground { z-index: 2; }
 /* 그림 아래쪽이 카드 흰 바탕으로 자연스럽게 섞이며 끝나도록 */
 .walk::before {
   content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 11%;  /* 바닥(그림 아래 약 19%)의 중간부터 */
   background: linear-gradient(to bottom, transparent, var(--surface));
-  pointer-events: none;
+  pointer-events: none; z-index: 1;
 }
 .walk-top {
   position: absolute; inset: var(--sp-6) var(--sp-6) auto;
@@ -285,13 +303,14 @@
   font-size: var(--fs-sm); line-height: 1.45; color: var(--text-sub);
   box-shadow: var(--shadow-pop);
 }
-.walk-bubble strong { font-size: var(--fs-md); color: var(--text); }
+.walk-bubble .bubble-label { font-size: var(--fs-sm); color: var(--text-sub); }
+.walk-bubble strong { font-size: var(--fs-xl); font-weight: 800; line-height: 1.2; color: var(--text); }
+.walk-bubble strong.bubble-add { font-size: var(--fs-md); text-decoration: underline; text-decoration-color: var(--pink-300); text-underline-offset: 3px; }
 /* 누를 수 있는 말풍선: 올리면 살짝 떠오르고 테두리 */
 .walk-bubble {
   border: 1.5px solid transparent; text-align: left; font-family: inherit; cursor: pointer;
   transition: transform .18s var(--ease), border-color .15s var(--ease), box-shadow .18s var(--ease);
 }
-.walk-bubble span { text-decoration: underline; text-decoration-color: var(--pink-300); text-underline-offset: 3px; }
 .walk-bubble:hover, .walk-bubble:focus-visible {
   transform: translateY(-4px); border-color: var(--pink-300);
   box-shadow: var(--shadow-lift);
