@@ -8,10 +8,14 @@
    - 발표 전 데이터 초기화: 콘솔에서 MyStudy.reset()
 
    localStorage 키
-     myStudy.subjects : [{ id, name, color, memo, exams: [{ id, name, date }] }]
-                        date가 ""이면 '날짜 미정' 
+     myStudy.subjects : [{ id, name, color, memo,
+                          categories: [{ id, name }],          ← 할 일 카테고리 (과목마다 추가·삭제)
+                          exams: [{ id, name, date, catId }] }]
+                        date가 ""이면 '날짜 미정'
+                        catId: 이 시험의 준비 카테고리 id (null이면 사용자가 카테고리를 지운 것)
      myStudy.tasks    : [{ id, subjectId, category, title, dueDate, done }]
-   category: "assignment"(과제) | "midterm"(중간고사) | "final"(기말고사)
+                        category: 그 과목 categories 의 id
+   예전 데이터(categories 없음)는 ensureCategories()가 처음 열 때 채워 줍니다.
    ========================================================= */
 
 const MyStudy = (() => {
@@ -26,6 +30,9 @@ const MyStudy = (() => {
     { key: "midterm", label: "중간고사 준비" },
     { key: "final", label: "기말고사 준비" },
   ];
+
+  // 시험 이름 → 예전 기본 카테고리 id (예전 데이터 연결용)
+  const EXAM_KEYWORD = { midterm: "중간", final: "기말" };
 
   const COLORS = [
     { hex: "#e5508c", name: "체리" },
@@ -122,6 +129,48 @@ const MyStudy = (() => {
       .sort((a, b) => a.dd.diff - b.dd.diff)[0] || null;
   }
 
+  /* ---------- 할 일 카테고리 ---------- */
+  // 과목의 카테고리를 정리해서 저장
+  // 1) categories가 없으면(예전 데이터): '과제' + 할 일이 있는 예전 기본 카테고리로 시작
+  // 2) 준비 카테고리가 아직 없는 시험(catId가 undefined)은 '○○ 준비' 카테고리를 만들어 연결
+  //    → 시험을 등록하면 그 시험 준비 카테고리가 자동으로 생김
+  function ensureCategories(subjectId) {
+    const subjects = getSubjects();
+    const subject = subjects.find((s) => s.id === subjectId);
+    if (!subject) return null;
+    let changed = false;
+
+    if (!Array.isArray(subject.categories)) {
+      const used = new Set(getTasksOf(subjectId).map((t) => t.category));
+      subject.categories = CATEGORIES
+        .filter((c) => c.key === "assignment" || used.has(c.key))
+        .map((c) => ({ id: c.key, name: c.label }));
+      changed = true;
+    }
+
+    subject.exams.forEach((exam) => {
+      if (exam.catId !== undefined) return;
+      const legacyKey = Object.keys(EXAM_KEYWORD).find((k) => exam.name.includes(EXAM_KEYWORD[k]));
+      let cat = subject.categories.find((c) => c.id === legacyKey);
+      if (!cat) {
+        cat = { id: uid("c"), name: `${exam.name} 준비` };
+        subject.categories.push(cat);
+      }
+      exam.catId = cat.id;
+      changed = true;
+    });
+
+    if (changed) saveSubjects(subjects);
+    return subject;
+  }
+
+  // 카테고리 이름 (다른 페이지에서 할 일의 묶음 이름을 보여 줄 때)
+  function categoryName(subject, catId) {
+    const cat = (subject.categories || []).find((c) => c.id === catId)
+             || CATEGORIES.find((c) => c.key === catId);
+    return cat ? (cat.name || cat.label) : "";
+  }
+
   // 할 일 진행 상황: { done, total, left, percent }
   function progress(tasks) {
     const done = tasks.filter((t) => t.done).length;
@@ -134,5 +183,6 @@ const MyStudy = (() => {
     init, reset,
     getSubjects, getTasks, saveSubjects, saveTasks, getSubject, getTasksOf,
     uid, dday, formatDate, nextExam, progress,
+    ensureCategories, categoryName,
   };
 })();

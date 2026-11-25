@@ -87,7 +87,8 @@ function cardHTML(subject, tasks) {
 
       <div class="subject-card-foot">
         <a class="btn btn-sm" href="${detailURL}">할 일 보기</a>
-        <button class="icon-btn" type="button" data-action="edit" aria-label="${esc(subject.name)} 수정" title="수정">${icon("edit")}</button>
+        <!-- 수정은 과목 상세 페이지의 수정 창 하나로 통일 (edit=1이면 열자마자 수정 창) -->
+        <a class="icon-btn" href="${detailURL}&edit=1" aria-label="${esc(subject.name)} 수정" title="수정">${icon("edit")}</a>
         <button class="icon-btn" type="button" data-action="delete" aria-label="${esc(subject.name)} 삭제" title="삭제">${icon("trash")}</button>
       </div>
     </li>`;
@@ -101,14 +102,16 @@ function renderExamList(subjects) {
 
   els.examList.innerHTML = upcoming.length === 0
     ? `<li class="exam-item"><span class="exam-date">예정된 시험이 없어요.</span></li>`
-    : upcoming.slice(0, 5).map((e) => `
+    : upcoming.map((e) => `
       <li class="exam-item">
-        <span class="subject-dot" style="--subject-color: ${esc(e.subject.color)}"></span>
-        <span class="exam-info">
-          <a href="00_mystudy_subject.html?id=${encodeURIComponent(e.subject.id)}">${esc(e.subject.name)} ${esc(e.name)}</a>
-          <span class="exam-date">${MyStudy.formatDate(e.date)}</span>
-        </span>
-        <span class="${e.dd.className}">${e.dd.label}</span>
+        <a class="exam-link" href="00_mystudy_subject.html?id=${encodeURIComponent(e.subject.id)}&exam=${encodeURIComponent(e.id)}">
+          <span class="subject-dot" style="--subject-color: ${esc(e.subject.color)}"></span>
+          <span class="exam-info">
+            <span class="exam-title"><span class="exam-subject">${esc(e.subject.name)}</span><strong>${esc(e.name)}</strong></span>
+            <span class="exam-date">${MyStudy.formatDate(e.date)}</span>
+          </span>
+          <span class="${e.dd.className}">${e.dd.label}</span>
+        </a>
       </li>`).join("");
   return upcoming.length;
 }
@@ -165,6 +168,7 @@ function syncExamBlock(block) {
   other.disabled = type !== "기타";
   date.disabled = tbd.checked;
   if (tbd.checked) date.value = "";
+  if (date.dataset.enhanced) MyUI.syncDate(date);
 }
 
 function addExamRow(exam = { name: "", date: "" }) {
@@ -192,7 +196,7 @@ function addExamRow(exam = { name: "", date: "" }) {
       <label class="form-row-label" for="examDate${n}">시험일 <span class="req" aria-hidden="true">*</span></label>
       <div class="form-row-field">
         <div class="date-row">
-          <input class="input" type="date" id="examDate${n}" name="examDate">
+          <input class="input" type="date" id="examDate${n}" name="examDate" data-placeholder="시험일을 선택해 주세요">
           <label class="check-inline">
             <span class="check"><input type="checkbox" name="examTbd" ${tbd ? "checked" : ""}><span class="box">${icon("check")}</span></span>
             날짜 미정
@@ -203,6 +207,7 @@ function addExamRow(exam = { name: "", date: "" }) {
   block.querySelector('[name="examOther"]').value = type === "기타" ? exam.name : "";
   block.querySelector('[name="examDate"]').value = exam.date || "";
   els.examRows.append(block);
+  MyUI.enhanceDates(block);
   syncExamBlock(block);
   updateExamCount();
   return block;
@@ -269,16 +274,25 @@ function saveSubject(event) {
     const examName = type === "기타" ? otherField.value.trim() : type;
     if (!examName) return showError("기타 시험명을 입력해 주세요.", otherField);
     if (!tbd && !dateField.value) return showError("시험일을 선택하거나 '날짜 미정'을 체크해 주세요.", dateField);
-    exams.push({ id: block.dataset.examId || MyStudy.uid("e"), name: examName, date: tbd ? "" : dateField.value });
+    // 이미 있던 시험이면 준비 카테고리 연결(catId)은 그대로 유지
+    const prev = editingId && MyStudy.getSubject(editingId).exams.find((x) => x.id === block.dataset.examId);
+    const exam = { id: block.dataset.examId || MyStudy.uid("e"), name: examName, date: tbd ? "" : dateField.value };
+    if (prev && prev.catId !== undefined) exam.catId = prev.catId;
+    exams.push(exam);
   }
 
   if (editingId) {
     MyStudy.saveSubjects(subjects.map((s) => (s.id === editingId ? { ...s, name, color, memo, exams } : s)));
     MyUI.toast(`'${name}' 과목을 수정했어요.`);
   } else {
-    subjects.push({ id: MyStudy.uid("s"), name, color, memo, exams });
+    const id = MyStudy.uid("s");
+    subjects.push({ id, name, color, memo, exams });
     MyStudy.saveSubjects(subjects);
-    MyUI.toast(`'${name}' 과목을 추가했어요.`);
+    // 교수님·강의실·성적 기준 같은 나머지 정보는 상세 페이지 수정 창에서
+    MyUI.toast(`'${name}' 과목을 추가했어요.`, {
+      actionLabel: "자세히 입력",
+      onAction: () => { location.href = `00_mystudy_subject.html?id=${encodeURIComponent(id)}&edit=1`; },
+    });
   }
 
   els.modal.close();
@@ -338,7 +352,6 @@ function bindEvents() {
     const btn = e.target.closest("button[data-action]");
     if (!btn) return;
     const id = btn.closest(".subject-card").dataset.id;
-    if (btn.dataset.action === "edit") openSubjectModal(id);
     if (btn.dataset.action === "delete") askDeleteSubject(id);
   });
 
