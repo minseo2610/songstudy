@@ -274,8 +274,15 @@
   color: var(--text-sub);
   font-weight: 400;
 }
+/* 펼친 할 일: 폴더 안 하위 항목처럼 오른쪽으로 들여쓰고, 폴더 아래로 세로 점선 */
 .home-task-list {
-  padding: 0 var(--sp-5) var(--sp-3);
+  position: relative;
+  padding: 0 var(--sp-5) var(--sp-3) 64px;
+}
+.home-task-list::before {
+  content: "";
+  position: absolute; left: 36px; top: 0; bottom: var(--sp-4);
+  border-left: 1.5px dashed var(--line-strong);
 }
 .home-task {
   display: flex;
@@ -713,3 +720,16 @@
     font-size: 80px;
   }
 }
+
+/* 주 이동: < > 화살표 버튼 (같은 > 아이콘을 왼쪽은 뒤집어 사용) */
+.week-arrow { width: 36px; height: 36px; border: 1.5px solid var(--line-strong); border-radius: var(--r-md); background: var(--surface); color: var(--text); }
+.week-arrow:hover { background: var(--pink-100); }
+#prevWeek .icon { transform: scaleX(-1); }
+.week-arrow:disabled { opacity: .45; cursor: not-allowed; }
+
+/* 할 일 요약: 글씨 + 막대 */
+#taskSummary { display: flex; flex-direction: column; gap: var(--sp-2); flex: 1; min-width: 0; max-width: 320px; }
+.home-sum-text { display: flex; align-items: baseline; gap: var(--sp-1); color: var(--text); font-size: var(--fs-sm); }
+.home-sum-text b { font-size: var(--fs-lg); font-weight: 800; }
+.home-sum-text small { margin-left: auto; color: var(--text-sub); font-size: var(--fs-xs); }
+.home-sum-bar { width: 100%; }

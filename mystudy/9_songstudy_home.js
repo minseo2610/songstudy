@@ -63,7 +63,8 @@
   function showDate() {
     const now = new Date();
     $("todayDate").dateTime = dateKey(now);
-    $("todayDate").textContent = now.getFullYear() + ". " + (now.getMonth() + 1) + ". " + now.getDate() + " (" + days[now.getDay()] + ")";
+    // 큰 제목: 오늘 날짜 (예: 11월 26일 목요일)
+    $("todayDate").textContent = (now.getMonth() + 1) + "월 " + now.getDate() + "일 " + days[now.getDay()] + "요일";
   }
 
   function subjectColor(color) {
@@ -294,10 +295,13 @@
     const subjects = MyStudy.getSubjects();
     const tasks = MyStudy.getTasks();
     const hideDone = readJSON(KEYS.hideDone, false) === true;
-    $("toggleDone").setAttribute("aria-pressed", String(hideDone));
-    $("toggleDone").textContent = hideDone ? "완료 표시" : "완료 숨기기";
+    $("toggleDone").setAttribute("aria-pressed", String(!hideDone)); // 켜짐 = 완료한 할 일 보임
     const progress = MyStudy.progress(tasks);
-    $("taskSummary").textContent = "남은 할 일 " + progress.left + "개 · 전체 " + progress.total + "개";
+    // 전체 할 일 진행: 글씨 + 막대
+    $("taskSummary").innerHTML =
+      '<span class="home-sum-text">완료 <b class="num">' + progress.done + '</b> / ' + progress.total + '개<small>남은 할 일 ' + progress.left + '개</small></span>' +
+      '<span class="progress home-sum-bar" role="progressbar" aria-label="전체 할 일 완료율" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + progress.percent + '">' +
+      '<span style="--value: ' + progress.percent / 100 + '"></span></span>';
     $("subjectList").innerHTML = subjects.length ? subjects.map(function (subject) {
       const all = tasks.filter(function (task) { return task.subjectId === subject.id; });
       const list = all.filter(function (task) { return !hideDone || !task.done; }).sort(function (a, b) {
@@ -351,7 +355,8 @@
         '<div class="home-report-bar" role="progressbar" aria-label="' + esc(subject.name) + ' 월간 집중 시간 비율" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(ratio * 100) + '" aria-valuetext="' + studyDuration(duration) + ', 전체의 ' + Math.round(ratio * 100) + '%"><span data-value="' + ratio + '"></span></div></li>';
     }).join("");
     applyColors($("reportList"));
-    $("reportNote").textContent = total ? "막대는 이번 달 전체 집중 시간 중 각 과목의 비율이에요." : "아직 기록이 없어요. 타이머로 첫 집중 시간을 쌓아 보세요.";
+    $("reportNote").textContent = total ? "막대는 이번 달 전체 집중 시간 중 각 과목의 비율이에요." : "";
+    $("reportNote").hidden = !total;
   }
 
   function renderWeek() {

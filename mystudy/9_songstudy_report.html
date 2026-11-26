@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="author" content="인공지능공학부 2511329 이예랑">
-  <meta name="description" content="월별 과목 비중, 최근 공부 흐름과 날짜별 집중 기록을 확인하는 Songtudy 통계 리포트">
+  <meta name="description" content="일·주·월별 과목 공부 비율과 캘린더로 확인하는 Songtudy 공부 기록">
   <title>통계 리포트 | Songtudy</title>
   <link rel="stylesheet" href="9_Songstudy_common.css">
   <link rel="stylesheet" href="9_songstudy_report.css">
@@ -12,112 +12,65 @@
   <script src="../common/00_mystudy_store.js" defer></script>
   <script src="9_songstudy_report.js" defer></script>
 </head>
-<body class="report-page" data-page="report">
+<body data-page="report">
   <a class="skip-link" href="#main">본문 바로가기</a>
   <div class="window">
     <header class="window-tabs" data-nav></header>
     <div class="window-frame">
       <div class="window-bar" data-addr-bar></div>
-      <main class="window-body report-main" id="main">
-        <header class="report-page-head">
-          <div><h1 class="page-title">통계 리포트</h1><p class="report-page-description">과목별 비중과 최근 공부 흐름을 확인하세요.</p></div>
-          <a class="btn btn-sm" href="9_songstudy_home.html#study-timer"><svg class="icon" aria-hidden="true"><use href="#i-clock"></use></svg>집중 시작하기</a>
-        </header>
-        <div class="report-error" id="reportError" role="alert" hidden><p id="reportErrorMessage"></p><button class="btn btn-sm" id="retryReport" type="button">다시 불러오기</button></div>
-        <noscript><p class="report-error">통계 리포트를 보려면 JavaScript를 켜 주세요.</p></noscript>
+      <main class="window-body report-page" id="main">
+        <div class="page-head"><h1 class="page-title">통계 리포트</h1><a class="btn" href="timer.html"><svg class="icon" aria-hidden="true"><use href="#i-clock"></use></svg>학습 타이머</a></div>
+        <div class="empty" id="loadError" role="alert" hidden><p>공부 기록을 불러오지 못했어요.</p><button class="btn" id="retryButton" type="button">다시 불러오기</button></div>
+        <div class="skeleton report-loading" id="loading" role="status" aria-label="통계 불러오는 중"></div>
 
-        <section class="card report-month-panel" aria-labelledby="monthTitle">
-          <div class="report-panel-head">
-            <div><h2 id="monthTitle">월별 과목 비중</h2><p class="report-caption" id="monthRange"></p></div>
-            <div class="report-month-controls">
-              <button class="btn btn-sm" id="previousMonth" type="button" aria-label="도넛 차트의 이전 달 보기">이전 달</button>
-              <label class="sr-only" for="reportMonth">월별 과목 비중 조회 월</label><input class="input" id="reportMonth" type="month" aria-describedby="monthScope">
-              <button class="btn btn-sm" id="nextMonth" type="button" aria-label="도넛 차트의 다음 달 보기">다음 달</button>
-              <button class="link-btn" id="currentMonth" type="button">이번 달</button>
-            </div>
-          </div>
-          <div class="report-month-content" id="monthContent" aria-busy="true">
-            <figure class="report-donut-figure">
-              <div class="report-donut-wrap" id="donutWrap">
-                <svg class="report-donut" id="donutChart" viewBox="0 0 280 280" role="img" aria-labelledby="donutTitle"><title id="donutTitle">과목별 공부시간을 불러오는 중입니다.</title><circle class="report-donut-track" cx="140" cy="140" r="108"></circle><g id="donutSegments"></g></svg>
-                <div class="report-donut-center" aria-hidden="true"><span id="donutCenterLabel">총 공부시간</span><strong class="num" id="donutCenterTime">0분</strong><span id="donutCenterDetail">선택한 달</span></div>
+        <div class="report-content" id="reportApp" hidden>
+          <section class="card report-ratio" aria-labelledby="ratioTitle">
+            <div class="report-section-head">
+              <h2 class="card-title" id="ratioTitle">과목별 공부 비율</h2>
+              <div class="report-period" role="group" aria-label="공부 비율 집계 기간">
+                <button type="button" data-period="day" aria-pressed="true">하루</button>
+                <button type="button" data-period="week" aria-pressed="false">일주일</button>
+                <button type="button" data-period="month" aria-pressed="false">한 달</button>
               </div>
-              <figcaption id="donutCaption" class="sr-only">과목을 선택하면 아래 기록을 해당 과목으로 조회합니다.</figcaption>
-            </figure>
-            <div class="report-breakdown">
-              <div class="report-legend-heading"><span>과목별 기록 보기</span><span>기록시간</span><span>비중</span></div>
-              <ul id="subjectLegend" class="report-legend" aria-label="선택한 달의 과목별 공부시간과 비중"></ul>
-              <p class="report-caption report-month-scope" id="monthScope">과목을 누르면 선택한 월의 상세 기록으로 이동합니다.</p>
-              <p class="report-month-empty" id="monthEmpty" hidden>선택한 달에 기록된 공부시간이 없어요.</p>
             </div>
-          </div>
-          <p class="report-month-insight" id="monthInsight"></p>
-        </section>
-
-        <section class="report-overview" aria-labelledby="overviewTitle">
-          <div class="report-section-head"><h2 id="overviewTitle">공부시간 요약</h2><p class="report-caption">모든 과목 기준</p></div>
-          <div class="report-metrics">
-            <article class="card report-metric"><h3>오늘 기록시간</h3><p class="report-metric-value num" id="todayStudyTime">0분</p><p class="report-caption"><span id="todayMetricDate"></span><span class="report-meta-divider" aria-hidden="true">·</span><span id="todayStudyCount">타이머 0회</span></p></article>
-            <article class="card report-metric"><h3>최근 30일 일 평균</h3><p class="report-metric-value num" id="averageStudyTime">0분</p><p class="report-caption" id="averageMetricRange" title="공부 기록이 없는 날까지 포함하여 총 30일로 나눈 평균입니다.">기록 없는 날 포함 · 30일 기준</p></article>
-            <article class="card report-metric"><h3>전체 누적 기록시간</h3><p class="report-metric-value num" id="allStudyTime">0분</p><p class="report-caption">첫 기록부터 오늘까지<span class="report-meta-divider" aria-hidden="true">·</span><span id="totalStudyDays">0일</span></p></article>
-          </div>
-          <div class="report-comparison"><p><span>최근 7일</span><strong id="recentWeekTime">0분</strong><span id="recentWeekChange">직전 7일과 비교</span></p><p><span>기록한 날</span><strong id="recentWeekDays">0 / 7일</strong><span id="recentWeekRange"></span></p></div>
-          <details class="report-metric-guide"><summary>집계 기준 보기</summary><div><p>기록시간은 타이머에 저장된 시간이며, 실제 학습 성과를 평가하는 수치는 아닙니다.</p><p>타이머 횟수에는 중간에 멈춘 기록도 포함합니다. 일시정지 후 재개한 타이머는 같은 기록으로 셉니다. 자정을 넘긴 시간은 날짜별로 나눠 표시합니다.</p><p>최근 30일 평균은 기록이 없는 날까지 포함한 30일 기준입니다. 초 단위 시간은 상세 기록에서 확인할 수 있습니다.</p></div></details>
-        </section>
-
-        <section class="card report-trend-panel" id="analysisPanel" aria-labelledby="trendTitle">
-          <div class="report-panel-head"><div><h2 id="trendTitle" tabindex="-1">기록 분석</h2><p class="report-caption" id="trendRange"></p></div><div class="report-segmented" role="group" aria-label="그래프와 상세 기록의 조회 기간"><button id="trend7" type="button" aria-pressed="true">최근 7일</button><button id="trend30" type="button" aria-pressed="false">최근 30일</button></div></div>
-          <div class="report-analysis-context"><p id="analysisConditions" role="status">조회 조건을 불러오고 있어요.</p><button class="link-btn" id="resetAnalysis" type="button">전체 과목 · 최근 7일</button></div>
-          <details class="report-range-panel" id="rangePanel"><summary>조회 기간 직접 선택</summary><form id="rangeForm"><label class="field" for="rangeStart">시작일<input class="input" type="date" id="rangeStart" required></label><label class="field" for="rangeEnd">종료일<input class="input" type="date" id="rangeEnd" required></label><button class="btn btn-sm" type="submit">기간 적용</button><p class="form-error" id="rangeError" role="alert"></p></form></details>
-          <details class="report-filter-panel" id="filterPanel"><summary><span>과목 선택</span><span id="appliedFilterSummary">전체 과목</span><span class="report-pending-tag" id="filterPending" hidden>변경 후 적용 전</span><span class="report-filter-trigger">변경</span></summary>
-          <form class="report-filter" id="subjectFilter">
-            <div class="report-filter-head"><span id="filterLabel">과목 필터</span><div><button class="link-btn" id="selectAllSubjects" type="button">전체 선택</button><button class="link-btn" id="clearSubjects" type="button">전체 해제</button></div></div>
-            <fieldset class="report-subject-pills" id="subjectChoices" aria-labelledby="filterLabel" aria-describedby="filterStatus"></fieldset>
-            <div class="report-filter-foot"><p class="report-caption" id="filterStatus" role="status">그래프와 상세 기록에 함께 적용됩니다.</p><button class="btn btn-primary btn-sm" id="applyFilter" type="submit">적용</button></div>
-          </form>
-          </details>
-          <figure class="report-line-figure">
-            <div class="report-chart-meta"><div class="report-segmented report-mode" role="group" aria-label="그래프 표시 방식"><button id="chartTotal" type="button" aria-pressed="true">합계 흐름</button><button id="chartSubjects" type="button" aria-pressed="false">과목별 비교</button></div><button class="link-btn" id="toggleChartTable" type="button" aria-expanded="false" aria-controls="chartTableWrap">통계표 보기</button></div>
-            <ul class="report-chart-legend" id="chartLegend" aria-label="그래프 범례"></ul>
-            <div class="report-chart-empty" id="trendEmpty" hidden><p id="trendEmptyMessage">선택한 기간에 공부 기록이 없어요.</p><a href="9_songstudy_home.html#study-timer">집중 타이머로 이동</a></div>
-            <div class="report-chart-scroll" id="lineInteraction" tabindex="0" role="group" aria-label="일별 공부시간 그래프. 좌우 방향키로 날짜별 값을 확인할 수 있습니다.">
-              <svg class="report-line-svg" id="lineChart" viewBox="0 0 1000 280" data-period="7" role="img" aria-labelledby="lineTitle lineDescription"><title id="lineTitle">일별 공부시간 추이</title><desc id="lineDescription">학습 기록을 불러오는 중입니다.</desc><g id="chartGrid"></g><g id="chartLines"></g><g id="chartMarkers"></g><line class="report-chart-guide" id="chartGuide" x1="60" x2="60" y1="24" y2="240" hidden></line></svg>
+            <div class="report-date-toolbar">
+              <div class="report-period-navigation"><button class="btn btn-sm" id="previousPeriod" type="button">이전</button><p class="report-period-label" id="periodLabel"></p><button class="btn btn-sm" id="nextPeriod" type="button">다음</button></div>
+              <label class="report-date-label" for="reportDate">기준 날짜<input class="input" id="reportDate" type="date" min="1900-01-01"></label>
+              <button class="link-btn" id="goToday" type="button">오늘</button>
             </div>
-            <div class="report-chart-readout" id="chartReadout"><p id="readoutDate"></p><ul id="readoutValues"></ul></div>
-            <figcaption class="report-caption" id="trendCaption">날짜를 선택하면 공부시간을 확인할 수 있어요.</figcaption>
-          </figure>
-          <div class="report-table-scroll report-chart-table-wrap" id="chartTableWrap" hidden><table class="report-table report-chart-table"><caption class="sr-only">그래프에 표시한 날짜별 과목 공부시간</caption><thead id="chartTableHead"></thead><tbody id="chartTableBody"></tbody></table></div>
-        </section>
+            <div class="report-ratio-body">
+              <div class="report-donut-wrap">
+                <svg class="report-donut" id="donutChart" viewBox="0 0 240 240" role="img" aria-labelledby="donutTitle donutDescription"><title id="donutTitle">과목별 공부 비율</title><desc id="donutDescription"></desc><circle class="report-donut-track" cx="120" cy="120" r="94"></circle><g id="donutSegments"></g></svg>
+                <div class="report-donut-center" aria-hidden="true"><span>총 공부시간</span><strong class="num" id="periodTotal">0분</strong></div>
+              </div>
+              <div class="report-subject-summary">
+                <ul class="report-ratio-list" id="ratioSubjects" aria-label="과목별 공부시간과 비율"></ul>
+                <div class="report-ratio-empty" id="ratioEmpty" hidden><p>이 기간에 기록된 공부시간이 없어요.</p><a href="timer.html">타이머로 공부 기록 남기기</a></div>
+              </div>
+            </div>
+            <p class="report-ratio-note" id="periodNote"></p>
+          </section>
 
-        <section class="report-history" aria-labelledby="historyTitle">
-          <div class="report-section-head"><div><h2 id="historyTitle">날짜별 공부 기록</h2><p class="report-caption" id="historyRange"></p></div><p class="report-caption" id="historyScope">위의 조회 조건과 동일</p></div>
-          <div class="card report-history-panel">
-            <div class="report-history-toolbar"><label class="report-zero-toggle"><input id="includeEmptyDays" type="checkbox">기록 없는 날 포함</label><p>기간 합계 <strong class="num" id="historyTotal">0분</strong><span class="report-toolbar-divider" aria-hidden="true"></span>일 평균 <strong class="num" id="historyAverage">0분</strong></p></div>
-            <div class="report-mobile-sort"><label for="historySort">정렬</label><select class="select" id="historySort"><option value="date-desc">최신 날짜순</option><option value="date-asc">오래된 날짜순</option><option value="duration-desc">공부시간 많은 순</option><option value="duration-asc">공부시간 적은 순</option></select></div>
-            <table class="report-table report-history-table" id="historyTable">
-              <caption class="sr-only">조회한 기간과 과목의 날짜별 기록시간과 타이머 사용 횟수. 기록 보기 버튼으로 개별 기록을 확인하고 수정할 수 있습니다.</caption>
-              <thead><tr><th scope="col" id="dateSortHeading" aria-sort="descending"><button class="report-sort" id="sortDate" type="button">날짜 <span id="dateSortIcon" aria-hidden="true">최신순</span></button></th><th scope="col" id="timeSortHeading" aria-sort="none"><button class="report-sort" id="sortDuration" type="button">기록시간 <span id="timeSortIcon" aria-hidden="true"></span></button><small class="report-time-format">시:분:초</small></th><th scope="col">공부한 과목</th><th scope="col" class="report-session-column">타이머 기록</th></tr></thead>
-              <tbody id="historyBody"><tr class="report-empty-row"><td class="report-table-empty" colspan="4">공부 기록을 불러오고 있어요.</td></tr></tbody>
-            </table>
-            <div class="report-history-footer"><p id="historyCount" class="report-caption" role="status"></p><nav class="report-pagination" aria-label="공부 기록 페이지"><button class="btn btn-sm" id="historyPrevious" type="button">이전</button><span class="num" id="historyPage">1 / 1</span><button class="btn btn-sm" id="historyNext" type="button">다음</button></nav></div>
-          </div>
-        </section>
+          <section class="card report-calendar-card" aria-labelledby="calendarTitle">
+            <div class="report-section-head"><h2 class="card-title" id="calendarTitle">공부 기록 캘린더</h2><div class="report-calendar-filter"><label class="sr-only" for="calendarSubject">캘린더에 표시할 과목</label><span class="report-select"><select class="select" id="calendarSubject"><option value="">전체 과목</option></select></span></div></div>
+            <div class="report-calendar-toolbar"><h3 id="calendarMonth"></h3><div class="report-calendar-navigation"><button class="btn btn-sm" id="previousMonth" type="button">이전 달</button><button class="btn btn-sm" id="thisMonth" type="button">이번 달</button><button class="btn btn-sm" id="nextMonth" type="button">다음 달</button></div></div>
+            <div class="report-weekdays" aria-hidden="true"><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span><span>일</span></div>
+            <div class="report-calendar-grid" id="calendarGrid" role="group" aria-labelledby="calendarMonth"></div>
+            <div class="report-calendar-key"><p id="calendarMonthSummary"></p><div class="report-heat-key" aria-label="배경이 진할수록 공부시간이 많습니다"><span>적게</span><i class="heat-0"></i><i class="heat-1"></i><i class="heat-2"></i><i class="heat-3"></i><i class="heat-4"></i><span>많이</span></div></div>
+            <div class="report-calendar-legend" id="calendarLegend" aria-label="과목 색상 범례"></div>
+            <div class="report-day-detail" id="dayDetails" aria-labelledby="selectedDayTitle">
+              <div class="report-day-heading"><h3 id="selectedDayTitle"></h3><strong class="num" id="selectedDayTotal"></strong></div>
+              <ul class="report-day-subjects" id="daySubjects" aria-label="선택한 날짜의 과목별 공부시간"></ul>
+              <p class="report-day-empty" id="dayEmpty" hidden>이 날짜에는 공부 기록이 없어요.</p>
+            </div>
+          </section>
+        </div>
+        <p class="report-storage-note" id="storageNote" hidden>기록은 이 브라우저에 저장돼요. 캘린더의 날짜를 누르면 과목별 공부시간을 볼 수 있어요.</p>
+        <noscript><p>통계를 확인하려면 브라우저의 JavaScript를 켜 주세요.</p></noscript>
       </main>
     </div>
   </div>
-  <footer class="site-footer report-footer"><p>Songtudy</p><span>웹프로그래밍 기말 프로젝트</span></footer>
-  <dialog class="modal modal-wide report-record-dialog" id="dayDialog" aria-labelledby="dayDialogTitle">
-    <div class="modal-head"><div><h2 class="modal-title" id="dayDialogTitle">타이머 기록</h2><p class="report-caption" id="dayDialogTotal"></p></div><button class="icon-btn" id="closeDayDialog" type="button" aria-label="기록 상세 닫기"><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg></button></div>
-    <div class="modal-body"><p class="report-record-notice" id="recordLockNotice" hidden></p><ul class="report-record-list" id="sessionList"></ul>
-      <form class="report-record-editor" id="recordForm" hidden>
-        <h3>기록 수정</h3><div class="report-editor-fields"><label class="field" for="recordDate">날짜<input class="input" id="recordDate" type="date" required></label><label class="field" for="recordSubject">과목<select class="select" id="recordSubject" required></select></label></div>
-        <fieldset class="report-duration-fields"><legend>기록시간</legend><label class="field" for="recordHours">시간<input class="input" id="recordHours" type="number" min="0" max="23" step="1" required></label><label class="field" for="recordMinutes">분<input class="input" id="recordMinutes" type="number" min="0" max="59" step="1" required></label><label class="field" for="recordSeconds">초<input class="input" id="recordSeconds" type="number" min="0" max="59" step="1" required></label></fieldset>
-        <p class="form-error" id="recordError" role="alert"></p><div class="report-editor-actions"><button class="btn btn-sm" id="cancelRecordEdit" type="button">취소</button><button class="btn btn-primary btn-sm" type="submit">변경 저장</button></div>
-      </form>
-      <p class="report-caption">기록을 수정하거나 삭제하면 요약과 그래프에도 반영됩니다.</p><p class="report-caption" id="recordActionStatus" role="status"></p>
-    </div>
-    <div class="modal-foot"><div class="report-undo-bar" id="recordUndoBar" hidden><span id="recordUndoMessage" role="status"></span><button class="btn btn-sm" id="undoRecordButton" type="button">되돌리기</button></div><button class="btn" id="doneDayDialog" type="button">닫기</button></div>
-  </dialog>
-  <p class="sr-only" id="reportAnnouncement" role="status"></p>
+  <footer class="site-footer"><p>Songtudy 웹프로그래밍 기말 프로젝트</p></footer>
+  <p class="sr-only" id="reportAnnouncement" role="status" aria-live="polite"></p>
 </body>
 </html>

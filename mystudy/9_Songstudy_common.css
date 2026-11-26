@@ -411,6 +411,28 @@ a:hover { color: var(--text); text-decoration-thickness: 2px; }
 .input:disabled, .select:disabled { background: var(--surface-muted); cursor: not-allowed; }
 
 .form-error { color: var(--danger); font-size: var(--fs-sm); min-height: 1.5em; }
+.modal-body .form-error:empty { display: none; }  /* 창 안 빈 오류칸이 아래 여백을 만들지 않게 */
+
+/* 켜고 끄는 스위치 (완료한 할 일 보기 등) */
+.toggle {
+  display: inline-flex; align-items: center; gap: var(--sp-2);
+  min-height: 40px; padding: 0 var(--sp-3) 0 var(--sp-2);
+  border: 0; border-radius: var(--r-md); background: transparent;
+  font-size: var(--fs-sm); font-weight: 600; color: var(--text-sub);
+}
+.toggle:hover { background: var(--pink-100); color: var(--text); }
+.toggle-track {
+  position: relative; width: 40px; height: 24px; flex: none;
+  border-radius: var(--r-pill); background: var(--line-strong);
+  transition: background-color .2s var(--ease);
+}
+.toggle-thumb {
+  position: absolute; left: 3px; top: 3px; width: 18px; height: 18px;
+  border-radius: 50%; background: var(--surface);
+  transition: transform .2s var(--ease);
+}
+.toggle[aria-pressed="true"] .toggle-track { background: var(--pink-500); }
+.toggle[aria-pressed="true"] .toggle-thumb { transform: translateX(16px); }
 .form-label { font-size: var(--fs-sm); font-weight: 600; color: var(--text-sub); }
 
 .check { position: relative; display: inline-flex; width: 24px; height: 24px; flex: none; }
