@@ -5,6 +5,11 @@
 .home-main {
   gap: var(--sp-8);
 }
+/* 주요 세 구역 사이: 기본 32px에 16px을 더해 동일한 48px 간격을 사용합니다. */
+.home-main > .home-overview,
+.home-main > .home-week-section {
+  margin-top: var(--sp-4);
+}
 .home-intro {
   display: flex;
   justify-content: space-between;
@@ -58,6 +63,10 @@
   color: var(--pink-700);
   width: 22px;
   height: 22px;
+}
+.home-section-head .home-title-link {
+  color: inherit;
+  text-decoration: none;
 }
 .home-section-head h2 > span {
   margin-left: var(--sp-1);
@@ -138,7 +147,8 @@
   font-size: var(--fs-sm);
   color: var(--text-sub);
 }
-.home-timer-clock { position: relative; }
+.home-timer-clock { width: max-content; max-width: 100%; }
+.home-timer-number-row { position: relative; text-align: center; }
 .home-timer-adjust { position: absolute; left: calc(100% + var(--sp-3)); top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: var(--sp-1); }
 .home-timer-step { display: grid; place-items: center; width: 40px; height: 36px; padding: 0; border: 0; border-radius: var(--r-sm); background: transparent; color: var(--pink-700); font-size: var(--fs-xl); line-height: 1; }
 .home-timer-step:disabled { opacity: .4; cursor: not-allowed; }
@@ -161,14 +171,21 @@
 
 
 .home-timer-track {
-  width: min(260px, 75%);
+  position: relative;
+  width: max-content;
+  max-width: 100%;
   height: 6px;
   border-radius: var(--r-pill);
   background: var(--pink-200);
   overflow: hidden;
-  margin-top: var(--sp-2);
+  margin: var(--sp-2) auto 0;
 }
+/* 막대 너비는 측정 방식과 관계없이 설정한 타이머의 분:초 표시를 기준으로 합니다. */
+.home-timer-track-size { visibility: hidden; height: 0; line-height: 0; pointer-events: none; }
 .home-timer-track > span {
+  position: absolute;
+  inset: 0;
+  width: 100%;
   display: block;
   height: 100%;
   background: var(--pink-700);
@@ -180,7 +197,8 @@
   display: flex;
   justify-content: center;
   gap: var(--sp-3);
-  margin-top: var(--sp-8);
+  /* 스위치~숫자 간격(안내 영역의 위 여백 + 최소 높이)과 동일하게 맞춥니다. */
+  margin-top: calc(var(--sp-5) + var(--fs-sm) * 1.6);
 }
 .home-timer-actions .btn {
   font-size: var(--fs-md);
@@ -470,60 +488,70 @@
   font-size: var(--fs-sm);
   font-weight: 700;
 }
+.home-week-step.is-prev .icon { transform: rotate(180deg); }
+.home-week-controls > .link-btn {
+  min-height: 38px;
+  font-size: var(--fs-xs);
+}
+.home-week-controls > .link-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.home-week-scroll {
+  overflow: hidden;
+  border: 1.5px solid var(--line-strong);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+}
 .home-week-grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  border: 1.5px solid var(--line-strong);
-  border-radius: var(--r-md);
-  overflow: hidden;
   background: var(--surface);
 }
 .home-day {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
-  border-right: 1px solid var(--line);
+  min-height: 230px;
+  border-left: 1px solid var(--line);
 }
-.home-day:last-child {
-  border-right: 0;
-}
+.home-day:first-child { border-left: 0; }
 .home-day-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
   gap: var(--sp-1);
-  min-height: 48px;
-  padding: var(--sp-2) var(--sp-3);
-  border-bottom: 1px solid var(--line-strong);
+  min-height: 72px;
+  padding: var(--sp-3);
+  border-bottom: 1px solid var(--line);
   background: var(--pink-100);
 }
 .home-day-head h3 {
-  font-size: var(--fs-sm);
-  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: 0;
 }
-.home-day-head time {
-  font-weight: 800;
-}
+.home-day-number { font-size: var(--fs-2xl); font-weight: 600; line-height: 1; letter-spacing: -.04em; }
+.home-day-name { font-size: var(--fs-xs); color: var(--text-sub); font-weight: 500; }
 .home-day-head > span {
+  padding: 1px var(--sp-1);
   color: var(--text-sub);
   font-size: var(--fs-xs);
 }
 .home-day.is-today .home-day-head {
   background: var(--pink-200);
 }
+.home-day.is-today .home-day-number { font-weight: 800; }
 .home-day.is-today .home-day-head > span {
   color: var(--text);
   font-weight: 700;
 }
 .home-day-content {
-  min-height: 202px;
-  padding: var(--sp-2) var(--sp-3) var(--sp-5);
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0,
-    transparent 33px,
-    var(--pink-100) 33px,
-    var(--pink-100) 34px
-  );
+  flex: 1;
+  min-height: 0;
+  padding: var(--sp-3) var(--sp-2);
+  background: var(--surface);
 }
 .home-week-task {
   display: flex;
@@ -547,6 +575,8 @@
   overflow-wrap: anywhere;
 }
 .home-week-task label > span {
+  font-size: var(--fs-sm);
+  line-height: 1.5;
   font-weight: 600;
 }
 .home-week-task small {
@@ -568,11 +598,6 @@
 .home-week-task.is-done label > span {
   text-decoration: line-through;
   color: var(--text-sub);
-}
-.home-week-empty {
-  margin-top: var(--sp-3);
-  color: var(--text-sub);
-  font-size: var(--fs-xs);
 }
 .home-exam {
   padding: var(--sp-2);
@@ -635,11 +660,6 @@
   .home-week-heading {
     align-items: flex-start;
   }
-  .home-day-head,
-  .home-day-content {
-    padding-left: var(--sp-2);
-    padding-right: var(--sp-2);
-  }
 }
 @media (max-width: 760px) {
   .home-overview {
@@ -669,36 +689,12 @@
   .home-timer-help {
     max-width: 310px;
   }
-  .home-week-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .home-day {
-    border-bottom: 1px solid var(--line-strong);
-  }
-  .home-day:nth-child(even) {
-    border-right: 0;
-  }
-  .home-day:last-child {
-    grid-column: 1 / -1;
-    border-bottom: 0;
-  }
-  .home-day-content {
-    min-height: 122px;
-    padding: var(--sp-3);
-  }
-  .home-day-head {
-    padding-left: var(--sp-3);
-    padding-right: var(--sp-3);
-  }
   .home-week-controls {
     width: 100%;
   }
   .home-week-controls > p {
     min-width: 0;
     flex: 1;
-  }
-  .home-week-controls .btn {
-    padding: 0 var(--sp-2);
   }
 }
 @media (max-width: 400px) {
@@ -717,12 +713,6 @@
   .home-stat > strong {
     font-size: var(--fs-lg);
   }
-  .home-week-grid {
-    grid-template-columns: 1fr;
-  }
-  .home-day {
-    border-right: 0;
-  }
 }
 
 
@@ -736,7 +726,30 @@
 /* 완료한 할 일 보기: 마우스를 올려도 배경과 글자 색을 유지합니다. */
 #toggleDone:hover { background: transparent; color: var(--text-sub); }
 
+/* 일주일을 한 줄로 유지하고 화면 너비에 맞춰 각 날짜 칸을 줄입니다. */
+@media (max-width: 1050px) {
+  .home-day-head { flex-direction: column; justify-content: flex-start; min-height: 108px; padding: var(--sp-3) var(--sp-1); }
+  .home-day-head h3 { flex-direction: column; gap: var(--sp-1); }
+  .home-day-name { text-align: center; overflow-wrap: anywhere; }
+}
+@media (max-width: 650px) {
+  .home-day { min-height: 210px; }
+  .home-day-head { min-height: 136px; }
+  .home-day-head > span { padding: 1px 0; white-space: nowrap; }
+  .home-day-content { padding: var(--sp-2) var(--sp-1); }
+  .home-week-task { flex-direction: column; gap: var(--sp-1); }
+  .home-week-task small { flex-direction: column; gap: 2px; }
+  .home-exam { padding: var(--sp-1); }
+}
+
 /* 두 측정 방식은 같은 숫자 크기를 쓰며, 작은 화면에서는 긴 시:분:초 표시도 들어가게 조정합니다. */
 @media (max-width: 600px) {
   .home-timer-digits { font-size: clamp(44px, 14vw, 84px); }
+}
+
+/* 두 요약 구역의 제목 줄 높이를 공유해 카드 상단을 나란히 맞춥니다. */
+@media (min-width: 761px) {
+  .home-overview { grid-template-rows: auto auto; row-gap: var(--sp-3); align-items: stretch; }
+  .home-overview > .home-section { display: grid; grid-template-rows: subgrid; grid-row: span 2; align-items: start; }
+  .home-overview > .home-section > .home-section-head { margin-bottom: 0; align-self: stretch; }
 }

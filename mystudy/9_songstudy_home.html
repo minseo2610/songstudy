@@ -48,38 +48,145 @@
               </h2>
             </div>
             <div class="card home-timer-card">
-              <h3 class="home-timer-focus-title" id="timerFocusTitle">어떤 과목을 공부할까요?</h3>
+              <h3 class="home-timer-focus-title" id="timerFocusTitle">
+                어떤 과목을 공부할까요?
+              </h3>
               <div class="home-timer-settings">
                 <div class="home-timer-options">
-                <div class="home-option"><span id="timerSubjectLabel">과목</span><div class="home-timer-picker" id="timerSubjectPicker">
-                  <button class="home-timer-select" id="timerSubject" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="timerSubjectOptions" aria-labelledby="timerSubjectLabel timerSubjectValue" disabled><span id="timerSubjectValue">과목 불러오는 중</span><span class="home-timer-chevron" aria-hidden="true"></span></button>
-                  <div class="home-timer-menu" id="timerSubjectMenu" hidden><div class="home-timer-menu-options" id="timerSubjectOptions" role="listbox" aria-labelledby="timerSubjectLabel"></div></div>
-                </div></div>
-                <div class="home-option"><span id="timerTaskLabel">할 일</span><div class="home-timer-picker" id="timerTaskPicker">
-                  <button class="home-timer-select" id="timerTask" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="timerTaskOptions" aria-labelledby="timerTaskLabel timerTaskValue" disabled><span id="timerTaskValue">과목만 기록하기</span><span class="home-timer-chevron" aria-hidden="true"></span></button>
-                  <div class="home-timer-menu" id="timerTaskMenu" hidden><div class="home-timer-menu-options" id="timerTaskOptions" role="listbox" aria-labelledby="timerTaskLabel"></div></div>
-                </div></div>
+                  <div class="home-option">
+                    <span id="timerSubjectLabel">과목</span>
+                    <div class="home-timer-picker" id="timerSubjectPicker">
+                      <button
+                        class="home-timer-select"
+                        id="timerSubject"
+                        type="button"
+                        aria-haspopup="listbox"
+                        aria-expanded="false"
+                        aria-controls="timerSubjectOptions"
+                        aria-labelledby="timerSubjectLabel timerSubjectValue"
+                        disabled
+                      >
+                        <span id="timerSubjectValue">과목 불러오는 중</span
+                        ><span
+                          class="home-timer-chevron"
+                          aria-hidden="true"
+                        ></span>
+                      </button>
+                      <div class="home-timer-menu" id="timerSubjectMenu" hidden>
+                        <div
+                          class="home-timer-menu-options"
+                          id="timerSubjectOptions"
+                          role="listbox"
+                          aria-labelledby="timerSubjectLabel"
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="home-option">
+                    <span id="timerTaskLabel">할 일</span>
+                    <div class="home-timer-picker" id="timerTaskPicker">
+                      <button
+                        class="home-timer-select"
+                        id="timerTask"
+                        type="button"
+                        aria-haspopup="listbox"
+                        aria-expanded="false"
+                        aria-controls="timerTaskOptions"
+                        aria-labelledby="timerTaskLabel timerTaskValue"
+                        disabled
+                      >
+                        <span id="timerTaskValue">과목만 기록하기</span
+                        ><span
+                          class="home-timer-chevron"
+                          aria-hidden="true"
+                        ></span>
+                      </button>
+                      <div class="home-timer-menu" id="timerTaskMenu" hidden>
+                        <div
+                          class="home-timer-menu-options"
+                          id="timerTaskOptions"
+                          role="listbox"
+                          aria-labelledby="timerTaskLabel"
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <div class="home-timer-mode-settings" id="homeTimerSettings">
-                  <div class="home-timer-mode" role="group" aria-label="시간 측정 방식"><button type="button" data-home-timer-mode="stopwatch" aria-pressed="false" disabled>스톱워치</button><button type="button" id="homeTimerMode" data-home-timer-mode="focus" aria-pressed="true" disabled>타이머</button></div>
+                  <div
+                    class="home-timer-mode"
+                    role="group"
+                    aria-label="시간 측정 방식"
+                  >
+                    <button
+                      type="button"
+                      data-home-timer-mode="stopwatch"
+                      aria-pressed="false"
+                      disabled
+                    >
+                      스톱워치</button
+                    ><button
+                      type="button"
+                      id="homeTimerMode"
+                      data-home-timer-mode="focus"
+                      aria-pressed="true"
+                      disabled
+                    >
+                      타이머
+                    </button>
+                  </div>
                 </div>
               </div>
-              <p class="home-timer-state" id="timerState">
-              </p>
+              <p class="home-timer-state" id="timerState"></p>
               <div class="home-timer-clock">
-              <div
-                class="home-timer-digits num"
-                id="timerDisplay"
-                role="timer"
-                aria-label="남은 집중 시간"
-                aria-live="off"
-              >
-                25:00
-              </div>
-              <div class="home-timer-adjust" id="timerAdjust" role="group" aria-label="타이머 시간 조절"><button class="home-timer-step" id="timerIncrease" type="button" aria-label="5분 늘리기" title="5분 늘리기" aria-controls="timerDisplay" disabled><span aria-hidden="true">△</span></button><button class="home-timer-step" id="timerDecrease" type="button" aria-label="5분 줄이기" title="5분 줄이기" aria-controls="timerDisplay" disabled><span aria-hidden="true">▽</span></button></div>
-              </div>
-              <div class="home-timer-track" aria-hidden="true">
-                <span id="timerTrack"></span>
+                <div class="home-timer-number-row">
+                  <div
+                    class="home-timer-digits num"
+                    id="timerDisplay"
+                    role="timer"
+                    aria-label="남은 집중 시간"
+                    aria-live="off"
+                  >
+                    25:00
+                  </div>
+                  <div
+                    class="home-timer-adjust"
+                    id="timerAdjust"
+                    role="group"
+                    aria-label="타이머 시간 조절"
+                  >
+                    <button
+                      class="home-timer-step"
+                      id="timerIncrease"
+                      type="button"
+                      aria-label="5분 늘리기"
+                      title="5분 늘리기"
+                      aria-controls="timerDisplay"
+                      disabled
+                    >
+                      <span aria-hidden="true">△</span></button
+                    ><button
+                      class="home-timer-step"
+                      id="timerDecrease"
+                      type="button"
+                      aria-label="5분 줄이기"
+                      title="5분 줄이기"
+                      aria-controls="timerDisplay"
+                      disabled
+                    >
+                      <span aria-hidden="true">▽</span>
+                    </button>
+                  </div>
+                </div>
+                <div class="home-timer-track" aria-hidden="true">
+                  <div
+                    class="home-timer-digits home-timer-track-size"
+                    id="timerTrackSize"
+                  >
+                    25:00
+                  </div>
+                  <span id="timerTrack"></span>
+                </div>
               </div>
               <div class="home-timer-actions">
                 <button
@@ -88,10 +195,19 @@
                   type="button"
                   disabled
                 >
-                  <svg class="icon" id="timerStartIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 10 7-10 7z"></path></svg><span id="timerStartLabel">시작하기</span>
+                  <svg
+                    class="icon"
+                    id="timerStartIcon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path d="m9 5 10 7-10 7z"></path></svg
+                  ><span id="timerStartLabel">시작하기</span>
                 </button>
                 <button class="btn" id="timerFinish" type="button" disabled>
-                  <svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg>기록하기
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-check"></use></svg
+                  >기록하기
                 </button>
               </div>
               <p class="sr-only" id="timerAnnouncement" role="status"></p>
@@ -108,10 +224,17 @@
                 <h2 id="subjectsTitle">
                   <svg class="icon" aria-hidden="true">
                     <use href="#i-book"></use></svg
-                  >과목별 할 일
+                  ><a class="home-title-link" href="9_Songstudy_subjects.html">과목별 할 일</a>
                 </h2>
-                <button class="toggle" id="toggleDone" type="button" aria-pressed="true">
-                  <span class="toggle-track" aria-hidden="true"><span class="toggle-thumb"></span></span>
+                <button
+                  class="toggle"
+                  id="toggleDone"
+                  type="button"
+                  aria-pressed="true"
+                >
+                  <span class="toggle-track" aria-hidden="true"
+                    ><span class="toggle-thumb"></span
+                  ></span>
                   완료한 할 일 보기
                 </button>
               </div>
@@ -153,7 +276,7 @@
                 <h2 id="reportTitle">
                   <svg class="icon" aria-hidden="true">
                     <use href="#i-chart"></use></svg
-                  >학습 리포트
+                  ><a class="home-title-link" href="9_songstudy_report.html">통계 리포트</a>
                 </h2>
                 <span class="home-section-note" id="reportMonth"></span>
               </div>
@@ -197,22 +320,40 @@
               <h2 id="plannerTitle">
                 <svg class="icon" aria-hidden="true">
                   <use href="#i-calendar"></use></svg
-                >주간 플래너
+                ><a class="home-title-link" href="weekly.html">주간 플래너</a>
               </h2>
               <div class="home-week-controls">
-                <button class="icon-btn arrow-btn is-prev" id="prevWeek" type="button" aria-label="이전 주 보기" title="이전 주">
-                  <svg class="icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg>
+                <button
+                  class="icon-btn home-week-step is-prev"
+                  id="prevWeek"
+                  type="button"
+                  aria-label="이전 주 보기"
+                  title="이전 주"
+                >
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-chevron-right"></use>
+                  </svg>
                 </button>
                 <p class="num" id="weekRange" aria-live="polite"></p>
-                <button class="icon-btn arrow-btn" id="nextWeek" type="button" aria-label="다음 주 보기" title="다음 주">
-                  <svg class="icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg>
+                <button
+                  class="icon-btn home-week-step"
+                  id="nextWeek"
+                  type="button"
+                  aria-label="다음 주 보기"
+                  title="다음 주"
+                >
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#i-chevron-right"></use>
+                  </svg>
                 </button>
-                <button class="btn btn-sm" id="thisWeek" type="button">
+                <button class="link-btn" id="thisWeek" type="button">
                   이번 주
                 </button>
               </div>
             </div>
-            <div class="home-week-grid" id="weekGrid" aria-busy="true"></div>
+            <div class="home-week-scroll">
+              <div class="home-week-grid" id="weekGrid" aria-busy="true"></div>
+            </div>
             <div class="home-week-footer">
               <p>
                 할 일은 마감일 기준으로 표시돼요. 체크하면 과목별 목록에도 함께

@@ -214,6 +214,7 @@
     const minutes = stopwatch ? Math.floor(seconds / 60) % 60 : Math.floor(seconds / 60);
     const display = (stopwatch ? String(Math.floor(seconds / 3600)).padStart(2, "0") + ":" : "") + String(minutes).padStart(2, "0") + ":" + String(seconds % 60).padStart(2, "0");
     $("timerDisplay").textContent = display;
+    $("timerTrackSize").textContent = String(timer.durationMinutes).padStart(2, "0") + ":00";
     $("timerDisplay").classList.toggle("is-stopwatch", stopwatch);
     $("timerDisplay").setAttribute("aria-label", (stopwatch ? "측정한 공부시간 " : "남은 집중 시간 ") + display);
     $("timerTrack").style.setProperty("--value", stopwatch ? (elapsed % 3600000) / 3600000 : Math.max(0, Math.min(1, 1 - remaining / timer.totalMs)));
@@ -557,19 +558,21 @@
     $("thisWeek").disabled = today >= week.startDate && today <= week.endDate;
     $("weekGrid").innerHTML = week.days.map(function (day, index) {
       const isToday = day.date === today;
+      // 완료한 할 일은 날짜별 목록 아래에 모으고, 같은 상태끼리는 기존 순서를 유지합니다.
+      const tasks = day.tasks.slice().sort(function (a, b) { return Number(a.done) - Number(b.done); });
       const exams = [];
       subjects.forEach(function (subject) {
         (subject.exams || []).forEach(function (exam) {
           if (exam.date === day.date) exams.push({ name: exam.name, subjectName: subject.name });
         });
       });
-      return '<section class="home-day' + (isToday ? ' is-today' : '') + '" aria-label="' + esc(MyStudy.formatDate(day.date)) + '"><div class="home-day-head"><h3>' + ["월", "화", "수", "목", "금", "토", "일"][index] + ' <time datetime="' + day.date + '">' + localDate(day.date).getDate() + '</time></h3>' + (isToday ? '<span>오늘</span>' : '') + '</div><div class="home-day-content"><ul>' + day.tasks.map(function (task) {
+      return '<section class="home-day' + (isToday ? ' is-today' : '') + '" aria-label="' + esc(MyStudy.formatDate(day.date)) + '"><div class="home-day-head"><h3><time class="home-day-number num" datetime="' + day.date + '"' + (isToday ? ' aria-current="date"' : '') + '>' + localDate(day.date).getDate() + '</time><span class="home-day-name">' + ["월", "화", "수", "목", "금", "토", "일"][index] + '요일</span></h3>' + (isToday ? '<span>오늘</span>' : '') + '</div><div class="home-day-content"><ul>' + tasks.map(function (task) {
         const subject = MyStudy.getSubject(task.subjectId);
         const id = "week-task-" + task.id;
         return '<li class="home-week-task' + (task.done ? ' is-done' : '') + '" data-color="' + esc(subject ? subject.color : "") + '"><span class="check"><input type="checkbox" id="' + esc(id) + '" data-task-id="' + esc(task.id) + '"' + (task.done ? ' checked' : '') + '><span class="box">' + MyUI.icon("check") + '</span></span><label for="' + esc(id) + '"><span>' + esc(task.title) + '</span><small>' + esc(subject ? subject.name : "이전 과목") + '</small></label></li>';
       }).join("") + '</ul>' + exams.map(function (exam) {
         return '<div class="home-exam"><strong>시험 · ' + esc(exam.name) + '</strong><span>' + esc(exam.subjectName) + '</span></div>';
-      }).join("") + (!day.tasks.length && !exams.length ? '<p class="home-week-empty">등록된 일정 없음</p>' : '') + '</div></section>';
+      }).join("") + '</div></section>';
     }).join("");
     applyColors($("weekGrid"));
     $("weekGrid").setAttribute("aria-busy", "false");
