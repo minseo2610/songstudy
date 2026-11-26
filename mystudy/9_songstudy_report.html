@@ -1,76 +1,343 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="author" content="인공지능공학부 2511329 이예랑">
-  <meta name="description" content="일·주·월별 과목 공부 비율과 캘린더로 확인하는 Songtudy 공부 기록">
-  <title>통계 리포트 | Songtudy</title>
-  <link rel="stylesheet" href="9_Songstudy_common.css">
-  <link rel="stylesheet" href="9_songstudy_report.css">
-  <script src="9_Songstudy_common.js" defer></script>
-  <script src="../common/00_mystudy_store.js" defer></script>
-  <script src="9_songstudy_report.js" defer></script>
-</head>
-<body data-page="report">
-  <a class="skip-link" href="#main">본문 바로가기</a>
-  <div class="window">
-    <header class="window-tabs" data-nav></header>
-    <div class="window-frame">
-      <div class="window-bar" data-addr-bar></div>
-      <main class="window-body report-page" id="main">
-        <div class="page-head"><h1 class="page-title">통계 리포트</h1><a class="btn" href="timer.html"><svg class="icon" aria-hidden="true"><use href="#i-clock"></use></svg>학습 타이머</a></div>
-        <div class="empty" id="loadError" role="alert" hidden><p>공부 기록을 불러오지 못했어요.</p><button class="btn" id="retryButton" type="button">다시 불러오기</button></div>
-        <div class="skeleton report-loading" id="loading" role="status" aria-label="통계 불러오는 중"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="인공지능공학부 2511329 이예랑" />
+    <meta
+      name="description"
+      content="일·주·월별 과목 공부 비율과 캘린더로 확인하는 Songtudy 공부 기록"
+    />
+    <title>통계 리포트 | Songtudy</title>
+    <link rel="stylesheet" href="9_Songstudy_common.css" />
+    <link rel="stylesheet" href="9_songstudy_report.css" />
+    <script src="9_Songstudy_common.js" defer></script>
+    <script src="../common/00_mystudy_store.js" defer></script>
+    <script src="9_songstudy_report.js" defer></script>
+  </head>
+  <body data-page="report">
+    <a class="skip-link" href="#main">본문 바로가기</a>
+    <div class="window">
+      <header class="window-tabs" data-nav></header>
+      <div class="window-frame">
+        <div class="window-bar" data-addr-bar></div>
+        <main class="window-body report-page" id="main">
+          <div class="page-head"><h1 class="page-title">통계 리포트</h1></div>
+          <div class="empty" id="loadError" role="alert" hidden>
+            <p>공부 기록을 불러오지 못했어요.</p>
+            <button class="btn" id="retryButton" type="button">
+              다시 불러오기
+            </button>
+          </div>
+          <div
+            class="skeleton report-loading"
+            id="loading"
+            role="status"
+            aria-label="통계 불러오는 중"
+          ></div>
 
-        <div class="report-content" id="reportApp" hidden>
-          <section class="card report-ratio" aria-labelledby="ratioTitle">
-            <div class="report-section-head">
-              <h2 class="card-title" id="ratioTitle">과목별 공부 비율</h2>
-              <div class="report-period" role="group" aria-label="공부 비율 집계 기간">
-                <button type="button" data-period="day" aria-pressed="true">하루</button>
-                <button type="button" data-period="week" aria-pressed="false">일주일</button>
-                <button type="button" data-period="month" aria-pressed="false">한 달</button>
+          <div class="report-content" id="reportApp" hidden>
+            <section class="card report-ratio" aria-labelledby="ratioTitle">
+              <div class="report-section-head">
+                <h2 class="card-title" id="ratioTitle">과목별 공부 비율</h2>
+                <div
+                  class="report-period"
+                  role="group"
+                  aria-label="공부 비율 집계 기간"
+                >
+                  <button type="button" data-period="day" aria-pressed="true">
+                    Day
+                  </button>
+                  <button type="button" data-period="week" aria-pressed="false">
+                    Week
+                  </button>
+                  <button
+                    type="button"
+                    data-period="month"
+                    aria-pressed="false"
+                  >
+                    Month
+                  </button>
+                </div>
               </div>
-            </div>
-            <div class="report-date-toolbar">
-              <div class="report-period-navigation"><button class="icon-btn arrow-btn is-prev" id="previousPeriod" type="button" aria-label="이전 기간" title="이전 기간"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></button><p class="report-period-label" id="periodLabel"></p><button class="icon-btn arrow-btn" id="nextPeriod" type="button" aria-label="다음 기간" title="다음 기간"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></button></div>
-              <label class="report-date-label" for="reportDate">기준 날짜<input class="input" id="reportDate" type="date" min="1900-01-01"></label>
-              <button class="link-btn" id="goToday" type="button">오늘</button>
-            </div>
-            <div class="report-ratio-body">
-              <div class="report-donut-wrap">
-                <svg class="report-donut" id="donutChart" viewBox="0 0 240 240" role="img" aria-labelledby="donutTitle donutDescription"><title id="donutTitle">과목별 공부 비율</title><desc id="donutDescription"></desc><circle class="report-donut-track" cx="120" cy="120" r="94"></circle><g id="donutSegments"></g></svg>
-                <div class="report-donut-center" aria-hidden="true"><span>총 공부시간</span><strong class="num" id="periodTotal">0분</strong></div>
+              <div class="report-date-toolbar">
+                <div class="report-period-navigation">
+                  <button
+                    class="icon-btn report-month-step"
+                    id="previousPeriod"
+                    type="button"
+                    aria-label="이전 기간"
+                    title="이전 기간"
+                  >
+                    <svg class="icon" aria-hidden="true">
+                      <use href="#i-chevron-right"></use>
+                    </svg>
+                  </button>
+                  <p class="report-period-label" id="periodLabel"></p>
+                  <button
+                    class="icon-btn report-month-step"
+                    id="nextPeriod"
+                    type="button"
+                    aria-label="다음 기간"
+                    title="다음 기간"
+                  >
+                    <svg class="icon" aria-hidden="true">
+                      <use href="#i-chevron-right"></use>
+                    </svg>
+                  </button>
+                </div>
+                <div class="report-date-label">
+                  <label for="reportDate">기준 날짜</label>
+                  <div class="report-date-picker" id="reportDatePicker">
+                    <div class="report-picker-control">
+                      <input
+                        class="input report-picker-input"
+                        id="reportDate"
+                        type="text"
+                        inputmode="none"
+                        autocomplete="off"
+                        readonly
+                        aria-label="기준 날짜 선택"
+                        aria-haspopup="dialog"
+                        aria-expanded="false"
+                        aria-controls="reportDateCalendar"
+                      /><button
+                        class="report-picker-toggle"
+                        id="reportDateToggle"
+                        type="button"
+                        aria-label="기준 날짜 달력 열기"
+                        aria-expanded="false"
+                        aria-controls="reportDateCalendar"
+                      ></button>
+                    </div>
+                    <div
+                      class="report-picker-popover"
+                      id="reportDateCalendar"
+                      role="dialog"
+                      aria-label="기준 날짜 선택"
+                      hidden
+                    >
+                      <div class="report-picker-head">
+                        <button
+                          class="icon-btn"
+                          id="pickerPreviousMonth"
+                          type="button"
+                          aria-label="날짜 선택창 이전 달"
+                        >
+                          ‹</button
+                        ><strong
+                          id="pickerMonthTitle"
+                          aria-live="polite"
+                        ></strong
+                        ><button
+                          class="icon-btn"
+                          id="pickerNextMonth"
+                          type="button"
+                          aria-label="날짜 선택창 다음 달"
+                        >
+                          ›
+                        </button>
+                      </div>
+                      <div class="report-picker-weekdays" aria-hidden="true">
+                        <span>일</span><span>월</span><span>화</span
+                        ><span>수</span><span>목</span><span>금</span
+                        ><span>토</span>
+                      </div>
+                      <div
+                        class="report-picker-grid"
+                        id="pickerDateGrid"
+                        role="group"
+                        aria-labelledby="pickerMonthTitle"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+                <button class="link-btn" id="goToday" type="button">
+                  오늘
+                </button>
               </div>
-              <div class="report-subject-summary">
-                <ul class="report-ratio-list" id="ratioSubjects" aria-label="과목별 공부시간과 비율"></ul>
-                <div class="report-ratio-empty" id="ratioEmpty" hidden><p>이 기간에 기록된 공부시간이 없어요.</p><a href="timer.html">타이머로 공부 기록 남기기</a></div>
+              <div class="report-ratio-body">
+                <div class="report-donut-wrap">
+                  <svg
+                    class="report-donut"
+                    id="donutChart"
+                    viewBox="0 0 240 240"
+                    role="img"
+                    aria-labelledby="donutTitle donutDescription"
+                  >
+                    <title id="donutTitle">과목별 공부 비율</title>
+                    <desc id="donutDescription"></desc>
+                    <circle
+                      class="report-donut-track"
+                      cx="120"
+                      cy="120"
+                      r="94"
+                    ></circle>
+                    <g id="donutSegments"></g>
+                  </svg>
+                  <div class="report-donut-center" aria-hidden="true">
+                    <span>총 공부시간</span
+                    ><strong class="num" id="periodTotal">0분</strong>
+                  </div>
+                </div>
+                <div class="report-subject-summary">
+                  <ul
+                    class="report-ratio-list"
+                    id="ratioSubjects"
+                    aria-label="과목별 공부시간과 비율"
+                  ></ul>
+                  <div class="report-ratio-empty" id="ratioEmpty" hidden>
+                    <p>이 기간에 기록된 공부시간이 없어요.</p>
+                    <a href="timer.html">타이머로 공부 기록 남기기</a>
+                  </div>
+                </div>
               </div>
-            </div>
-            <p class="report-ratio-note" id="periodNote"></p>
-          </section>
+              <p class="report-ratio-note" id="periodNote"></p>
+            </section>
 
-          <section class="card report-calendar-card" aria-labelledby="calendarTitle">
-            <div class="report-section-head"><h2 class="card-title" id="calendarTitle">공부 기록 캘린더</h2><div class="report-calendar-filter"><label class="sr-only" for="calendarSubject">캘린더에 표시할 과목</label><span class="report-select"><select class="select" id="calendarSubject"><option value="">전체 과목</option></select></span></div></div>
-            <div class="report-calendar-toolbar"><h3 id="calendarMonth"></h3><div class="report-calendar-navigation"><button class="icon-btn arrow-btn is-prev" id="previousMonth" type="button" aria-label="이전 달" title="이전 달"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></button><button class="btn btn-sm" id="thisMonth" type="button">이번 달</button><button class="icon-btn arrow-btn" id="nextMonth" type="button" aria-label="다음 달" title="다음 달"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></button></div></div>
-            <div class="report-weekdays" aria-hidden="true"><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span><span>일</span></div>
-            <div class="report-calendar-grid" id="calendarGrid" role="group" aria-labelledby="calendarMonth"></div>
-            <div class="report-calendar-key"><p id="calendarMonthSummary"></p><div class="report-heat-key" aria-label="배경이 진할수록 공부시간이 많습니다"><span>적게</span><i class="heat-0"></i><i class="heat-1"></i><i class="heat-2"></i><i class="heat-3"></i><i class="heat-4"></i><span>많이</span></div></div>
-            <div class="report-calendar-legend" id="calendarLegend" aria-label="과목 색상 범례"></div>
-            <div class="report-day-detail" id="dayDetails" aria-labelledby="selectedDayTitle">
-              <div class="report-day-heading"><h3 id="selectedDayTitle"></h3><strong class="num" id="selectedDayTotal"></strong></div>
-              <ul class="report-day-subjects" id="daySubjects" aria-label="선택한 날짜의 과목별 공부시간"></ul>
-              <p class="report-day-empty" id="dayEmpty" hidden>이 날짜에는 공부 기록이 없어요.</p>
-            </div>
-          </section>
-        </div>
-        <p class="report-storage-note" id="storageNote" hidden>기록은 이 브라우저에 저장돼요. 캘린더의 날짜를 누르면 과목별 공부시간을 볼 수 있어요.</p>
-        <noscript><p>통계를 확인하려면 브라우저의 JavaScript를 켜 주세요.</p></noscript>
-      </main>
+            <section
+              class="card report-calendar-card"
+              aria-labelledby="calendarTitle"
+            >
+              <div class="report-section-head">
+                <h2 class="card-title" id="calendarTitle">공부 기록 캘린더</h2>
+                <div class="report-calendar-filter" id="calendarSubjectPicker">
+                  <span class="sr-only" id="calendarSubjectLabel"
+                    >캘린더에 표시할 과목</span
+                  >
+                  <button
+                    class="report-subject-trigger"
+                    id="calendarSubject"
+                    type="button"
+                    aria-haspopup="listbox"
+                    aria-expanded="false"
+                    aria-controls="calendarSubjectOptions"
+                    aria-labelledby="calendarSubjectLabel calendarSubjectValue"
+                  >
+                    <span class="report-subject-value" id="calendarSubjectValue"
+                      >전체 과목</span
+                    ><span
+                      class="report-subject-chevron"
+                      aria-hidden="true"
+                    ></span>
+                  </button>
+                  <div
+                    class="report-subject-menu"
+                    id="calendarSubjectMenu"
+                    hidden
+                  >
+                    <p class="report-subject-menu-title">과목 선택</p>
+                    <div
+                      class="report-subject-options"
+                      id="calendarSubjectOptions"
+                      role="listbox"
+                      aria-labelledby="calendarSubjectLabel"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+              <div class="report-calendar-toolbar">
+                <div class="report-calendar-navigation">
+                  <button
+                    class="icon-btn report-month-step"
+                    id="previousMonth"
+                    type="button"
+                    aria-label="이전 달"
+                    aria-controls="calendarGrid"
+                    title="이전 달"
+                  >
+                    <svg class="icon" aria-hidden="true">
+                      <use href="#i-chevron-right"></use>
+                    </svg>
+                  </button>
+                  <h3 id="calendarMonth"></h3>
+                  <button
+                    class="icon-btn report-month-step"
+                    id="nextMonth"
+                    type="button"
+                    aria-label="다음 달"
+                    aria-controls="calendarGrid"
+                    title="다음 달"
+                  >
+                    <svg class="icon" aria-hidden="true">
+                      <use href="#i-chevron-right"></use>
+                    </svg>
+                  </button>
+                </div>
+                <button class="link-btn" id="thisMonth" type="button">
+                  이번 달
+                </button>
+              </div>
+              <div class="report-weekdays" aria-hidden="true">
+                <span>월</span><span>화</span><span>수</span><span>목</span
+                ><span>금</span><span>토</span><span>일</span>
+              </div>
+              <div
+                class="report-calendar-grid"
+                id="calendarGrid"
+                role="group"
+                aria-labelledby="calendarMonth"
+              ></div>
+              <div class="report-calendar-key">
+                <p id="calendarMonthSummary"></p>
+                <div
+                  class="report-heat-key"
+                  role="img"
+                  aria-label="공부시간별 배경색 총 5단계: 0단계 0시간, 1단계 0시간 초과 2시간 이하, 2단계 2시간 초과 5시간 이하, 3단계 5시간 초과 8시간 이하, 4단계 8시간 초과"
+                >
+                  <span>적게</span><i class="heat-0" title="0단계: 0시간"></i
+                  ><i class="heat-1" title="1단계: 0시간 초과 2시간 이하"></i
+                  ><i class="heat-2" title="2단계: 2시간 초과 5시간 이하"></i
+                  ><i class="heat-3" title="3단계: 5시간 초과 8시간 이하"></i
+                  ><i class="heat-4" title="4단계: 8시간 초과"></i
+                  ><span>많이</span>
+                </div>
+              </div>
+              <div
+                class="report-calendar-legend"
+                id="calendarLegend"
+                aria-label="과목 색상 범례"
+              ></div>
+              <div
+                class="report-day-detail"
+                id="dayDetails"
+                aria-labelledby="selectedDayTitle"
+              >
+                <div class="report-day-heading">
+                  <h3 id="selectedDayTitle"></h3>
+                  <strong class="num" id="selectedDayTotal"></strong>
+                </div>
+                <ul
+                  class="report-day-subjects"
+                  id="daySubjects"
+                  aria-label="선택한 날짜의 과목별 공부시간"
+                ></ul>
+                <p class="report-day-empty" id="dayEmpty" hidden>
+                  이 날짜에는 공부 기록이 없어요.
+                </p>
+              </div>
+            </section>
+          </div>
+          <p class="report-storage-note" id="storageNote" hidden>
+            기록은 이 브라우저에 저장돼요. 캘린더의 날짜를 누르면 과목별
+            공부시간을 볼 수 있어요.
+          </p>
+          <noscript
+            ><p>
+              통계를 확인하려면 브라우저의 JavaScript를 켜 주세요.
+            </p></noscript
+          >
+        </main>
+      </div>
     </div>
-  </div>
-  <footer class="site-footer"><p>Songtudy 웹프로그래밍 기말 프로젝트</p></footer>
-  <p class="sr-only" id="reportAnnouncement" role="status" aria-live="polite"></p>
-</body>
+    <footer class="site-footer">
+      <p>Songtudy 웹프로그래밍 기말 프로젝트</p>
+    </footer>
+    <p
+      class="sr-only"
+      id="reportAnnouncement"
+      role="status"
+      aria-live="polite"
+    ></p>
+  </body>
 </html>

@@ -2,7 +2,7 @@
    수업 내용: Date·배열·객체·함수, DOM, addEventListener, JSON·Fetch·웹 스토리지.
    공통 MyStudy.init()으로 과목 JSON을 불러옵니다. 별도 서버나 라이브러리는 쓰지 않습니다.
    기존 홈 타이머와 timer.html의 기록을 읽기만 하며 원본 기록은 수정하지 않습니다.
-   추가로 학습한 SVG circle의 dasharray로 도넛을 그립니다. */
+   추가로 학습한 SVG path의 원호로 도넛을 그립니다. */
 (() => {
   "use strict";
   const $ = (id) => document.getElementById(id);
@@ -24,6 +24,11 @@
   let ready = false;
   let lastSignature = "";
   let pollId = null;
+  let ratioParts = [];
+  let ratioTotal = 0;
+  let hoveredSubjectId = "";
+  let pickerMonth = anchor.slice(0, 7);
+  let pickerFocusDate = anchor;
   const fallbackColor = getComputedStyle(document.documentElement).getPropertyValue("--pink-700").trim();
 
   function readJSON(key, fallback) {
@@ -140,6 +145,7 @@
   function calendarRecords(date) { return records.filter((row) => row.date === date && (!filterId || row.subjectId === filterId)); }
 
   function renderRatio() {
+    const focusedSubjectId = document.activeElement?.closest("#ratioSubjects [data-donut-id]")?.dataset.donutId;
     const range = bounds();
     const parts = breakdown(records.filter((row) => row.date >= range.start && row.date <= range.end));
     const sum = total(parts);
@@ -147,7 +153,6 @@
     const endLabel = range.start.slice(0, 4) === range.end.slice(0, 4) ? `${parseDate(range.end).getMonth() + 1}. ${parseDate(range.end).getDate()}` : fullDate(range.end);
     $("periodLabel").textContent = period === "day" ? `${fullDate(anchor)} (${DAY_NAMES[date.getDay()]})` : period === "week" ? `${fullDate(range.start)} – ${endLabel}` : `${date.getFullYear()}년 ${date.getMonth() + 1}월`;
     $("reportDate").value = anchor;
-    $("reportDate").max = todayKey();
     $("previousPeriod").disabled = range.start <= MIN_DATE;
     $("nextPeriod").disabled = range.end >= todayKey();
     document.querySelectorAll("[data-period]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.period === period)));
@@ -160,20 +165,46 @@
     const rounded = percentages.map(Math.floor);
     const remainders = percentages.map((value, index) => ({ index, value: value - rounded[index] })).sort((a, b) => b.value - a.value);
     for (let i = 0, left = 100 - rounded.reduce((a, b) => a + b, 0); i < left && i < remainders.length; i++) rounded[remainders[i].index]++;
-    const circumference = 2 * Math.PI * 94;
+    ratioParts = parts;
+    ratioTotal = sum;
     let offset = 0;
     $("donutSegments").innerHTML = parts.map((subject) => {
-      const length = subject.durationMs / sum * circumference;
-      const markup = `<circle class="report-donut-segment" cx="120" cy="120" r="94" transform="rotate(-90 120 120)" stroke-dasharray="${length} ${circumference}" stroke-dashoffset="${-offset}" data-subject-color="${esc(subject.color)}"></circle>`;
+      const length = subject.durationMs / sum;
+      const markup = `<path class="report-donut-segment" d="${donutArc(offset, offset + length)}" data-donut-id="${esc(subject.id)}" data-subject-color="${esc(subject.color)}"></path>`;
       offset += length;
       return markup;
     }).join("");
-    $("ratioSubjects").innerHTML = parts.map((subject, index) => `<li data-subject-color="${esc(subject.color)}"><span class="report-subject-name"><i class="report-swatch" aria-hidden="true"></i>${esc(subject.name)}</span><strong class="report-ratio-time num" title="${exactDuration(subject.durationMs)}">${duration(subject.durationMs)}</strong><span class="report-ratio-percent num">${rounded[index]}%</span></li>`).join("");
+    $("ratioSubjects").innerHTML = parts.map((subject, index) => `<li tabindex="0" data-donut-id="${esc(subject.id)}" data-subject-color="${esc(subject.color)}"><span class="report-subject-name"><i class="report-swatch" aria-hidden="true"></i>${esc(subject.name)}</span><strong class="report-ratio-time num" title="${exactDuration(subject.durationMs)}">${duration(subject.durationMs)}</strong><span class="report-ratio-percent num">${rounded[index]}%</span></li>`).join("");
     $("donutDescription").textContent = `${$("periodLabel").textContent}. 총 ${exactDuration(sum)}. ${parts.length ? parts.map((subject, index) => `${subject.name} ${rounded[index]}%`).join(", ") : "공부 기록 없음"}`;
     const days = new Set(records.filter((row) => row.date >= range.start && row.date <= range.end).map((row) => row.date)).size;
     $("periodNote").textContent = period === "day" ? "기록된 공부시간 기준 · 과목별 시간과 비율" : `기록된 공부시간 기준 · ${days}일 공부${period === "week" ? " · 월요일~일요일" : ""}`;
     paintColors($("donutSegments"));
     paintColors($("ratioSubjects"));
+    if (focusedSubjectId) Array.from($("ratioSubjects").children).find((item) => item.dataset.donutId === focusedSubjectId)?.focus({ preventScroll: true });
+    hoveredSubjectId = document.querySelector(".report-ratio-body [data-donut-id]:hover")?.dataset.donutId || "";
+    updateDonutHighlight();
+  }
+
+  function donutArc(start, end) {
+    const point = (fraction) => {
+      const angle = fraction * Math.PI * 2 - Math.PI / 2;
+      return `${120 + Math.cos(angle) * 94} ${120 + Math.sin(angle) * 94}`;
+    };
+    // 원호 자체를 나누어 각 과목에 마우스가 정확히 반응하게 합니다.
+    if (end - start >= .999999999) return `M 120 26 A 94 94 0 1 1 120 214 A 94 94 0 1 1 120 26 Z`;
+    return `M ${point(start)} A 94 94 0 ${end - start > .5 ? 1 : 0} 1 ${point(end)}`;
+  }
+  function updateDonutHighlight() {
+    const focusedId = document.activeElement?.closest("#ratioSubjects [data-donut-id]")?.dataset.donutId;
+    const subject = ratioParts.find((item) => item.id === (hoveredSubjectId || focusedId));
+    document.querySelectorAll(".report-ratio-body [data-donut-id]").forEach((item) => {
+      const active = !!subject && item.dataset.donutId === subject.id;
+      item.classList.toggle("is-highlight", active);
+      item.classList.toggle("is-muted", !!subject && !active && item.classList.contains("report-donut-segment"));
+    });
+    document.querySelector(".report-donut-center > span").textContent = subject ? subject.name : "총 공부시간";
+    $("periodTotal").textContent = duration(subject ? subject.durationMs : ratioTotal);
+    $("periodTotal").title = exactDuration(subject ? subject.durationMs : ratioTotal);
   }
 
   function renderCalendar() {
@@ -189,13 +220,15 @@
     $("previousMonth").disabled = month <= MIN_DATE.slice(0, 7);
     $("nextMonth").disabled = month >= todayKey().slice(0, 7);
     $("thisMonth").disabled = month === todayKey().slice(0, 7);
-    $("calendarSubject").innerHTML = '<option value="">전체 과목</option>' + catalog.map((subject) => `<option value="${esc(subject.id)}">${esc(subject.name)}</option>`).join("");
-    $("calendarSubject").value = filterId;
+    renderSubjectPicker();
     $("calendarGrid").innerHTML = Array.from({ length: count }, (_, index) => {
       const key = shiftDate(start, index);
       const parts = breakdown(calendarRecords(key));
       const sum = total(parts);
-      const level = !sum ? 0 : sum < 3600000 ? 1 : sum < 7200000 ? 2 : sum < 14400000 ? 3 : 4;
+      // 흰색을 포함한 총 5단계: 0시간 / 0~2시간 / 2~5시간 / 5~8시간 / 8시간 초과.
+      // 각 구간의 상한(2·5·8시간)은 해당 구간에 포함합니다.
+      const hours = sum / 3600000;
+      const level = !sum ? 0 : hours <= 2 ? 1 : hours <= 5 ? 2 : hours <= 8 ? 3 : 4;
       const inMonth = key.startsWith(month);
       const label = `${fullDate(key)} (${DAY_NAMES[parseDate(key).getDay()]}), ${sum ? exactDuration(sum) + ", " + parts.map((subject) => `${subject.name} ${exactDuration(subject.durationMs)}`).join(", ") : "공부 기록 없음"}`;
       const dots = parts.slice(0, 3).map((subject) => `<i class="report-swatch" data-subject-color="${esc(subject.color)}"></i>`).join("");
@@ -207,6 +240,41 @@
     paintColors($("calendarGrid"));
     paintColors($("calendarLegend"));
     renderDay();
+  }
+  function renderSubjectPicker() {
+    const focusedId = document.activeElement?.closest(".report-subject-option")?.dataset.subjectId;
+    const subject = catalog.find((item) => item.id === filterId);
+    $("calendarSubjectValue").innerHTML = subject ? `<i class="report-swatch" data-subject-color="${esc(subject.color)}" aria-hidden="true"></i>${esc(subject.name)}` : '<i class="report-swatch report-all-subjects" aria-hidden="true"></i>전체 과목';
+    const options = [{ id: "", name: "전체 과목" }, ...catalog];
+    $("calendarSubjectOptions").innerHTML = options.map((item) => `<button class="report-subject-option" type="button" role="option" data-subject-id="${esc(item.id)}" tabindex="${item.id === filterId ? 0 : -1}" aria-selected="${item.id === filterId}"><i class="report-swatch${item.id ? "" : " report-all-subjects"}"${item.id ? ` data-subject-color="${esc(item.color)}"` : ""} aria-hidden="true"></i><span>${esc(item.name)}</span></button>`).join("");
+    paintColors($("calendarSubjectPicker"));
+    if (focusedId !== undefined && !$("calendarSubjectMenu").hidden) focusSubjectOption(focusedId);
+  }
+  function focusSubjectOption(id) {
+    const options = Array.from($("calendarSubjectOptions").children);
+    const target = options.find((item) => item.dataset.subjectId === id) || options.find((item) => item.dataset.subjectId === filterId) || options[0];
+    options.forEach((item) => { item.tabIndex = item === target ? 0 : -1; });
+    target?.focus({ preventScroll: true });
+    target?.scrollIntoView({ block: "nearest" });
+  }
+  function openSubjectPicker() {
+    closeDatePicker();
+    $("calendarSubjectMenu").hidden = false;
+    $("calendarSubject").setAttribute("aria-expanded", "true");
+    focusSubjectOption(filterId);
+  }
+  function closeSubjectPicker(restoreFocus = false) {
+    $("calendarSubjectMenu").hidden = true;
+    $("calendarSubject").setAttribute("aria-expanded", "false");
+    if (restoreFocus) $("calendarSubject").focus({ preventScroll: true });
+  }
+  function chooseCalendarSubject(id) {
+    if (id && !catalog.some((item) => item.id === id)) return;
+    filterId = id;
+    remember();
+    renderCalendar();
+    closeSubjectPicker(true);
+    $("reportAnnouncement").textContent = `${catalog.find((item) => item.id === filterId)?.name || "전체 과목"}의 캘린더. ${$("calendarMonthSummary").textContent}.`;
   }
   function renderDay() {
     const parts = breakdown(calendarRecords(anchor));
@@ -234,6 +302,46 @@
   function stepMonth(direction) {
     const next = moveMonth(anchor, direction);
     chooseDate(next < MIN_DATE ? MIN_DATE : next > todayKey() ? todayKey() : next);
+  }
+  // weekly의 날짜 선택창과 같은 일요일 시작·원형 날짜 버튼을 사용합니다.
+  // 아래 공부 기록 캘린더의 표시와 이벤트는 기존 구현을 그대로 둡니다.
+  function renderDatePicker(focusDay = false) {
+    const first = `${pickerMonth}-01`;
+    const start = shiftDate(first, -parseDate(first).getDay());
+    const date = parseDate(first);
+    $("pickerMonthTitle").textContent = `${date.getFullYear()}년 ${date.getMonth() + 1}월`;
+    $("pickerPreviousMonth").disabled = pickerMonth <= MIN_DATE.slice(0, 7);
+    $("pickerNextMonth").disabled = pickerMonth >= todayKey().slice(0, 7);
+    $("pickerDateGrid").innerHTML = Array.from({ length: 42 }, (_, index) => {
+      const key = shiftDate(start, index);
+      const day = parseDate(key);
+      const disabled = key < MIN_DATE || key > todayKey();
+      const classes = ["report-picker-day", !key.startsWith(pickerMonth) ? "is-other-month" : "", key === todayKey() ? "is-today" : "", key === anchor ? "is-selected" : ""].filter(Boolean).join(" ");
+      return `<button class="${classes}" type="button" data-picker-date="${key}" tabindex="${!disabled && key === pickerFocusDate ? 0 : -1}" aria-label="${fullDate(key)} (${DAY_NAMES[day.getDay()]})" aria-pressed="${key === anchor}"${key === todayKey() ? ' aria-current="date"' : ""}${disabled ? " disabled" : ""}>${day.getDate()}</button>`;
+    }).join("");
+    if (focusDay) $("pickerDateGrid").querySelector(`[data-picker-date="${pickerFocusDate}"]`)?.focus({ preventScroll: true });
+  }
+  function openDatePicker() {
+    pickerMonth = anchor.slice(0, 7);
+    pickerFocusDate = anchor;
+    $("reportDateCalendar").hidden = false;
+    $("reportDate").setAttribute("aria-expanded", "true");
+    $("reportDateToggle").setAttribute("aria-expanded", "true");
+    renderDatePicker(true);
+  }
+  function closeDatePicker(restoreFocus = false) {
+    $("reportDateCalendar").hidden = true;
+    $("reportDate").setAttribute("aria-expanded", "false");
+    $("reportDateToggle").setAttribute("aria-expanded", "false");
+    if (restoreFocus) $("reportDate").focus({ preventScroll: true });
+  }
+  function movePickerMonth(direction, focusDay = false) {
+    const nextMonth = moveMonth(`${pickerMonth}-01`, direction).slice(0, 7);
+    if (nextMonth < MIN_DATE.slice(0, 7) || nextMonth > todayKey().slice(0, 7)) return;
+    const next = moveMonth(pickerFocusDate, direction);
+    pickerFocusDate = next > todayKey() ? todayKey() : next < MIN_DATE ? MIN_DATE : next;
+    pickerMonth = nextMonth;
+    renderDatePicker(focusDay);
   }
   function refresh(force = false) {
     if (!ready) return;
@@ -274,6 +382,22 @@
   });
   const brand = document.querySelector("[data-nav] .brand");
   if (brand) brand.href = "9_songstudy_home.html";
+  const ratioBody = document.querySelector(".report-ratio-body");
+  ratioBody.addEventListener("pointerover", (event) => {
+    if (event.pointerType === "touch") return;
+    hoveredSubjectId = event.target.closest("[data-donut-id]")?.dataset.donutId || "";
+    updateDonutHighlight();
+  });
+  ratioBody.addEventListener("pointerout", (event) => {
+    if (event.pointerType === "touch") return;
+    hoveredSubjectId = event.relatedTarget instanceof Element && ratioBody.contains(event.relatedTarget) ? event.relatedTarget.closest("[data-donut-id]")?.dataset.donutId || "" : "";
+    updateDonutHighlight();
+  });
+  ratioBody.addEventListener("focusin", updateDonutHighlight);
+  ratioBody.addEventListener("focusout", () => {
+    // focusout 시점에는 이전 항목에 초점이 남아 있어 다음 프레임에 확인합니다.
+    requestAnimationFrame(updateDonutHighlight);
+  });
   document.querySelectorAll("[data-period]").forEach((button) => button.addEventListener("click", () => {
     period = button.dataset.period;
     remember();
@@ -291,11 +415,68 @@
     if (!validDate(key) || key < MIN_DATE || key > todayKey()) { $("reportDate").value = anchor; MyUI.toast("오늘 또는 이전 날짜를 선택해 주세요."); return; }
     chooseDate(key);
   });
-  $("calendarSubject").addEventListener("change", () => {
-    filterId = $("calendarSubject").value;
-    remember();
-    renderCalendar();
-    $("reportAnnouncement").textContent = `${$("calendarSubject").selectedOptions[0].textContent}의 캘린더. ${$("calendarMonthSummary").textContent}.`;
+  $("reportDate").addEventListener("click", openDatePicker);
+  $("reportDateToggle").addEventListener("click", () => $("reportDateCalendar").hidden ? openDatePicker() : closeDatePicker(true));
+  $("reportDate").addEventListener("keydown", (event) => {
+    if (["ArrowDown", "Enter", " "].includes(event.key)) { event.preventDefault(); openDatePicker(); }
+  });
+  $("pickerPreviousMonth").addEventListener("click", () => movePickerMonth(-1));
+  $("pickerNextMonth").addEventListener("click", () => movePickerMonth(1));
+  $("pickerDateGrid").addEventListener("click", (event) => {
+    const day = event.target.closest("[data-picker-date]");
+    if (!day || day.disabled) return;
+    chooseDate(day.dataset.pickerDate);
+    closeDatePicker(true);
+  });
+  $("pickerDateGrid").addEventListener("keydown", (event) => {
+    const day = event.target.closest("[data-picker-date]");
+    if (!day) return;
+    if (["PageUp", "PageDown"].includes(event.key)) {
+      event.preventDefault(); movePickerMonth(event.key === "PageUp" ? -1 : 1, true); return;
+    }
+    const offset = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 }[event.key];
+    const weekday = parseDate(day.dataset.pickerDate).getDay();
+    const next = offset ? shiftDate(day.dataset.pickerDate, offset) : event.key === "Home" ? shiftDate(day.dataset.pickerDate, -weekday) : event.key === "End" ? shiftDate(day.dataset.pickerDate, 6 - weekday) : "";
+    if (!next) return;
+    event.preventDefault();
+    if (next < MIN_DATE || next > todayKey()) return;
+    pickerFocusDate = next;
+    pickerMonth = next.slice(0, 7);
+    renderDatePicker(true);
+  });
+  document.addEventListener("pointerdown", (event) => {
+    if (!event.target.closest('#reportDatePicker, label[for="reportDate"]')) closeDatePicker();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !$("reportDateCalendar").hidden) { event.preventDefault(); closeDatePicker(true); }
+  });
+  $("reportDatePicker").addEventListener("focusout", () => {
+    requestAnimationFrame(() => { if (!$("reportDatePicker").contains(document.activeElement)) closeDatePicker(); });
+  });
+  $("calendarSubject").addEventListener("click", () => $("calendarSubjectMenu").hidden ? openSubjectPicker() : closeSubjectPicker(true));
+  $("calendarSubject").addEventListener("keydown", (event) => {
+    if (["ArrowDown", "ArrowUp"].includes(event.key)) { event.preventDefault(); openSubjectPicker(); }
+  });
+  $("calendarSubjectOptions").addEventListener("click", (event) => {
+    const option = event.target.closest("[data-subject-id]");
+    if (option) chooseCalendarSubject(option.dataset.subjectId);
+  });
+  $("calendarSubjectOptions").addEventListener("keydown", (event) => {
+    const options = Array.from($("calendarSubjectOptions").children);
+    const index = options.indexOf(event.target.closest("[data-subject-id]"));
+    const next = event.key === "ArrowDown" ? Math.min(index + 1, options.length - 1) : event.key === "ArrowUp" ? Math.max(0, index - 1) : event.key === "Home" ? 0 : event.key === "End" ? options.length - 1 : -1;
+    if (next < 0) return;
+    event.preventDefault();
+    focusSubjectOption(options[next].dataset.subjectId);
+  });
+  document.addEventListener("pointerdown", (event) => {
+    if (!event.target.closest("#calendarSubjectPicker")) closeSubjectPicker();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !$("calendarSubjectMenu").hidden) { event.preventDefault(); closeSubjectPicker(true); }
+  });
+  $("calendarSubjectPicker").addEventListener("focusout", () => {
+    requestAnimationFrame(() => { if (!$("calendarSubjectPicker").contains(document.activeElement)) closeSubjectPicker(); });
   });
   $("calendarGrid").addEventListener("click", (event) => {
     const button = event.target.closest("button[data-date]");
