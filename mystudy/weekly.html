@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Songtudy 프로젝트 팀">
+  <meta name="team-member" content="담당: 팀원B - 주간 플래너">
+  <meta name="description" content="과목별 할 일과 마감을 한눈에 확인하는 Songtudy 주간 플래너">
+  <title>주간 플래너 | Songtudy</title>
+  <link rel="stylesheet" href="00_mystudy_common.css">
+  <link rel="stylesheet" href="weekly.css">
+  <script src="00_mystudy_common.js" defer></script>
+  <script src="../common/00_mystudy_store.js" defer></script>
+  <script src="weekly.js" defer></script>
+</head>
+<body data-page="planner" data-addr="weekly">
+  <a class="skip-link" href="#main">본문 바로가기</a>
+  <div class="window">
+    <header class="window-tabs" data-nav></header>
+    <div class="window-frame">
+      <div class="window-bar" data-addr-bar></div>
+      <main class="window-body weekly-page" id="main">
+        <div class="page-head">
+          <h1 class="page-title">주간 플래너</h1>
+        </div>
+
+        <div class="empty" id="loadError" role="alert" hidden>
+          <p>플래너를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</p>
+          <button class="btn" type="button" id="retryBtn">다시 불러오기</button>
+        </div>
+        <div class="skeleton planner-loading" id="loading" role="status" aria-label="플래너 불러오는 중"></div>
+
+        <div id="weeklyApp" hidden>
+          <section class="week-toolbar" aria-labelledby="weekTitle">
+            <div class="week-heading">
+              <p class="planner-eyebrow" id="weekMonth"></p>
+              <h2 class="week-title num" id="weekTitle" tabindex="-1"></h2>
+            </div>
+            <div class="week-controls">
+              <div class="week-navigation" aria-label="주간 이동">
+                <button class="btn week-step" type="button" data-week-shift="-7" aria-label="지난주"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg></button>
+                <button class="btn" type="button" id="thisWeekBtn">이번 주</button>
+                <button class="btn week-step" type="button" data-week-shift="7" aria-label="다음주"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg></button>
+              </div>
+            </div>
+          </section>
+
+          <div class="planner-layout">
+            <aside class="planner-sidebar" aria-label="날짜와 과목 선택">
+              <section class="planner-calendar" aria-labelledby="calendarTitle">
+                <div class="calendar-head">
+                  <h3 id="calendarTitle"></h3>
+                  <div class="calendar-controls">
+                    <button class="icon-btn" type="button" data-month-shift="-1" aria-label="이전 달"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg></button>
+                    <button class="icon-btn" type="button" data-month-shift="1" aria-label="다음 달"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg></button>
+                  </div>
+                </div>
+                <div class="calendar-weekdays" aria-hidden="true"><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span><span>일</span></div>
+                <div class="calendar-grid" id="calendarGrid" aria-label="날짜 선택"></div>
+              </section>
+
+              <section class="planner-subjects" aria-labelledby="subjectFilterTitle">
+                <h3 class="sidebar-title" id="subjectFilterTitle">과목별 보기</h3>
+                <div class="subject-filters" id="subjectFilters" role="group" aria-labelledby="subjectFilterTitle"></div>
+              </section>
+
+              <section class="planner-progress" aria-labelledby="progressTitle">
+                <div class="sidebar-section-head"><h3 class="sidebar-title" id="progressTitle">이번주 할 일</h3><span class="num" id="progressText" aria-live="polite">(0/0)</span></div>
+                <div class="progress" id="weekProgress" role="progressbar" aria-label="이번 주 할 일 완료율" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div>
+                <a class="planner-timer-link" href="timer.html"><svg class="icon" aria-hidden="true"><use href="#i-clock"></use></svg>학습 타이머 열기</a>
+              </section>
+            </aside>
+
+            <div class="planner-workspace">
+              <section class="planner-notebook" aria-labelledby="weekTitle">
+                <div class="week-grid" id="weekGrid"></div>
+              </section>
+              <section class="card undated-section" aria-labelledby="undatedTitle">
+                <div class="undated-heading"><h2 class="card-title" id="undatedTitle" tabindex="-1">마감 미정 <span class="badge badge-plain num" id="undatedCount">0</span></h2><p>날짜가 정해지면 이번 주에도 담아 보세요.</p></div>
+                <ul class="undated-list" id="undatedList"></ul>
+              </section>
+            </div>
+          </div>
+        </div>
+        <noscript><p>플래너를 사용하려면 브라우저의 JavaScript를 켜 주세요.</p></noscript>
+      </main>
+    </div>
+  </div>
+  <footer class="site-footer"><p>Songtudy 웹프로그래밍 기말 프로젝트</p></footer>
+
+  <dialog class="modal" id="taskDialog" aria-labelledby="taskDialogTitle">
+    <form id="taskForm" novalidate>
+      <div class="modal-head"><h2 class="modal-title" id="taskDialogTitle">할 일 추가</h2><button class="icon-btn" type="button" data-close-dialog aria-label="닫기"><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg></button></div>
+      <div class="modal-body">
+        <div class="date-picker date-picker-enhanced" aria-label="분홍색 마감일 달력">
+          <input class="input date-picker-input" id="customDueDate" type="text" inputmode="none" autocomplete="off" placeholder="년-월-일" readonly aria-label="마감일 선택">
+          <button class="date-picker-toggle" type="button" aria-label="마감일 달력 열기" aria-expanded="false" aria-controls="dueDateCalendar">⌄</button>
+          <div class="date-picker-popover" id="dueDateCalendar" role="dialog" aria-label="마감일 선택" hidden>
+            <div class="date-picker-head"><button class="icon-btn" type="button" data-date-picker-shift="-1" aria-label="이전 달">‹</button><strong id="datePickerTitle"></strong><button class="icon-btn" type="button" data-date-picker-shift="1" aria-label="다음 달">›</button></div>
+            <div class="date-picker-weekdays" aria-hidden="true"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
+            <div class="date-picker-grid" id="datePickerGrid"></div>
+            <button class="date-picker-today" type="button" data-date-picker-today>오늘로 선택</button>
+          </div>
+        </div>
+        <label class="field" for="taskSubject">과목 <span class="planner-select"><select class="select" id="taskSubject" name="subjectId" required></select></span></label>
+        <label class="field" for="taskTitleInput">할 일 <input class="input" id="taskTitleInput" name="title" maxlength="40" placeholder="어떤 할 일을 추가할까요?" required aria-describedby="taskError"></label>
+        <label class="field" for="taskDueDate">마감일 <input class="input" id="taskDueDate" name="dueDate" type="date" aria-describedby="taskError"></label>
+        <label class="check-inline"><input type="checkbox" id="noDueDate">마감 미정</label>
+        <p class="form-error" id="taskError" role="alert"></p>
+      </div>
+      <div class="modal-foot"><button class="btn" type="button" data-close-dialog>취소</button><button class="btn btn-primary" type="submit">저장</button></div>
+    </form>
+  </dialog>
+</body>
+</html>
