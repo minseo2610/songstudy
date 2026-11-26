@@ -4,7 +4,7 @@
    - 토스트 알림(되돌리기 버튼 지원), HTML 이스케이프 도우미를 제공합니다.
 
    사용법
-     <body data-page="planner" data-addr="planner">
+     <body data-page="planner">
        <header class="window-tabs" data-nav></header>
        <div class="window-bar" data-addr-bar></div>
      아이콘: MyUI.icon("calendar")  → <svg class="icon">…</svg> 문자열
@@ -15,8 +15,8 @@ const MyUI = (() => {
   const PAGES = [
     { key: "home", label: "홈", short: "홈", href: "00_mystudy_index.html", icon: "home" },
     { key: "subjects", label: "과목 관리", short: "과목", href: "00_mystudy_subjects.html", icon: "book" },
-    { key: "planner", label: "주간 플래너", short: "플래너", href: "00_mystudy_planner.html", icon: "calendar" },
-    { key: "timer", label: "학습 타이머", short: "타이머", href: "00_mystudy_timer.html", icon: "clock" },
+    { key: "planner", label: "주간 플래너", short: "플래너", href: "weekly.html", icon: "calendar" },
+    { key: "timer", label: "학습 타이머", short: "타이머", href: "timer.html", icon: "clock" },
     { key: "report", label: "통계 리포트", short: "리포트", href: "00_mystudy_report.html", icon: "chart" },
   ];
 
@@ -34,6 +34,7 @@ const MyUI = (() => {
     trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
     x: '<path d="M6 6l12 12M18 6L6 18"/>',
     check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+    "chevron-right": '<path d="M9 5l7 7-7 7"/>',
     star: '<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>',
     heart: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
   };
@@ -73,9 +74,12 @@ const MyUI = (() => {
   function renderAddrBar() {
     const bar = document.querySelector("[data-addr-bar]");
     if (!bar) return;
-    const path = document.body.dataset.addr || document.body.dataset.page || "";
+    // 기본은 메뉴 이름(띄어쓰기 없이): songtudy/과목관리. data-addr로 바꿀 수 있음
+    const page = PAGES.find((p) => p.key === document.body.dataset.page);
+    const path = document.body.dataset.addr || (page ? page.label.replace(/\s/g, "") : "");
     bar.setAttribute("aria-hidden", "true");
-    bar.innerHTML = `<span class="addr">${icon("heart")}songtudy/<strong data-addr-current>${escapeHTML(path)}</strong></span>`;
+    // 'songtudy/'와 페이지 이름을 한 덩어리로 묶어 사이가 벌어지지 않게
+    bar.innerHTML = `<span class="addr">${icon("heart")}<span>songtudy/<strong data-addr-current>${escapeHTML(path)}</strong></span></span>`;
   }
 
   // 상세 페이지처럼 주소 끝부분을 바꿀 때
@@ -147,10 +151,44 @@ const MyUI = (() => {
     toastEl?.classList.remove("is-show");
   }
 
+  /* ---------- 날짜 입력칸 안내 문구 ----------
+     브라우저 기본 '연도. 월. 일.' 대신 안내 문구를 보여 줌
+     <input class="input" type="date" data-placeholder="마감일을 선택해 주세요">
+     - 비어 있을 때만 문구가 보이고, 칸을 누르면 달력이 바로 열림
+     - JS로 값을 바꾼 뒤에는 MyUI.syncDate(input) 호출 (form.reset()은 자동) */
+  function syncDate(input) {
+    input.parentElement.classList.toggle("is-empty", !input.value);
+  }
+
+  function enhanceDate(input) {
+    if (input.dataset.enhanced) return;
+    input.dataset.enhanced = "true";
+    const wrap = document.createElement("span");
+    wrap.className = "date-input";
+    input.before(wrap);
+    wrap.append(input);
+    const ph = document.createElement("span");
+    ph.className = "date-ph";
+    ph.setAttribute("aria-hidden", "true"); // 화면 읽기는 칸의 label로 충분
+    ph.textContent = input.dataset.placeholder;
+    wrap.append(ph);
+    ["input", "change"].forEach((type) => input.addEventListener(type, () => syncDate(input)));
+    input.form?.addEventListener("reset", () => setTimeout(() => syncDate(input)));
+    input.addEventListener("click", () => {
+      try { input.showPicker(); } catch (err) { /* 지원하지 않는 브라우저는 기본 동작 */ }
+    });
+    syncDate(input);
+  }
+
+  function enhanceDates(root = document) {
+    root.querySelectorAll('input[type="date"][data-placeholder]').forEach(enhanceDate);
+  }
+
   /* ---------- 시작 ---------- */
   injectSprite();
   renderNav();
   renderAddrBar();
+  enhanceDates();
 
-  return { PAGES, icon, escapeHTML, toast, setAddr };
+  return { PAGES, icon, escapeHTML, toast, setAddr, enhanceDates, syncDate };
 })();
