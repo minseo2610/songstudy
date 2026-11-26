@@ -227,7 +227,7 @@
         <ul class="day-list">${tasks.length ? tasks.map(taskHTML).join("") : '<li class="day-empty"><span>마감 일정이 없어요.</span></li>'}</ul>
         <div class="day-actions" id="day-actions-${day.date}" hidden><button class="day-add" type="button" data-add-date="${day.date}" aria-label="${MyStudy.formatDate(day.date)} 할 일 추가">${MyUI.icon("plus")}할 일 추가</button></div>
       </section>`;
-    }).join("") + `<section class="week-note" aria-labelledby="weekNoteTitle"><h3 id="weekNoteTitle">${MyUI.icon("pen")}이번 주 메모</h3><textarea id="weekNote" maxlength="500" aria-label="이번 주 메모" placeholder="이번 주에 기억하고 싶은 것들을 적어 보세요.">${esc(note)}</textarea></section>`;
+    }).join("") + `<section class="week-note" aria-labelledby="weekNoteTitle"><h3 id="weekNoteTitle">${MyUI.icon("pen")}이번 주 메모</h3><textarea id="weekNote" maxlength="500" aria-label="이번 주 메모" placeholder="중요한 내용을 여기 메모해주세요.">${esc(note)}</textarea></section>`;
     const filters = [{ id: "all", name: "전체 과목" }, ...subjects];
     els.filters.innerHTML = filters.map((subject) => `<button class="subject-filter" type="button" data-filter-subject="${esc(subject.id)}" aria-pressed="${subject.id === state.subjectId}" ${subject.color ? `data-subject-color="${esc(subject.color)}"` : ""}><span class="${subject.id === "all" ? "all-subjects" : "subject-dot"}" aria-hidden="true"></span><span>${esc(subject.name)}</span><span class="filter-count num">${allWeekTasks.filter((task) => subject.id === "all" || task.subjectId === subject.id).length}</span></button>`).join("");
     const undated = MyStudy.getUnscheduledTasks().filter(matchesSubject);

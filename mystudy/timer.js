@@ -96,6 +96,13 @@
     return `${hours ? `${hours}시간 ` : ""}${minutes}분`;
   }
 
+  // 오늘의 총 공부 시간: hh시간 mm분 ss초
+  function totalLabel(seconds) {
+    const whole = Math.max(0, Math.floor(seconds));
+    const pad = (value) => String(value).padStart(2, "0");
+    return `${pad(Math.floor(whole / 3600))}시간 ${pad(Math.floor(whole / 60) % 60)}분 ${pad(whole % 60)}초`;
+  }
+
   let timeline = null;
 
   function ensureTimeline() {
@@ -132,7 +139,7 @@
         const nextHour = hour + (part === 5 ? 1 : 0);
         const nextMinute = (part + 1) % 6 * 10;
         const label = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}~${String(nextHour).padStart(2, "0")}:${String(nextMinute).padStart(2, "0")}`;
-        slots.push(`<span class="timeline-slot ${subject ? "is-study" : ""}"${subject ? ` data-subject-color="${esc(subject.color)}"` : ""} role="gridcell" aria-label="${label}${subject ? ` ${esc(subject.name)} 공부` : " 공부하지 않음"}" title="${label}${subject ? ` · ${esc(subject.name)}` : ""}"></span>`);
+        slots.push(`<span class="timeline-slot ${subject ? "is-study" : ""}" role="gridcell" aria-label="${label}${subject ? ` ${esc(subject.name)} 공부` : " 공부하지 않음"}" title="${label}${subject ? ` · ${esc(subject.name)}` : ""}"></span>`);
       }
       rows.push(`<tr class="timeline-hour"><th scope="row">${String(hour).padStart(2, "0")}:00</th>${slots.join("")}</tr>`);
     }
@@ -147,14 +154,14 @@
       .sort((a, b) => b.endedAt.localeCompare(a.endedAt));
     const total = records.reduce((sum, record) => sum + record.durationSeconds, 0);
     els.date.textContent = `${now.getMonth() + 1}월 ${now.getDate()}일`;
-    els.todayDuration.textContent = durationLabel(total);
+    els.todayDuration.textContent = totalLabel(total);
     els.todayCount.textContent = records.length ? `${records.length}번의 집중을 차곡차곡 모았어요.` : "아직 기록한 공부 시간이 없어요.";
     els.sessionCount.textContent = `${records.length}회`;
     els.empty.hidden = records.length > 0;
     els.sessions.innerHTML = records.map((record) => {
       const subject = subjectFor(record);
-      const time = new Date(record.startedAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false });
-      return `<li class="session-item" data-subject-color="${esc(subject.color)}"><div class="session-head"><span class="subject-dot" aria-hidden="true"></span><span>${esc(subject.name)}</span><strong class="num">${durationLabel(record.durationSeconds)}</strong></div>${record.taskTitle ? `<p class="session-task">${esc(record.taskTitle)}</p>` : ""}<p class="session-meta">${time} 시작 · ${record.mode === "focus" ? "집중 타이머" : "스톱워치"}${record.completed ? " 완료" : ""}</p></li>`;
+      // 과목 색 · 과목명 · 공부한 시간, 정해 둔 할 일이 있으면 아랫줄에 'ㄴ 할 일'
+      return `<li class="session-item" data-subject-color="${esc(subject.color)}"><div class="session-head"><span class="subject-dot" aria-hidden="true"></span><span>${esc(subject.name)}</span><strong class="num">${durationLabel(record.durationSeconds)}</strong></div>${record.taskTitle ? `<p class="session-task"><span class="session-task-mark" aria-hidden="true">ㄴ</span><span>${esc(record.taskTitle)}</span></p>` : ""}</li>`;
     }).join("");
     const totals = new Map();
     for (const record of records) {

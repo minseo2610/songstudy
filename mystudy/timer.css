@@ -1,10 +1,10 @@
 @charset "UTF-8";
 /* 학습 타이머: 공통 디자인의 종이와 분홍 포인트를 재사용합니다. */
 .timer-loading { height: 500px; }
-/* 강조 글자 색: 보라·남색이 섞인 짙은 분홍. weekly.css와 같은 값 */
-:root { --pink-plum: #8e3a72; }
-/* 강조 글자: 타임테이블 제목 */
-.timeline-section .card-title { color: var(--pink-plum); }
+/* 강조 글자 색: 딸기초코 같은 핑크브라운. weekly.css와 같은 값 */
+:root { --berry-choco: #6d4936; }
+/* 강조 글자: 오른쪽 기록 카드 제목(오늘의 총 공부 시간, 타임테이블, 오늘의 기록) */
+.timer-records .card-title { color: var(--berry-choco); }
 .timer-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: var(--sp-6); align-items: start; }
 .timer-paper { position: relative; display: flex; align-items: center; flex-direction: column; padding: var(--sp-6) var(--sp-8); border: 1.5px solid var(--line-strong); border-radius: var(--r-lg); background: var(--surface); overflow: hidden; }
 .timer-paper::before { content: ""; height: 9px; width: 84px; position: absolute; top: 0; left: var(--sp-8); background: var(--pink-300); border-radius: 0 0 var(--r-sm) var(--r-sm); }
@@ -50,7 +50,8 @@
 .today-total-head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); }
 .today-total-head .card-title { font-size: var(--fs-md); }
 .today-total-head .badge { font-size: var(--fs-xs); }
-.today-duration { margin-top: var(--sp-5); font-size: 2rem; line-height: 1.3; font-weight: 800; letter-spacing: -.04em; }
+/* 총 공부 시간: 글자·단어 사이를 띄워 답답하지 않게 */
+.today-duration { margin-top: var(--sp-5); font-size: 2rem; line-height: 1.3; font-weight: 700; letter-spacing: .02em; word-spacing: .18em; white-space: nowrap; }
 .today-count { margin-top: var(--sp-2); font-size: var(--fs-xs); color: var(--text-sub); }
 .today-subjects { display: flex; flex-direction: column; gap: var(--sp-3); }
 .today-subjects:not(:empty) { border-top: 1px solid var(--line); padding-top: var(--sp-4); margin-top: var(--sp-5); }
@@ -68,7 +69,8 @@
 .study-timetable tr:last-child th, .study-timetable tr:last-child td { border-bottom: 0; }
 .study-timetable th:last-child, .study-timetable td:last-child { border-right: 0; }
 .timeline-slot { background: var(--surface); }
-.timeline-slot.is-study { background: var(--subject-color, var(--pink-300)); }
+/* 범례(공부한 시간)와 같은 색. 과목 이름은 칸의 title·aria-label로 알려 준다. */
+.timeline-slot.is-study { background: var(--pink-300); }
 .timeline-legend { display: flex; align-items: center; justify-content: flex-end; gap: var(--sp-3); margin-top: var(--sp-3); color: var(--text-sub); font-size: 11px; }
 .timeline-legend-item { display: inline-flex; align-items: center; gap: 5px; }
 .timeline-legend-empty, .timeline-legend-filled { width: 10px; height: 10px; border: 1px solid var(--line); border-radius: 3px; background: var(--pink-50); }
@@ -82,12 +84,13 @@
 .session-head { display: flex; gap: var(--sp-2); align-items: center; font-size: var(--fs-sm); }
 .session-head .subject-dot { width: 10px; height: 10px; border-radius: 3px; }
 .session-head strong { margin-left: auto; font-size: var(--fs-sm); white-space: nowrap; }
-.session-task { margin-top: var(--sp-1); font-size: var(--fs-xs); color: var(--text-sub); overflow-wrap: anywhere; }
-.session-meta { margin-top: var(--sp-2); font-size: var(--fs-xs); color: var(--text-sub); }
+/* 할 일 줄: 'ㄴ'을 과목명 시작 위치(색 점 10px + 간격)에 맞추고 윗줄에 붙인다 */
+.session-task { display: flex; gap: var(--sp-1); margin-top: 0; line-height: 1.4; padding-left: calc(10px + var(--sp-2)); font-size: var(--fs-xs); color: var(--text-sub); overflow-wrap: anywhere; }
+.session-task-mark { flex-shrink: 0; }
 .session-empty { min-height: 190px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-3); text-align: center; color: var(--text-sub); font-size: var(--fs-sm); line-height: 1.8; }
 .session-empty .icon { width: 32px; height: 32px; stroke: var(--line-strong); stroke-width: 1.5; }
 .timer-record-note { display: flex; align-items: center; justify-content: center; gap: var(--sp-2); font-size: var(--fs-xs); color: var(--text-sub); }
 .timer-record-note .icon { width: 15px; height: 15px; fill: var(--pink-200); stroke: var(--pink-700); }
-@media (max-width: 1050px) { .timer-layout { grid-template-columns: minmax(0, 1fr) 280px; gap: var(--sp-4); } .timer-paper { padding: var(--sp-6) var(--sp-5); } .timer-selection { grid-template-columns: minmax(0, 1fr); } .timer-clock-area { width: min(100%, 300px); } .today-duration { font-size: 1.8rem; } }
+@media (max-width: 1050px) { .timer-layout { grid-template-columns: minmax(0, 1fr) 280px; gap: var(--sp-4); } .timer-paper { padding: var(--sp-6) var(--sp-5); } .timer-selection { grid-template-columns: minmax(0, 1fr); } .timer-clock-area { width: min(100%, 300px); } .today-duration { font-size: 1.5rem; } }
 @media (max-width: 760px) { .timer-layout { grid-template-columns: minmax(0, 1fr); } .timer-selection { grid-template-columns: repeat(2, minmax(0, 1fr)); } .timer-records { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; } .timer-record-note { grid-column: 1 / -1; } .timer-digits { font-size: 3rem; } .timer-clock-area { width: min(100%, 320px); } }
 @media (max-width: 480px) { .timer-selection, .timer-records { grid-template-columns: minmax(0, 1fr); } .timer-paper { padding: var(--sp-5) var(--sp-4); } .timer-controls-row { padding-right: 52px; } .sound-control { right: 0; } .timer-mode button { padding-right: var(--sp-3); padding-left: var(--sp-3); } .timer-actions { gap: var(--sp-2); } .timer-start { min-width: 135px; } .timer-actions .btn { padding: 0 var(--sp-3); } .focus-settings { gap: var(--sp-3); } }
