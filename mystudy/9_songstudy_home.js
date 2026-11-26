@@ -541,7 +541,7 @@
     $("reportList").innerHTML = subjects.map(function (subject) {
       const duration = monthly.filter(function (record) { return record.subjectId === subject.id; }).reduce(function (sum, record) { return sum + record.durationMs; }, 0);
       const ratio = total ? duration / total : 0;
-      return '<li class="home-report-row" data-color="' + esc(subject.color) + '"><div class="home-report-label"><span><i class="subject-dot" aria-hidden="true"></i>' + esc(subject.name) + '</span><strong>' + studyDuration(duration) + '</strong></div>' +
+      return '<li class="home-report-row" data-color="' + esc(subject.color) + '"><div class="home-report-label"><span>' + esc(subject.name) + '</span><strong>' + studyDuration(duration) + '</strong></div>' +
         '<div class="home-report-bar" role="progressbar" aria-label="' + esc(subject.name) + ' 월간 집중 시간 비율" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(ratio * 100) + '" aria-valuetext="' + studyDuration(duration) + ', 전체의 ' + Math.round(ratio * 100) + '%"><span data-value="' + ratio + '"></span></div></li>';
     }).join("");
     applyColors($("reportList"));
