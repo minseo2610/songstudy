@@ -2,7 +2,7 @@
    수업 내용: Date·배열·객체·함수, DOM, addEventListener, JSON·Fetch·웹 스토리지.
    공통 MyStudy.init()으로 과목 JSON을 불러옵니다. 별도 서버나 라이브러리는 쓰지 않습니다.
    기존 홈 타이머와 timer.html의 기록을 읽기만 하며 원본 기록은 수정하지 않습니다.
-   추가로 학습한 SVG circle의 dasharray로 도넛을 그립니다. */
+   추가로 학습한 SVG path의 원호로 도넛을 그립니다. */
 (() => {
   "use strict";
   const $ = (id) => document.getElementById(id);
@@ -24,6 +24,9 @@
   let ready = false;
   let lastSignature = "";
   let pollId = null;
+  let ratioParts = [];
+  let ratioTotal = 0;
+  let hoveredSubjectId = "";
   const fallbackColor = getComputedStyle(document.documentElement).getPropertyValue("--pink-700").trim();
 
   function readJSON(key, fallback) {
@@ -140,6 +143,7 @@
   function calendarRecords(date) { return records.filter((row) => row.date === date && (!filterId || row.subjectId === filterId)); }
 
   function renderRatio() {
+    const focusedSubjectId = document.activeElement?.closest("#ratioSubjects [data-donut-id]")?.dataset.donutId;
     const range = bounds();
     const parts = breakdown(records.filter((row) => row.date >= range.start && row.date <= range.end));
     const sum = total(parts);
@@ -160,20 +164,46 @@
     const rounded = percentages.map(Math.floor);
     const remainders = percentages.map((value, index) => ({ index, value: value - rounded[index] })).sort((a, b) => b.value - a.value);
     for (let i = 0, left = 100 - rounded.reduce((a, b) => a + b, 0); i < left && i < remainders.length; i++) rounded[remainders[i].index]++;
-    const circumference = 2 * Math.PI * 94;
+    ratioParts = parts;
+    ratioTotal = sum;
     let offset = 0;
     $("donutSegments").innerHTML = parts.map((subject) => {
-      const length = subject.durationMs / sum * circumference;
-      const markup = `<circle class="report-donut-segment" cx="120" cy="120" r="94" transform="rotate(-90 120 120)" stroke-dasharray="${length} ${circumference}" stroke-dashoffset="${-offset}" data-subject-color="${esc(subject.color)}"></circle>`;
+      const length = subject.durationMs / sum;
+      const markup = `<path class="report-donut-segment" d="${donutArc(offset, offset + length)}" data-donut-id="${esc(subject.id)}" data-subject-color="${esc(subject.color)}"></path>`;
       offset += length;
       return markup;
     }).join("");
-    $("ratioSubjects").innerHTML = parts.map((subject, index) => `<li data-subject-color="${esc(subject.color)}"><span class="report-subject-name"><i class="report-swatch" aria-hidden="true"></i>${esc(subject.name)}</span><strong class="report-ratio-time num" title="${exactDuration(subject.durationMs)}">${duration(subject.durationMs)}</strong><span class="report-ratio-percent num">${rounded[index]}%</span></li>`).join("");
+    $("ratioSubjects").innerHTML = parts.map((subject, index) => `<li tabindex="0" data-donut-id="${esc(subject.id)}" data-subject-color="${esc(subject.color)}"><span class="report-subject-name"><i class="report-swatch" aria-hidden="true"></i>${esc(subject.name)}</span><strong class="report-ratio-time num" title="${exactDuration(subject.durationMs)}">${duration(subject.durationMs)}</strong><span class="report-ratio-percent num">${rounded[index]}%</span></li>`).join("");
     $("donutDescription").textContent = `${$("periodLabel").textContent}. 총 ${exactDuration(sum)}. ${parts.length ? parts.map((subject, index) => `${subject.name} ${rounded[index]}%`).join(", ") : "공부 기록 없음"}`;
     const days = new Set(records.filter((row) => row.date >= range.start && row.date <= range.end).map((row) => row.date)).size;
     $("periodNote").textContent = period === "day" ? "기록된 공부시간 기준 · 과목별 시간과 비율" : `기록된 공부시간 기준 · ${days}일 공부${period === "week" ? " · 월요일~일요일" : ""}`;
     paintColors($("donutSegments"));
     paintColors($("ratioSubjects"));
+    if (focusedSubjectId) Array.from($("ratioSubjects").children).find((item) => item.dataset.donutId === focusedSubjectId)?.focus({ preventScroll: true });
+    hoveredSubjectId = document.querySelector(".report-ratio-body [data-donut-id]:hover")?.dataset.donutId || "";
+    updateDonutHighlight();
+  }
+
+  function donutArc(start, end) {
+    const point = (fraction) => {
+      const angle = fraction * Math.PI * 2 - Math.PI / 2;
+      return `${120 + Math.cos(angle) * 94} ${120 + Math.sin(angle) * 94}`;
+    };
+    // 원호 자체를 나누어 각 과목에 마우스가 정확히 반응하게 합니다.
+    if (end - start >= .999999999) return `M 120 26 A 94 94 0 1 1 120 214 A 94 94 0 1 1 120 26 Z`;
+    return `M ${point(start)} A 94 94 0 ${end - start > .5 ? 1 : 0} 1 ${point(end)}`;
+  }
+  function updateDonutHighlight() {
+    const focusedId = document.activeElement?.closest("#ratioSubjects [data-donut-id]")?.dataset.donutId;
+    const subject = ratioParts.find((item) => item.id === (hoveredSubjectId || focusedId));
+    document.querySelectorAll(".report-ratio-body [data-donut-id]").forEach((item) => {
+      const active = !!subject && item.dataset.donutId === subject.id;
+      item.classList.toggle("is-highlight", active);
+      item.classList.toggle("is-muted", !!subject && !active && item.classList.contains("report-donut-segment"));
+    });
+    document.querySelector(".report-donut-center > span").textContent = subject ? subject.name : "총 공부시간";
+    $("periodTotal").textContent = duration(subject ? subject.durationMs : ratioTotal);
+    $("periodTotal").title = exactDuration(subject ? subject.durationMs : ratioTotal);
   }
 
   function renderCalendar() {
@@ -274,6 +304,22 @@
   });
   const brand = document.querySelector("[data-nav] .brand");
   if (brand) brand.href = "9_songstudy_home.html";
+  const ratioBody = document.querySelector(".report-ratio-body");
+  ratioBody.addEventListener("pointerover", (event) => {
+    if (event.pointerType === "touch") return;
+    hoveredSubjectId = event.target.closest("[data-donut-id]")?.dataset.donutId || "";
+    updateDonutHighlight();
+  });
+  ratioBody.addEventListener("pointerout", (event) => {
+    if (event.pointerType === "touch") return;
+    hoveredSubjectId = event.relatedTarget instanceof Element && ratioBody.contains(event.relatedTarget) ? event.relatedTarget.closest("[data-donut-id]")?.dataset.donutId || "" : "";
+    updateDonutHighlight();
+  });
+  ratioBody.addEventListener("focusin", updateDonutHighlight);
+  ratioBody.addEventListener("focusout", () => {
+    // focusout 시점에는 이전 항목에 초점이 남아 있어 다음 프레임에 확인합니다.
+    requestAnimationFrame(updateDonutHighlight);
+  });
   document.querySelectorAll("[data-period]").forEach((button) => button.addEventListener("click", () => {
     period = button.dataset.period;
     remember();
