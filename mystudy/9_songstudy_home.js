@@ -82,8 +82,8 @@
 
   function connectNavigation() {
     const routes = {
-      home: "9_songstudy_home.html", subjects: "00_mystudy_subjects.html",
-      planner: "#weekly-planner", timer: "#study-timer", report: "#study-report"
+      home: "9_songstudy_home.html", subjects: "9_Songstudy_subjects.html",
+      planner: "weekly.html", timer: "timer.html", report: "9_songstudy_report.html"
     };
     document.querySelectorAll("[data-nav] .tab").forEach(function (tab, index) {
       const page = MyUI.PAGES[index];
@@ -311,7 +311,7 @@
           return '<li class="home-task' + (task.done ? ' is-done' : '') + '"><span class="check"><input type="checkbox" id="' + esc(id) + '" data-task-id="' + esc(task.id) + '"' + (task.done ? ' checked' : '') + '><span class="box">' + MyUI.icon("check") + '</span></span>' +
             '<label class="home-task-copy" for="' + esc(id) + '"><span>' + esc(task.title) + '</span><small' + (!task.done && task.dueDate && task.dueDate < dateKey(new Date()) ? ' class="home-overdue"' : '') + '>' + esc(taskDeadline(task)) + '</small></label></li>';
         }).join("") : '<li class="home-task-empty">' + (hideDone && all.length ? '남은 할 일이 없어요. 잘했어요!' : '등록된 할 일이 없어요.') + '</li>') + '</ul></details>';
-    }).join("") : '<div class="empty"><p>아직 등록한 과목이 없어요.</p><a href="00_mystudy_subjects.html">첫 과목 추가하기</a></div>';
+    }).join("") : '<div class="empty"><p>아직 등록한 과목이 없어요.</p><a href="9_Songstudy_subjects.html">첫 과목 추가하기</a></div>';
     applyColors($("subjectList"));
     $("subjectList").setAttribute("aria-busy", "false");
   }

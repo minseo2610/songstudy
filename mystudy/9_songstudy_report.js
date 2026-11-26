@@ -428,9 +428,9 @@
   function connectNavigation() {
     const routes = {
       home: "9_songstudy_home.html",
-      subjects: "00_mystudy_subjects.html",
-      planner: "9_songstudy_home.html#weekly-planner",
-      timer: "9_songstudy_home.html#study-timer",
+      subjects: "9_Songstudy_subjects.html",
+      planner: "weekly.html",
+      timer: "timer.html",
       report: "9_songstudy_report.html",
     };
     document.querySelectorAll("[data-nav] .tab").forEach(function (tab, index) {
