@@ -467,7 +467,6 @@
       return '<option value="' + esc(subject.id) + '">' + esc(subject.name) + '</option>';
     }).join("");
     $("taskSubject").innerHTML = options;
-    $("addTask").disabled = !subjects.length;
     if (timer && !timer.running && timerElapsed() === 0 && !subjects.some(function (subject) { return subject.id === timer.subjectId; })) {
       timer = createTimer(subjects[0] ? subjects[0].id : "", "", timerMode(), timer.durationMinutes);
       saveTimer();
@@ -682,11 +681,9 @@
     $("prevWeek").addEventListener("click", function () { if (ready) { viewedDate.setDate(viewedDate.getDate() - 7); renderWeek(); } });
     $("nextWeek").addEventListener("click", function () { if (ready) { viewedDate.setDate(viewedDate.getDate() + 7); renderWeek(); } });
     $("thisWeek").addEventListener("click", function () { if (ready) { viewedDate = new Date(); renderWeek(); } });
-    $("addTask").addEventListener("click", openTaskModal);
     $("taskForm").addEventListener("submit", saveTask);
     ["closeTaskModal", "cancelTask"].forEach(function (id) { $(id).addEventListener("click", function () { $("taskModal").close(); }); });
     $("taskModal").addEventListener("click", function (event) { if (event.target === $("taskModal")) $("taskModal").close(); });
-    $("taskModal").addEventListener("close", function () { $("addTask").focus(); });
     $("taskTitle").addEventListener("input", function () { $("taskError").textContent = ""; });
     document.addEventListener("visibilitychange", function () {
       if (ready) { try { settleTimer(); renderTimer(); renderReport(); } catch (error) { storageFailure(error); } }
