@@ -28,9 +28,9 @@
             <div class="report-section-head">
               <h2 class="card-title" id="ratioTitle">과목별 공부 비율</h2>
               <div class="report-period" role="group" aria-label="공부 비율 집계 기간">
-                <button type="button" data-period="day" aria-pressed="true">하루</button>
-                <button type="button" data-period="week" aria-pressed="false">일주일</button>
-                <button type="button" data-period="month" aria-pressed="false">한 달</button>
+                <button type="button" data-period="day" aria-pressed="true">Day</button>
+                <button type="button" data-period="week" aria-pressed="false">Week</button>
+                <button type="button" data-period="month" aria-pressed="false">Month</button>
               </div>
             </div>
             <div class="report-date-toolbar">
@@ -41,7 +41,6 @@
                   <div class="report-picker-head"><button class="icon-btn" id="pickerPreviousMonth" type="button" aria-label="날짜 선택창 이전 달">‹</button><strong id="pickerMonthTitle" aria-live="polite"></strong><button class="icon-btn" id="pickerNextMonth" type="button" aria-label="날짜 선택창 다음 달">›</button></div>
                   <div class="report-picker-weekdays" aria-hidden="true"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
                   <div class="report-picker-grid" id="pickerDateGrid" role="group" aria-labelledby="pickerMonthTitle"></div>
-                  <button class="report-picker-today" id="pickerToday" type="button">오늘로 선택</button>
                 </div>
               </div></div>
               <button class="link-btn" id="goToday" type="button">오늘</button>
@@ -60,7 +59,11 @@
           </section>
 
           <section class="card report-calendar-card" aria-labelledby="calendarTitle">
-            <div class="report-section-head"><h2 class="card-title" id="calendarTitle">공부 기록 캘린더</h2><div class="report-calendar-filter"><label class="sr-only" for="calendarSubject">캘린더에 표시할 과목</label><span class="report-select"><select class="select" id="calendarSubject"><option value="">전체 과목</option></select></span></div></div>
+            <div class="report-section-head"><h2 class="card-title" id="calendarTitle">공부 기록 캘린더</h2><div class="report-calendar-filter" id="calendarSubjectPicker">
+              <span class="sr-only" id="calendarSubjectLabel">캘린더에 표시할 과목</span>
+              <button class="report-subject-trigger" id="calendarSubject" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="calendarSubjectOptions" aria-labelledby="calendarSubjectLabel calendarSubjectValue"><span class="report-subject-value" id="calendarSubjectValue">전체 과목</span><span class="report-subject-chevron" aria-hidden="true"></span></button>
+              <div class="report-subject-menu" id="calendarSubjectMenu" hidden><p class="report-subject-menu-title">과목 선택</p><div class="report-subject-options" id="calendarSubjectOptions" role="listbox" aria-labelledby="calendarSubjectLabel"></div></div>
+            </div></div>
             <div class="report-calendar-toolbar"><div class="report-calendar-navigation"><button class="icon-btn report-month-step" id="previousMonth" type="button" aria-label="이전 달" aria-controls="calendarGrid" title="이전 달"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></button><h3 id="calendarMonth"></h3><button class="icon-btn report-month-step" id="nextMonth" type="button" aria-label="다음 달" aria-controls="calendarGrid" title="다음 달"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></button></div><button class="link-btn" id="thisMonth" type="button">이번 달</button></div>
             <div class="report-weekdays" aria-hidden="true"><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span><span>일</span></div>
             <div class="report-calendar-grid" id="calendarGrid" role="group" aria-labelledby="calendarMonth"></div>

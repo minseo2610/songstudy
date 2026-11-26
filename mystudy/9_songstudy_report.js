@@ -220,8 +220,7 @@
     $("previousMonth").disabled = month <= MIN_DATE.slice(0, 7);
     $("nextMonth").disabled = month >= todayKey().slice(0, 7);
     $("thisMonth").disabled = month === todayKey().slice(0, 7);
-    $("calendarSubject").innerHTML = '<option value="">전체 과목</option>' + catalog.map((subject) => `<option value="${esc(subject.id)}">${esc(subject.name)}</option>`).join("");
-    $("calendarSubject").value = filterId;
+    renderSubjectPicker();
     $("calendarGrid").innerHTML = Array.from({ length: count }, (_, index) => {
       const key = shiftDate(start, index);
       const parts = breakdown(calendarRecords(key));
@@ -241,6 +240,41 @@
     paintColors($("calendarGrid"));
     paintColors($("calendarLegend"));
     renderDay();
+  }
+  function renderSubjectPicker() {
+    const focusedId = document.activeElement?.closest(".report-subject-option")?.dataset.subjectId;
+    const subject = catalog.find((item) => item.id === filterId);
+    $("calendarSubjectValue").innerHTML = subject ? `<i class="report-swatch" data-subject-color="${esc(subject.color)}" aria-hidden="true"></i>${esc(subject.name)}` : '<i class="report-swatch report-all-subjects" aria-hidden="true"></i>전체 과목';
+    const options = [{ id: "", name: "전체 과목" }, ...catalog];
+    $("calendarSubjectOptions").innerHTML = options.map((item) => `<button class="report-subject-option" type="button" role="option" data-subject-id="${esc(item.id)}" tabindex="${item.id === filterId ? 0 : -1}" aria-selected="${item.id === filterId}"><i class="report-swatch${item.id ? "" : " report-all-subjects"}"${item.id ? ` data-subject-color="${esc(item.color)}"` : ""} aria-hidden="true"></i><span>${esc(item.name)}</span></button>`).join("");
+    paintColors($("calendarSubjectPicker"));
+    if (focusedId !== undefined && !$("calendarSubjectMenu").hidden) focusSubjectOption(focusedId);
+  }
+  function focusSubjectOption(id) {
+    const options = Array.from($("calendarSubjectOptions").children);
+    const target = options.find((item) => item.dataset.subjectId === id) || options.find((item) => item.dataset.subjectId === filterId) || options[0];
+    options.forEach((item) => { item.tabIndex = item === target ? 0 : -1; });
+    target?.focus({ preventScroll: true });
+    target?.scrollIntoView({ block: "nearest" });
+  }
+  function openSubjectPicker() {
+    closeDatePicker();
+    $("calendarSubjectMenu").hidden = false;
+    $("calendarSubject").setAttribute("aria-expanded", "true");
+    focusSubjectOption(filterId);
+  }
+  function closeSubjectPicker(restoreFocus = false) {
+    $("calendarSubjectMenu").hidden = true;
+    $("calendarSubject").setAttribute("aria-expanded", "false");
+    if (restoreFocus) $("calendarSubject").focus({ preventScroll: true });
+  }
+  function chooseCalendarSubject(id) {
+    if (id && !catalog.some((item) => item.id === id)) return;
+    filterId = id;
+    remember();
+    renderCalendar();
+    closeSubjectPicker(true);
+    $("reportAnnouncement").textContent = `${catalog.find((item) => item.id === filterId)?.name || "전체 과목"}의 캘린더. ${$("calendarMonthSummary").textContent}.`;
   }
   function renderDay() {
     const parts = breakdown(calendarRecords(anchor));
@@ -394,7 +428,6 @@
     chooseDate(day.dataset.pickerDate);
     closeDatePicker(true);
   });
-  $("pickerToday").addEventListener("click", () => { chooseDate(todayKey()); closeDatePicker(true); });
   $("pickerDateGrid").addEventListener("keydown", (event) => {
     const day = event.target.closest("[data-picker-date]");
     if (!day) return;
@@ -420,11 +453,30 @@
   $("reportDatePicker").addEventListener("focusout", () => {
     requestAnimationFrame(() => { if (!$("reportDatePicker").contains(document.activeElement)) closeDatePicker(); });
   });
-  $("calendarSubject").addEventListener("change", () => {
-    filterId = $("calendarSubject").value;
-    remember();
-    renderCalendar();
-    $("reportAnnouncement").textContent = `${$("calendarSubject").selectedOptions[0].textContent}의 캘린더. ${$("calendarMonthSummary").textContent}.`;
+  $("calendarSubject").addEventListener("click", () => $("calendarSubjectMenu").hidden ? openSubjectPicker() : closeSubjectPicker(true));
+  $("calendarSubject").addEventListener("keydown", (event) => {
+    if (["ArrowDown", "ArrowUp"].includes(event.key)) { event.preventDefault(); openSubjectPicker(); }
+  });
+  $("calendarSubjectOptions").addEventListener("click", (event) => {
+    const option = event.target.closest("[data-subject-id]");
+    if (option) chooseCalendarSubject(option.dataset.subjectId);
+  });
+  $("calendarSubjectOptions").addEventListener("keydown", (event) => {
+    const options = Array.from($("calendarSubjectOptions").children);
+    const index = options.indexOf(event.target.closest("[data-subject-id]"));
+    const next = event.key === "ArrowDown" ? Math.min(index + 1, options.length - 1) : event.key === "ArrowUp" ? Math.max(0, index - 1) : event.key === "Home" ? 0 : event.key === "End" ? options.length - 1 : -1;
+    if (next < 0) return;
+    event.preventDefault();
+    focusSubjectOption(options[next].dataset.subjectId);
+  });
+  document.addEventListener("pointerdown", (event) => {
+    if (!event.target.closest("#calendarSubjectPicker")) closeSubjectPicker();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !$("calendarSubjectMenu").hidden) { event.preventDefault(); closeSubjectPicker(true); }
+  });
+  $("calendarSubjectPicker").addEventListener("focusout", () => {
+    requestAnimationFrame(() => { if (!$("calendarSubjectPicker").contains(document.activeElement)) closeSubjectPicker(); });
   });
   $("calendarGrid").addEventListener("click", (event) => {
     const button = event.target.closest("button[data-date]");
