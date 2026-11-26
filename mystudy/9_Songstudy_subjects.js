@@ -1,13 +1,3 @@
-/* =========================================================
-   Songtudy · 과목 관리 페이지
-   - 과목 추가 / 수정 / 삭제 (모달)
-   - 과목별 색상 지정
-   - 과목별 시험명·시험일 등록
-   - 카드: 다음 시험 D-day, 남은 할 일, 진행률
-     (과제·중간고사·기말고사별 자세한 개수는 과목 상세 페이지에서)
-   - 정렬 방식은 localStorage에 저장해 다음 방문 때 유지
-   ========================================================= */
-
 const SORT_KEY = "myStudy.subjectSort";
 const { icon, escapeHTML: esc } = MyUI;
 
@@ -35,10 +25,9 @@ const els = {
   confirmOk: document.querySelector("#confirmOk"),
 };
 
-let editingId = null;     // 수정 중인 과목 id (추가일 때 null)
-let onConfirm = null;     // 확인 모달에서 '확인'을 눌렀을 때 할 일
+let editingId = null;
+let onConfirm = null;
 
-/* ---------- 목록 그리기 ---------- */
 function sortSubjects(subjects, tasks) {
   const list = [...subjects];
   const mode = els.sort.value;
@@ -48,7 +37,7 @@ function sortSubjects(subjects, tasks) {
     const left = (s) => MyStudy.progress(tasks.filter((t) => t.subjectId === s.id)).left;
     list.sort((a, b) => left(b) - left(a));
   } else {
-    // 시험 임박순: 다가오는 시험이 없는 과목은 뒤로
+
     const diff = (s) => MyStudy.nextExam(s)?.dd.diff ?? Infinity;
     list.sort((a, b) => diff(a) - diff(b));
   }
@@ -58,16 +47,15 @@ function sortSubjects(subjects, tasks) {
 function cardHTML(subject, tasks) {
   const p = MyStudy.progress(tasks.filter((t) => t.subjectId === subject.id));
   const exam = MyStudy.nextExam(subject);
-  const detailURL = `00_mystudy_subject.html?id=${encodeURIComponent(subject.id)}`;
+  const detailURL = `9_Songstudy_subject.html?id=${encodeURIComponent(subject.id)}`;
   const leftText = p.total === 0 ? "할 일 없음" : p.left === 0 ? "모두 완료" : `남은 할 일 ${p.left}개`;
 
   return `
     <li class="card subject-card" data-id="${esc(subject.id)}" style="--subject-color: ${esc(subject.color)}">
       <div class="subject-title">
         <h3 class="subject-name">${esc(subject.name)}</h3>
-        <!-- 수정은 과목 상세 페이지의 수정 창 하나로 통일 (edit=1이면 열자마자 수정 창) -->
         <span class="subject-tools">
-          <a class="icon-btn" href="${detailURL}&edit=1" aria-label="${esc(subject.name)} 수정" title="수정">${icon("edit")}</a>
+          <button class="icon-btn" type="button" data-action="edit" aria-label="${esc(subject.name)} 수정" title="수정">${icon("edit")}</button>
           <button class="icon-btn" type="button" data-action="delete" aria-label="${esc(subject.name)} 삭제" title="삭제">${icon("trash")}</button>
         </span>
       </div>
@@ -91,7 +79,6 @@ function cardHTML(subject, tasks) {
 
       <div class="subject-end">
         ${exam ? `<span class="${exam.dd.className}">${exam.dd.label}</span>` : ""}
-        <!-- 자세히 보기: 카드 어디를 눌러도 이동 (수정·삭제 버튼은 제외) -->
         <a class="icon-btn subject-more" href="${detailURL}" aria-label="${esc(subject.name)} 자세히 보기" title="자세히 보기">${icon("chevron-right")}</a>
       </div>
 
@@ -108,7 +95,7 @@ function renderExamList(subjects) {
     ? `<li class="exam-item"><span class="exam-date">예정된 시험이 없어요.</span></li>`
     : upcoming.map((e) => `
       <li class="exam-item">
-        <a class="exam-link" href="00_mystudy_subject.html?id=${encodeURIComponent(e.subject.id)}&exam=${encodeURIComponent(e.id)}">
+        <a class="exam-link" href="9_Songstudy_subject.html?id=${encodeURIComponent(e.subject.id)}&exam=${encodeURIComponent(e.id)}">
           <span class="subject-dot" style="--subject-color: ${esc(e.subject.color)}"></span>
           <span class="exam-info">
             <span class="exam-title"><span class="exam-subject">${esc(e.subject.name)}</span><strong>${esc(e.name)}</strong></span>
@@ -135,13 +122,9 @@ function render() {
     <span class="badge badge-plain">다가오는 시험 ${examCount}개</span>`;
 }
 
-/* ---------- 모달: 과목 추가 · 수정 (알바몬 경력 입력 방식) ----------
-   왼쪽 항목 이름 / 오른쪽 입력칸, 필수 항목 *, 글자 수 카운터,
-   시험은 블록 단위로 추가·삭제 (최대 5개)
-*/
 const MAX_EXAMS = 5;
 const EXAM_TYPES = ["중간고사", "기말고사"];
-let examSeq = 0; // 시험 블록마다 고유 id를 만들기 위한 번호
+let examSeq = 0;
 
 function renderColorPicker(selected) {
   els.colorPicker.innerHTML = MyStudy.COLORS.map((c) => `
@@ -152,7 +135,6 @@ function renderColorPicker(selected) {
     </label>`).join("");
 }
 
-// 글자 수 표시: "<b>14</b>/20"
 function updateCount(input, countEl) {
   countEl.innerHTML = `<b>${input.value.length}</b>/${input.maxLength}`;
 }
@@ -163,7 +145,6 @@ function updateExamCount() {
   els.addExamRow.disabled = count >= MAX_EXAMS;
 }
 
-// 라디오 '기타'일 때만 시험명 입력칸, '날짜 미정'이면 날짜칸 비활성
 function syncExamBlock(block) {
   const type = block.querySelector('input[type="radio"]:checked')?.value;
   const other = block.querySelector('[name="examOther"]');
@@ -178,7 +159,7 @@ function syncExamBlock(block) {
 function addExamRow(exam = { name: "", date: "" }) {
   const n = ++examSeq;
   const type = EXAM_TYPES.includes(exam.name) ? exam.name : exam.name ? "기타" : "중간고사";
-  const tbd = Boolean(exam.id) && !exam.date; // 저장된 시험인데 날짜가 없으면 '날짜 미정'
+  const tbd = Boolean(exam.id) && !exam.date;
   const radios = [...EXAM_TYPES, "기타"].map((t) => `
     <label class="radio"><input type="radio" name="examType${n}" value="${t}" ${t === type ? "checked" : ""}>${t}</label>`).join("");
 
@@ -217,7 +198,6 @@ function addExamRow(exam = { name: "", date: "" }) {
   return block;
 }
 
-// 오류 문구를 해당 칸 아래(또는 폼 아래)에 표시하고 그 칸으로 초점 이동
 function showError(message, field, target = els.formError) {
   els.nameError.textContent = "";
   els.formError.textContent = "";
@@ -243,7 +223,6 @@ function openSubjectModal(subjectId = null) {
   updateCount(els.form.elements.name, els.nameCount);
   updateCount(els.form.elements.memo, els.memoCount);
 
-  // 새 과목은 아직 안 쓴 색을 먼저 골라 둠
   const used = MyStudy.getSubjects().map((s) => s.color);
   const firstFree = MyStudy.COLORS.find((c) => !used.includes(c.hex)) || MyStudy.COLORS[0];
   renderColorPicker(subject ? subject.color : firstFree.hex);
@@ -268,7 +247,6 @@ function saveSubject(event) {
     return showError("같은 이름의 과목이 이미 있어요.", nameInput, els.nameError);
   }
 
-  // 시험 블록 읽기: 종류(기타면 직접 입력) + 날짜(미정이면 빈 값)
   const exams = [];
   for (const block of els.examRows.querySelectorAll(".exam-block-item")) {
     const type = block.querySelector('input[type="radio"]:checked').value;
@@ -278,7 +256,7 @@ function saveSubject(event) {
     const examName = type === "기타" ? otherField.value.trim() : type;
     if (!examName) return showError("기타 시험명을 입력해 주세요.", otherField);
     if (!tbd && !dateField.value) return showError("시험일을 선택하거나 '날짜 미정'을 체크해 주세요.", dateField);
-    // 이미 있던 시험이면 준비 카테고리 연결(catId)은 그대로 유지
+
     const prev = editingId && MyStudy.getSubject(editingId).exams.find((x) => x.id === block.dataset.examId);
     const exam = { id: block.dataset.examId || MyStudy.uid("e"), name: examName, date: tbd ? "" : dateField.value };
     if (prev && prev.catId !== undefined) exam.catId = prev.catId;
@@ -292,10 +270,10 @@ function saveSubject(event) {
     const id = MyStudy.uid("s");
     subjects.push({ id, name, color, memo, exams });
     MyStudy.saveSubjects(subjects);
-    // 교수님·강의실·성적 기준 같은 나머지 정보는 상세 페이지 수정 창에서
+
     MyUI.toast(`'${name}' 과목을 추가했어요.`, {
       actionLabel: "자세히 입력",
-      onAction: () => { location.href = `00_mystudy_subject.html?id=${encodeURIComponent(id)}&edit=1`; },
+      onAction: () => MySubjectForm.open(id, { onSaved: render }),
     });
   }
 
@@ -303,14 +281,13 @@ function saveSubject(event) {
   render();
 }
 
-/* ---------- 확인 모달 (삭제, 초기화) ---------- */
 function openConfirm({ title, text, okLabel, onOk }) {
   els.confirmTitle.textContent = title;
   els.confirmText.textContent = text;
   els.confirmOk.textContent = okLabel;
   onConfirm = onOk;
   els.confirmModal.showModal();
-  els.confirmModal.querySelector("[data-close]").focus(); // 위험한 동작이라 '취소'에 먼저 초점
+  els.confirmModal.querySelector("[data-close]").focus();
 }
 
 function askDeleteSubject(subjectId) {
@@ -344,18 +321,17 @@ function askReset() {
   });
 }
 
-/* ---------- 이벤트 연결 ---------- */
 function bindEvents() {
-  // '과목 추가' 버튼 (상단, 빈 상태 두 곳)
+
   document.querySelectorAll('[data-action="add"]').forEach((btn) => {
     btn.addEventListener("click", () => openSubjectModal());
   });
 
-  // 카드 버튼은 목록 하나에 이벤트 위임
   els.grid.addEventListener("click", (e) => {
     const btn = e.target.closest("button[data-action]");
     if (!btn) return;
     const id = btn.closest(".subject-card").dataset.id;
+    if (btn.dataset.action === "edit") MySubjectForm.open(id, { opener: btn, onSaved: render });
     if (btn.dataset.action === "delete") askDeleteSubject(id);
   });
 
@@ -374,7 +350,7 @@ function bindEvents() {
     }
     if (e.target.name === "memo") updateCount(e.target, els.memoCount);
   });
-  // 시험 종류 라디오, '날짜 미정' 체크
+
   els.examRows.addEventListener("change", (e) => {
     const block = e.target.closest(".exam-block-item");
     if (!block) return;
@@ -398,7 +374,6 @@ function bindEvents() {
     onConfirm = null;
   });
 
-  // 두 모달 공통: 닫기 버튼, 바깥 영역 클릭
   [els.modal, els.confirmModal].forEach((dialog) => {
     dialog.addEventListener("click", (e) => {
       if (e.target.closest("[data-close]") || e.target === dialog) dialog.close();
@@ -407,13 +382,11 @@ function bindEvents() {
 
   els.resetBtn.addEventListener("click", askReset);
 
-  // 다른 탭에서 데이터가 바뀌면 다시 그리기
   window.addEventListener("storage", (e) => {
     if (e.key === MyStudy.KEYS.subjects || e.key === MyStudy.KEYS.tasks) render();
   });
 }
 
-/* ---------- 시작 ---------- */
 document.addEventListener("DOMContentLoaded", async () => {
   els.sort.value = localStorage.getItem(SORT_KEY) || "exam";
   bindEvents();

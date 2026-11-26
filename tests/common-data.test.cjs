@@ -191,7 +191,7 @@ test("failed initialization can retry and malformed seeds do not erase existing 
 });
 
 test("both existing subject screens reference the moved shared module", () => {
-  for (const file of ["00_mystudy_subjects.html", "00_mystudy_subject.html"]) {
+  for (const file of ["9_Songstudy_subjects.html", "9_Songstudy_subject.html"]) {
     const html = fs.readFileSync(path.join(root, "mystudy", file), "utf8");
     assert.match(html, /src="\.\.\/common\/00_mystudy_store\.js" defer/);
   }

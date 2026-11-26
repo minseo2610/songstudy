@@ -1,18 +1,13 @@
 @charset "UTF-8";
-/* =========================================================
-   Songtudy · 과목 관리 / 과목 상세 페이지 전용 스타일
-   공통 변수와 클래스는 00_mystudy_common.css 에 있습니다.
-   ========================================================= */
 
-/* ---------- 과목 관리: 상단 도구 ---------- */
 .toolbar { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
-/* 정렬: 라벨과 선택칸을 한 줄에 */
+
 .toolbar .field { flex-direction: row; align-items: center; gap: var(--sp-2); white-space: nowrap; }
 .toolbar .select { min-width: 170px; }
 .page-head { align-items: center; }
 
 .subjects-layout { display: flex; flex-wrap: wrap; gap: var(--sp-6); align-items: flex-start; }
-/* 넓은 화면: 왼쪽(과목) / 오른쪽(다가오는 시험)이 따로 스크롤, 사이에 점선 */
+
 @media (min-width: 1024px) {
   .subjects-layout { flex-wrap: nowrap; align-items: stretch; height: max(480px, calc(100vh - 300px)); gap: 0; }
   .subjects-main { overflow-y: auto; overscroll-behavior: contain; padding: var(--sp-1) var(--sp-6) var(--sp-4) var(--sp-1); }
@@ -27,10 +22,6 @@
   gap: var(--sp-5);
 }
 
-/* ---------- 과목 카드 ----------
-   [이름 ✎ 🗑 ........ D-day >]
-   [다음 시험]
-   [남은 할 일 + 막대] */
 .subject-card {
   position: relative; overflow: hidden;
   display: grid;
@@ -39,7 +30,7 @@
   align-items: center; gap: var(--sp-4) var(--sp-3);
   padding: var(--sp-6) var(--sp-5) var(--sp-5);
 }
-/* 카드 위쪽 과목 색 마스킹테이프 */
+
 .subject-card::before {
   content: "";
   position: absolute; left: var(--sp-5); top: 0;
@@ -53,14 +44,15 @@
 .subject-card .subject-exam { grid-area: exam; margin: calc(var(--sp-2) * -1) 0 0; }
 .subject-card .subject-progress { grid-area: progress; }
 .subject-end { grid-area: end; display: flex; align-items: center; justify-content: flex-end; gap: var(--sp-2); }
-.subject-tools { display: flex; gap: var(--sp-1); position: relative; z-index: 1; }   /* 카드 전체 링크보다 위 */
+.subject-tools { display: flex; gap: var(--sp-1); position: relative; z-index: 1; }
 .subject-tools .icon-btn { width: 36px; height: 36px; color: var(--text-sub); }
 .subject-tools .icon-btn:hover { color: var(--text); }
 .subject-tools .icon { width: 16px; height: 16px; }
-/* > 링크의 클릭 영역을 카드 전체로 넓힘 */
+
 .subject-more::after { content: ""; position: absolute; inset: 0; border-radius: var(--r-lg); }
 .subject-card { cursor: pointer; transition: border-color .15s var(--ease), transform .18s var(--ease); }
 .subject-card:hover { border-color: var(--pink-300); transform: translateY(-2px); }
+.subject-card:active { transform: scale(.98); transition-duration: .08s; }
 .subject-card:hover .subject-more { background: var(--pink-100); }
 .subject-card:has(.subject-more:focus-visible) { outline: 3px solid var(--pink-500); outline-offset: 2px; }
 .subject-more:focus-visible { outline: none; }
@@ -72,29 +64,38 @@
 .progress-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--sp-2); font-size: var(--fs-sm); color: var(--text-sub); }
 .progress-row span:first-child { color: var(--text); font-weight: 700; }
 
-
-/* ---------- 다가오는 시험 (사이드) ---------- */
 .exam-list { display: flex; flex-direction: column; }
 .exam-item { border-bottom: 1.5px solid var(--line); }
 .exam-item > .exam-date { display: block; padding: var(--sp-3) 0; }
-/* 줄 전체가 링크: 밑줄 대신 올리면 연한 핑크 바탕 */
+
 .exam-link {
   display: flex; align-items: center; gap: var(--sp-3);
   margin: 0 calc(var(--sp-2) * -1); padding: var(--sp-3) var(--sp-2);
   border-radius: var(--r-md); color: var(--text); text-decoration: none;
-  transition: background-color .15s var(--ease);
+  transition: background-color .2s var(--ease), transform .2s var(--ease), box-shadow .2s var(--ease);
 }
-.exam-link:hover { background: var(--pink-100); }
-.exam-link:hover strong { text-decoration: underline; text-decoration-color: var(--pink-500); text-underline-offset: 3px; }
+
+.exam-link:hover {
+  background: var(--pink-200);
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 6px 16px var(--lift-shadow);
+}
+.exam-link:active {
+  background: var(--pink-300);
+  transform: scale(.97);
+  box-shadow: none;
+  transition-duration: .08s;
+}
+.exam-link:hover .badge { transform: translateX(-2px); }
+.exam-link .badge { transition: transform .2s var(--ease); }
 .exam-item:last-child { border-bottom: 0; }
 .exam-item .exam-info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-/* 과목 이름(작고 회색) / 시험 이름(굵은 검정)으로 구분 */
+
 .exam-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-2); }
 .exam-subject { font-size: var(--fs-sm); color: var(--text-sub); }
 .exam-title strong { font-size: var(--fs-md); font-weight: 700; }
 .exam-item .exam-date { font-size: var(--fs-xs); color: var(--text-sub); }
 
-/* ---------- 과목 추가 모달: 시험 블록 (알바몬 경력 블록 방식) ---------- */
 .exam-section-form { display: flex; flex-direction: column; gap: var(--sp-3); padding-top: var(--sp-4); border-top: 1.5px solid var(--line); }
 .exam-section-title { display: flex; align-items: baseline; gap: var(--sp-2); font-size: var(--fs-xl); font-weight: 800; }
 .exam-blocks { display: flex; flex-direction: column; gap: var(--sp-3); }
@@ -115,10 +116,8 @@
 .add-block-btn { width: 100%; border-style: dashed; color: var(--text); }
 .add-block-btn:disabled:hover { background: var(--surface); }
 
-/* ---------- 과목 상세: 머리 카드 ---------- */
 .window-body-stack { display: flex; flex-direction: column; gap: var(--sp-6); }
 
-/* 위: 산책 그림(꽉 차게) / 아래: 시험 일정 */
 .detail-head { position: relative; padding: 0; overflow: hidden; }
 .detail-head::before {
   content: "";
@@ -132,14 +131,13 @@
 .detail-memo { color: var(--text-sub); font-size: var(--fs-sm); white-space: pre-line; }
 .detail-name-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); }
 
-/* ---------- 과목 상세: 시험 일정 (머리 카드 오른쪽) ---------- */
 .exam-panel { display: flex; flex-direction: column; gap: var(--sp-3); padding: var(--sp-5) var(--sp-6) var(--sp-6); }
 .exam-panel-head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); }
-.exam-panel-title { font-size: var(--fs-lg); font-weight: 700; }  /* 시험 일정 · 성적 기준 */
+.exam-panel-title { font-size: var(--fs-lg); font-weight: 700; }
 .exam-empty { padding: var(--sp-2) 0; color: var(--text-sub); font-size: var(--fs-sm); }
 .exam-section { display: flex; flex-direction: column; gap: var(--sp-4); }
 .section-head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); flex-wrap: wrap; }
-/* 시험이 늘어나도 그림 크기는 그대로, 아래로만 한 줄씩 늘어남 */
+
 .exam-chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--sp-3); }
 .exam-chip {
   display: flex; align-items: center; gap: var(--sp-3);
@@ -150,15 +148,14 @@
 .exam-chip .exam-info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .exam-chip .exam-info strong { font-size: var(--fs-md); }
 .exam-chip .exam-date { font-size: var(--fs-xs); color: var(--text-sub); }
-/* 시험별 준비 진행률: D-day 옆에 얼마나 준비했는지 */
+
 .exam-chip:has(.exam-prep, .exam-prep-add) { flex-wrap: wrap; }
-.exam-prep { display: flex; align-items: center; gap: var(--sp-3); flex-basis: 100%; padding-right: var(--sp-2); }  /* 칸 아래 한 줄 전체: 글씨는 D-day 밑, 막대는 오른쪽 */
-.exam-prep .progress { flex: 1; min-width: 0; height: 6px; background: var(--pink-200); } /* 칸 바탕이 연한 핑크라 막대 바탕을 한 단계 진하게 */
+.exam-prep { display: flex; align-items: center; gap: var(--sp-3); flex-basis: 100%; padding-right: var(--sp-2); }
+.exam-prep .progress { flex: 1; min-width: 0; height: 6px; background: var(--pink-200); }
 .exam-prep-text { display: inline-flex; align-items: center; gap: var(--sp-1); flex-shrink: 0; font-size: var(--fs-xs); font-weight: 700; color: var(--text); }
 .exam-prep-text .icon { width: 14px; height: 14px; fill: var(--pink-300); stroke: var(--text); }
 .exam-prep-add { flex-basis: 100%; text-align: left; font-size: var(--fs-xs); }
 
-/* ---------- 과목 상세: 완료한 할 일 보기 스위치 ---------- */
 .toggle {
   display: inline-flex; align-items: center; gap: var(--sp-2);
   min-height: 40px; padding: 0 var(--sp-3) 0 var(--sp-2);
@@ -179,13 +176,12 @@
 .toggle[aria-pressed="true"] .toggle-track { background: var(--pink-500); }
 .toggle[aria-pressed="true"] .toggle-thumb { transform: translateX(16px); }
 
-/* ---------- 과목 상세: 할 일 묶음 ---------- */
 .group-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--sp-5); align-items: start; }
 .group { display: flex; flex-direction: column; gap: var(--sp-3); }
-/* 접어 둔 묶음 추가 버튼 줄 */
+
 .group-head { display: flex; align-items: center; gap: var(--sp-2); }
 .group-label { font-size: var(--fs-lg); font-weight: 700; margin-right: auto; }
-/* 게이지: 해낸 일 / 해야 할 일 (내 목표 카드 레퍼런스) */
+
 .group-gauge { display: flex; flex-direction: column; gap: var(--sp-1); padding-bottom: var(--sp-3); border-bottom: 1.5px solid var(--line); }
 .group-caption { font-size: var(--fs-xs); color: var(--text-sub); }
 .group-caption strong { color: var(--text); font-weight: 700; }
@@ -195,7 +191,7 @@
 .group-count span { font-size: var(--fs-md); color: var(--text-sub); }
 .progress-lg { height: 8px; border-radius: 4px; margin-top: var(--sp-1); }
 .progress-lg > span { border-radius: 4px; }
-/* 오른쪽 아래 연한 '카테고리 삭제하기' */
+
 .group-foot { display: flex; justify-content: flex-end; margin-top: auto; padding-top: var(--sp-2); }
 .group-done-mark { display: none; align-items: center; gap: var(--sp-1); color: var(--text); font-size: var(--fs-sm); font-weight: 700; }
 .group.is-complete .group-done-mark { display: inline-flex; }
@@ -205,7 +201,7 @@
   display: flex; align-items: center; gap: var(--sp-3);
   min-height: 52px; padding: var(--sp-2) 0 var(--sp-2) var(--sp-3);
   border-bottom: 1.5px solid var(--line);
-  box-shadow: inset 4px 0 0 var(--urg, transparent);  /* 왼쪽 색 띠: 마감 임박 정도 */
+  box-shadow: inset 4px 0 0 var(--urg, transparent);
 }
 .urg-high { --urg: var(--urgent-high); }
 .urg-mid { --urg: var(--urgent-mid); }
@@ -214,40 +210,30 @@
 .task-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .task-title { font-size: var(--fs-md); overflow-wrap: anywhere; }
 .task-meta { display: flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-xs); color: var(--text-sub); }
-/* 마감 임박: 글씨색 대신 핑크 배지로 강조 */
+
 .task-meta .is-urgent { padding: 0 6px; border-radius: var(--r-pill); background: var(--pink-600); color: var(--on-accent); font-weight: 700; }
 .task.is-done .task-title { color: var(--text-sub); text-decoration: line-through; }
-/* 체크 직후: 줄이 그어진 채 잠깐 머물다 아래로 이동 */
+
 .task.is-settling { opacity: .55; transition: opacity .4s var(--ease); }
 
-/* 완료 구역 (아이폰 미리알림처럼 묶음 맨 아래) */
 .done-area { display: flex; flex-direction: column; padding-top: var(--sp-2); }
 .done-label { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-2) 0; font-size: var(--fs-sm); font-weight: 700; color: var(--text-sub); }
 .done-label::after { content: ""; flex: 1; height: 1.5px; background: var(--line); }
-.task-actions { display: flex; align-items: center; gap: var(--sp-2); }  /* 버튼 사이 8px: 잘못 누르기 방지 */
+.task-actions { display: flex; align-items: center; gap: var(--sp-2); }
 .task-empty { padding: var(--sp-4) 0; color: var(--text-sub); font-size: var(--fs-sm); text-align: center; }
 
 .task-field { display: flex; flex-direction: column; gap: var(--sp-1); font-size: var(--fs-xs); font-weight: 600; color: var(--text-sub); min-width: 0; }
 
-
-
-
-/* 불러오는 중 자리 표시 */
 .skeleton-card { height: 190px; }
 .detail-loading { display: flex; flex-direction: column; gap: var(--sp-6); }
 .detail-loading .skeleton { height: 120px; }
 .detail-loading .skeleton:last-child { height: 280px; }
 .exam-skeleton { flex: 1; }
 
-/* ---------- 과목 상세: 마감 색 띠 안내 ---------- */
 .urgency-legend { display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-4); margin: 0 auto 0 var(--sp-4); padding: 0; list-style: none; font-size: var(--fs-xs); color: var(--text-sub); }
 .urgency-legend li { display: inline-flex; align-items: center; gap: var(--sp-1); }
 .urgency-swatch { width: 4px; height: 16px; border-radius: 2px; background: var(--urg); }
 
-/* ---------- 과목 상세: 묶음 머리의 '+ 할 일' 버튼 ---------- */
-
-
-/* ---------- 할 일 추가 창 ---------- */
 .task-modal-body { display: flex; flex-direction: column; gap: var(--sp-2); }
 .task-modal-body > .task-field { margin-top: var(--sp-2); font-size: var(--fs-sm); color: var(--text); }
 .task-modal-field { display: flex; flex-direction: column; }
@@ -255,14 +241,12 @@
 .task-cat-legend { padding: 0; margin-bottom: var(--sp-2); font-size: var(--fs-sm); font-weight: 600; }
 .task-cat-options { display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-4); }
 
-/* 시험 추가 창 */
 .exam-other { margin-top: var(--sp-2); }
 .exam-date-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-4); }
 .exam-date-row .date-input { flex: 1; min-width: 200px; }
 .task-modal-body .form-error:empty { display: none; }
 .task-modal-body .form-guide { margin-top: var(--sp-2); font-size: var(--fs-xs); color: var(--text-sub); }
 
-/* ---------- 과목 상세: 할 일 머리 오른쪽 (완료 보기 + 카테고리 추가) ---------- */
 .section-actions { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
 .group-empty {
   grid-column: 1 / -1; padding: var(--sp-8) var(--sp-6);
@@ -271,23 +255,19 @@
 }
 .group-empty b { color: var(--text); }
 
-/* ---------- 과목 상세: 기니피그 산책 (당근 걸음 수 레퍼런스) ----------
-   배경 그림(1280×400)과 같은 16:5 비율로 고정 → 시험 개수와 상관없이 크기 일정
-   글씨는 그림 위 하늘 부분, 게이지는 그림 아래 길(바닥) 부분 */
 .walk {
-  --walk: 0;                         /* 0 ~ 1: JS가 준비 진행률로 채움 */
-  --bg-zoom: 1.12;                   /* 배경 확대 (바닥 기준) */
-  --tile: 2600px;                    /* 반복 그림 한 장 너비: JS가 (배너 높이 × 확대 × 2560/400)으로 채움 */
+  --walk: 0;
+  --bg-zoom: 1.12;
+  --tile: 2600px;
   position: relative; isolation: isolate; overflow: hidden;
   width: 100%; aspect-ratio: 16 / 5; min-height: 300px;
   background: var(--pink-100);
 }
-/* 배경은 왼쪽으로 천천히 흘러감 → 기니피그가 앞으로 걸어가는 느낌
-   한 장 너비만큼 이동하면 처음과 똑같은 모습이라 끊김 없이 반복 */
+
 .walk-bg {
   position: absolute; left: 0; bottom: 0; z-index: 0;
   width: calc(var(--tile) * 2); height: calc(100% * var(--bg-zoom));
-  background: url("00_mystudy_walk_bg_loop.jpg") left bottom / auto 100% repeat-x;
+  background: url("../images/9_Songstudy_walk_bg.jpg") left bottom / auto 100% repeat-x;
   animation: walk-pan 70s linear infinite;
   will-change: transform;
 }
@@ -298,9 +278,9 @@
   .walk-bg { animation: none; }
 }
 .walk-top, .walk-ground { z-index: 2; }
-/* 그림 아래쪽이 카드 흰 바탕으로 자연스럽게 섞이며 끝나도록 */
+
 .walk::before {
-  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 11%;  /* 바닥(그림 아래 약 19%)의 중간부터 */
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 11%;
   background: linear-gradient(to bottom, transparent, var(--surface));
   pointer-events: none; z-index: 1;
 }
@@ -310,7 +290,7 @@
 }
 .walk .detail-title { max-width: 420px; }
 .walk .detail-memo { color: var(--text); }
-/* 말풍선: 오른쪽 위 */
+
 .walk-bubble {
   position: relative; flex-shrink: 0;
   display: flex; flex-direction: column;
@@ -322,7 +302,7 @@
 .walk-bubble .bubble-label { font-size: var(--fs-sm); color: var(--text-sub); }
 .walk-bubble strong { font-size: var(--fs-xl); font-weight: 800; line-height: 1.2; color: var(--text); }
 .walk-bubble strong.bubble-add { font-size: var(--fs-md); text-decoration: underline; text-decoration-color: var(--pink-300); text-underline-offset: 3px; }
-/* 누를 수 있는 말풍선: 올리면 살짝 떠오르고 테두리 */
+
 .walk-bubble {
   border: 1.5px solid transparent; text-align: left; font-family: inherit; cursor: pointer;
   transition: transform .18s var(--ease), border-color .15s var(--ease), box-shadow .18s var(--ease);
@@ -332,19 +312,19 @@
   box-shadow: var(--shadow-lift);
 }
 .walk-bubble:active { transform: translateY(-1px); }
-/* 말풍선을 눌러 이동했을 때 시험 칸 잠깐 강조 */
+
 .exam-chip.is-flash { animation: chip-flash 1.2s var(--ease); }
 @keyframes chip-flash {
   0%, 40% { border-color: var(--pink-strong); background: var(--pink-100); }
   100% { border-color: var(--line); background: var(--pink-50); }
 }
-.walk-bubble::after {            /* 말풍선 꼬리 */
+.walk-bubble::after {
   content: ""; position: absolute; left: 28px; bottom: -7px;
   width: 14px; height: 14px; background: var(--surface); transform: rotate(45deg);
 }
-/* 바닥: 게이지 + 시작/도착 글씨 */
-.walk-ground { position: absolute; left: 5%; right: 5%; bottom: 0; }  /* 그림 맨 아래까지 내림 */
-.walk-lane { position: relative; height: 12px; border-radius: 6px; background: var(--pink-200); }  /* 흰 바탕 위라 연한 핑크로 */
+
+.walk-ground { position: absolute; left: 5%; right: 5%; bottom: 0; }
+.walk-lane { position: relative; height: 12px; border-radius: 6px; background: var(--pink-200); }
 .walk-fill {
   position: absolute; inset: 0; border-radius: 6px; background: var(--pink-strong);
   transform: scaleX(var(--walk)); transform-origin: left center;
@@ -359,21 +339,21 @@
 .walk-dots i:not(.is-passed) { background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--pink-300); }
 .walk-marks { display: flex; justify-content: space-between; margin-top: var(--sp-2); font-size: var(--fs-sm); font-weight: 700; color: var(--text); }
 .walk-goal { color: var(--text); }
-/* 기니피그: 길 폭만큼의 레일을 진행률만큼 밀어 이동 (left 대신 transform) */
+
 .walk-runner {
-  position: absolute; left: 0; right: 0; bottom: calc(100% + 14px); height: 0; pointer-events: none;  /* 바와 14px 간격 */
+  position: absolute; left: 0; right: 0; bottom: calc(100% + 14px); height: 0; pointer-events: none;
   transform: translateX(calc(var(--walk) * 100%));
   transition: transform .6s var(--ease);
 }
 .walk-pig {
   position: absolute; left: 0; bottom: -4px;
-  width: clamp(110px, 16%, 180px); aspect-ratio: 285 / 201; transform: translateX(-50%);
-  background: url("00_mystudy_guineapig.gif") center bottom / contain no-repeat;
+  width: clamp(110px, 16%, 180px); aspect-ratio: 285 / 201; transform: translateX(calc(var(--walk) * -100%));
+  background: url("../images/9_Songstudy_guineapig.gif") center bottom / contain no-repeat;
 }
 @media (prefers-reduced-motion: reduce) {
-  .walk-pig { background-image: url("00_mystudy_guineapig.png"); }  /* 움직임 줄이기: 멈춘 그림 */
+  .walk-pig { background-image: url("../images/9_Songstudy_guineapig.png"); }
 }
-/* 좁은 화면: 그림을 세로로 늘리고(양옆은 잘림) 말풍선은 제목 아래로 */
+
 @media (max-width: 720px) {
   .walk { aspect-ratio: auto; min-height: 360px; }
   .walk-top { inset: var(--sp-5) var(--sp-5) auto; flex-direction: column; gap: var(--sp-3); }
@@ -382,39 +362,35 @@
   .exam-panel { padding: var(--sp-4) var(--sp-5) var(--sp-5); }
 }
 
-/* ---------- 과목 상세: 수업 정보 (그림 위, 과목 이름 아래) ---------- */
 .subject-info { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-2); margin: 0; padding: 0; list-style: none; }
 .subject-info li {
   padding: 2px var(--sp-2); border-radius: var(--r-sm);
   background: var(--surface); font-size: var(--fs-xs); font-weight: 600; color: var(--text);
 }
 
-/* ---------- 과목 상세: 그림 아래 두 칸 (시험 일정 | 성적 기준) ---------- */
 .detail-bottom { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
 .detail-bottom .exam-chips { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
 .grade-panel { display: flex; flex-direction: column; gap: var(--sp-3); padding: var(--sp-5) var(--sp-6) var(--sp-6); border-left: 1.5px dashed var(--line); }
 .exam-weight { margin-left: var(--sp-1); padding: 0 6px; border-radius: var(--r-sm); background: var(--pink-100); font-size: var(--fs-xs); font-weight: 700; vertical-align: 2px; }
 
-/* 평가 비율 막대: 조각 너비 = 비율 */
 .grade-bar { display: flex; gap: 2px; height: 12px; border-radius: 6px; overflow: hidden; background: var(--pink-100); }
 .grade-bar span { flex: var(--value) 0 0; min-width: 4px; }
 .grade-legend { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-4); margin: 0; padding: 0; list-style: none; font-size: var(--fs-sm); }
 .grade-legend li { display: inline-flex; align-items: center; gap: var(--sp-1); }
 .grade-legend i { width: 10px; height: 10px; border-radius: 3px; }
 
-/* ---------- 과목 상세: 맨 아래 내 성적 ---------- */
 .score-section {
-  display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-5) var(--sp-6) var(--sp-6);  /* 제목·버튼과 표를 조금 위로 */
-  /* 원형 그래프·범례 색 (핑크 진하기 5단계) */
+  display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-5) var(--sp-6) var(--sp-6);
+
   --tone-0: var(--pink-strong); --tone-1: var(--pink-500); --tone-2: var(--pink-300);
   --tone-3: var(--pink-200); --tone-4: var(--text-sub);
 }
-/* 넓은 화면: 원형 그래프 | 점수 표 | 감점 기준 */
+
 .score-body { display: grid; grid-template-columns: 200px minmax(0, 1fr) minmax(0, 280px); gap: var(--sp-6) var(--sp-8); align-items: start; }
 .score-body.no-rules { grid-template-columns: 200px minmax(0, 1fr); }
 .score-body > .grade-rules { padding: var(--sp-4); border: 1.5px dashed var(--line); border-radius: var(--r-md); }
 .score-body > .grade-rules:only-child { grid-column: 1 / -1; }
-.score-donut { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); margin: 0; align-self: center; }  /* 옆 점수 표 높이의 가운데 */
+.score-donut { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); margin: 0; align-self: center; }
 .donut {
   position: relative; width: 180px; aspect-ratio: 1; border-radius: 50%;
   background: var(--donut, var(--pink-100));
@@ -433,13 +409,13 @@
 @media (max-width: 640px) {
   .score-body, .score-body.no-rules { grid-template-columns: minmax(0, 1fr); }
 }
-/* 항목별 내 점수: 항목 | 비중 | 내 점수 | 반영 */
+
 .score-table { display: flex; flex-direction: column; }
 .score-row {
   display: grid; grid-template-columns: minmax(0, 1fr) 64px 160px 72px; align-items: center; column-gap: 0;
   min-height: 52px; border-bottom: 1.5px solid var(--line); font-size: var(--fs-md);
 }
-/* 비중 | 내 점수 | 반영 사이 세로 구분선 + 여백 */
+
 .score-row > :nth-child(2) { padding-right: var(--sp-4); }
 .score-row > :nth-child(3) { align-self: stretch; padding: 0 var(--sp-4); border-left: 1.5px solid var(--line); border-right: 1.5px solid var(--line); }
 .score-row > :nth-child(4) { padding-left: var(--sp-3); }
@@ -468,8 +444,6 @@
   .grade-panel { padding: var(--sp-4) var(--sp-5) var(--sp-5); }
 }
 
-/* ---------- 과목 수정 창: 수업 정보 · 성적 기준 ---------- */
-/* 수정 창의 큰 묶음 제목 (수업 정보, 성적 기준): 위 칸의 밑줄 하나만 쓰고 제목은 크게 */
 .form-section-title {
   display: flex; align-items: baseline; gap: var(--sp-2);
   margin-top: var(--sp-5);
@@ -507,7 +481,7 @@
 @media (max-width: 560px) {
   .score-row { grid-template-columns: minmax(0, 1fr) 56px 84px 56px; font-size: var(--fs-sm); }
   .score-row > :nth-child(2) { padding: 0 var(--sp-2); }
-  .score-input .suffix { display: none; }   /* 폰: '/100'은 숨기고 칸만 (입력칸 이름표에 100점 만점 안내) */
+  .score-input .suffix { display: none; }
   .score-row > :nth-child(3) { padding: 0 var(--sp-2); }
   .score-row > :nth-child(4) { padding-left: var(--sp-2); }
   .score-input .input { width: 60px; }

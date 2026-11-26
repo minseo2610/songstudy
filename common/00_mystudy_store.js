@@ -6,7 +6,7 @@
      같은 과목·할 일 데이터를 읽을 수 있습니다.
    - 데이터 원본: 같은 폴더의 00_mystudy_data.json (2026년 11월)
    - 사용 안내: common/README.md
-   - 화면 관련 도우미(토스트, 아이콘)는 mystudy/00_mystudy_common.js 에 있습니다.
+   - 화면 관련 도우미(토스트, 아이콘)는 mystudy/9_Songstudy_common.js 에 있습니다.
    - 발표 전 데이터 초기화: 콘솔에서 MyStudy.reset()
 
    localStorage 키

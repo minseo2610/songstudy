@@ -3,16 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- 팀원 정보: 실제 이름·학번으로 바꿔 주세요 -->
-  <meta name="author" content="팀명 | 팀원A(학번), 팀원B(학번), 팀원C(학번)">
+
+  <meta name="author" content="팀명 | 김규린, 이예랑, 김민서">
   <meta name="team-member" content="담당: 팀원A - 과목 관리 페이지">
   <meta name="description" content="Songtudy 과목 관리: 과목 추가·수정·삭제, 과목 색상, 시험 일정 등록">
   <title>과목 관리 | Songtudy</title>
-  <link rel="stylesheet" href="00_mystudy_common.css">
-  <link rel="stylesheet" href="00_mystudy_subjects.css">
-  <script src="00_mystudy_common.js" defer></script>
+  <link rel="stylesheet" href="9_Songstudy_common.css">
+  <link rel="stylesheet" href="9_Songstudy_subjects.css">
+  <script src="9_Songstudy_common.js" defer></script>
   <script src="../common/00_mystudy_store.js" defer></script>
-  <script src="00_mystudy_subjects.js" defer></script>
+  <script src="9_Songstudy_subject_form.js" defer></script>
+  <script src="9_Songstudy_subjects.js" defer></script>
 </head>
 <body data-page="subjects">
   <a class="skip-link" href="#main">본문 바로가기</a>
@@ -45,7 +46,7 @@
           <section class="subjects-main" aria-labelledby="listTitle">
             <h2 class="sr-only" id="listTitle">과목 목록</h2>
             <ul class="subject-grid" id="subjectGrid" aria-busy="true">
-              <!-- 불러오는 동안 보이는 자리 표시: JS가 목록으로 교체 -->
+
               <li class="skeleton skeleton-card" aria-hidden="true"></li>
               <li class="skeleton skeleton-card" aria-hidden="true"></li>
               <li class="skeleton skeleton-card" aria-hidden="true"></li>
@@ -75,7 +76,6 @@
     <button class="link-btn" type="button" id="resetBtn">예시 데이터로 초기화</button>
   </footer>
 
-  <!-- 과목 추가·수정 모달 -->
   <dialog class="modal modal-wide" id="subjectModal" aria-labelledby="modalTitle">
     <form id="subjectForm" novalidate>
       <div class="modal-head">
@@ -86,7 +86,6 @@
       <div class="modal-body">
         <p class="form-guide"><span class="req" aria-hidden="true">*</span> 표시는 꼭 입력해야 하는 항목이에요.</p>
 
-        <!-- 과목명: 왼쪽 항목 이름 / 오른쪽 입력칸 + 글자 수 -->
         <div class="form-row">
           <label class="form-row-label" for="subjectName">과목명 <span class="req" aria-hidden="true">*</span></label>
           <div class="form-row-field">
@@ -97,7 +96,6 @@
           </div>
         </div>
 
-        <!-- 과목 색상 -->
         <div class="form-row">
           <span class="form-row-label" id="colorLabel">과목 색상</span>
           <div class="form-row-field">
@@ -105,7 +103,6 @@
           </div>
         </div>
 
-        <!-- 메모 -->
         <div class="form-row">
           <label class="form-row-label" for="subjectMemo">메모</label>
           <div class="form-row-field">
@@ -115,7 +112,6 @@
           </div>
         </div>
 
-        <!-- 시험 일정: 블록 단위로 추가·삭제 (알바몬 경력 추가 방식) -->
         <section class="exam-section-form" aria-labelledby="examFormTitle">
           <h3 class="exam-section-title" id="examFormTitle">
             시험 일정 <span class="count" id="examCount"><b>0</b>/5</span>
@@ -136,7 +132,6 @@
     </form>
   </dialog>
 
-  <!-- 확인 모달 (과목 삭제, 데이터 초기화에 함께 사용) -->
   <dialog class="modal" id="confirmModal" aria-labelledby="confirmTitle" aria-describedby="confirmText">
     <div class="modal-head">
       <h2 class="modal-title" id="confirmTitle">과목 삭제</h2>

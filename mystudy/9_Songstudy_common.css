@@ -1,89 +1,53 @@
 @charset "UTF-8";
-/* =========================================================
-   Songtudy · 공통 스타일 (팀 전체 공유)
-
-   [연결 순서] 모든 페이지 <head>
-     <link rel="stylesheet" href="00_mystudy_common.css">
-     <link rel="stylesheet" href="00_mystudy_(내 페이지).css">
-     <script src="00_mystudy_common.js" defer></script>
-
-   [페이지 뼈대] 내비게이션·아이콘은 00_mystudy_common.js가 채웁니다.
-     <body data-page="subjects">
-       <a class="skip-link" href="#main">본문 바로가기</a>
-       <div class="window">
-         <header class="window-tabs" data-nav></header>
-         <div class="window-frame">
-           <div class="window-bar" data-addr-bar></div>
-           <main class="window-body" id="main"> …페이지 내용… </main>
-         </div>
-       </div>
-       <footer class="site-footer"> … </footer>
-     </body>
-     data-page 값: home | subjects | planner | timer | report
-
-   [규칙]
-   - 색, 글꼴, 간격, 모서리는 아래 변수(--*)만 사용합니다. (색상 코드 직접 쓰기 X)
-   - 인라인 style 속성은 쓰지 않습니다.
-     예외: JS가 넣는 --subject-color(과목 색), --value(진행률 0~1), --at(산책 게이지 점 위치), --donut(성적 원형 그래프), --tile(산책 배경 한 장 너비)
-   ========================================================= */
 
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
 
-/* =========================================================
-   1. 변수
-   ========================================================= */
 :root {
-  /* --- 포인트 색: 핑크 --- */
-  --pink-50: #fff7fa;   /* 창 안쪽 바탕 */
-  --pink-100: #fff0f5;  /* hover, 옅은 면, 평소 탭 */
-  --pink-200: #ffdbe7;  /* 메인 핑크 (레퍼런스 폴더 앞면) */
-  --pink-300: #fcbcd4;  /* 메인 핑크 진하게 (레퍼런스 폴더 탭) */
-  --pink-500: #f28db4;  /* 진행 막대, 초점 테두리, 현재 탭 띠 */
-  --pink-strong: #cc3b76;       /* 진한 버튼: 흰 글씨 대비 4.7:1 */
+
+  --pink-50: #fff7fa;
+  --pink-100: #fff0f5;
+  --pink-200: #ffdbe7;
+  --pink-300: #fcbcd4;
+  --pink-500: #f28db4;
+  --pink-strong: #cc3b76;
   --pink-strong-hover: #b02d63;
-  --pink-600: #fcbcd4;  /* 버튼처럼 채워진 면: 위에는 검정 글자 */
-  --pink-650: #f9a6c5;  /* 위 면의 hover */
-  --pink-700: #d4568a;  /* 체크·라디오처럼 작은 표시의 테두리 */
+  --pink-600: #fcbcd4;
+  --pink-650: #f9a6c5;
+  --pink-700: #d4568a;
 
-  /* --- 바탕 --- */
-  --bg: #ffffff;                       /* 페이지 바탕: 흰색 (위에 핑크 별) */
-  --star-color: #fcbcd4;               /* 배경 별 색 */
-  --surface: #fffcfd;                  /* 카드·입력칸: 분홍빛 흰색 (종이 느낌) */
-  --surface-muted: #f4eef1;            /* 지난 날짜 등 비활성 면 */
-  --on-accent: var(--text);            /* 핑크 면 위 글자: 파스텔이라 검정 */
-  --on-dark: #fffafc;                  /* 어두운 면(토스트) 위 글자 */
-  --backdrop: rgba(80, 40, 60, .35);   /* 모달 뒤 배경 */
+  --bg: #ffffff;
+  --star-color: #fcbcd4;
+  --surface: #fffcfd;
+  --surface-muted: #f4eef1;
+  --on-accent: var(--text);
+  --on-dark: #fffafc;
+  --backdrop: rgba(80, 40, 60, .35);
 
-  /* --- 글자 --- */
-  --text: #3a3036;        /* 본문 */
-  --text-sub: #6e5f67;    /* 보조 글자 (대비 4.5:1 이상) */
-  --text-nav: #4a4046;    /* 내비게이션: 순수 검정보다 연한 검정 */
-  --placeholder: #7a6870;   /* 안내 글자도 대비 4.5:1 이상 */
+  --text: #3a3036;
+  --text-sub: #6e5f67;
+  --text-nav: #4a4046;
+  --placeholder: #7a6870;
 
-  /* --- 선 --- */
-  --line: #f8d9e4;        /* 기본 테두리: 옅게 */
-  --line-strong: #eeaac4; /* 입력칸·버튼 테두리 */
-  --line-dot: rgba(58, 48, 54, .15); /* 과목 색 점 테두리 */
+  --line: #f8d9e4;
+  --line-strong: #eeaac4;
+  --line-dot: rgba(58, 48, 54, .15);
 
-  /* --- 상태 --- */
   --success: #2f8f6f;
   --danger: #b3261e;
   --danger-line: #f0c3c0;
   --danger-bg: #fdeceb;
-  /* 마감 임박 색 띠 (할 일 왼쪽): 글씨에는 쓰지 않음 */
-  --urgent-high: #d94f86;  /* 1일 이내·지남: 메인 핑크 가장 진하게 */
-  --urgent-mid: #f28db4;   /* 3일 이내: 중간 */
-  --urgent-low: #fcbcd4;   /* 여유: 메인 핑크 */
 
-  /* --- 글자 크기: 최소 14px, 단계 차이는 완만하게 --- */
+  --urgent-high: #d94f86;
+  --urgent-mid: #f28db4;
+  --urgent-low: #fcbcd4;
+
   --fs-xs: 14px;
   --fs-sm: 15px;
-  --fs-md: 16px;  /* 기본 */
+  --fs-md: 16px;
   --fs-lg: 18px;
   --fs-xl: 22px;
   --fs-2xl: 28px;
 
-  /* --- 간격 --- */
   --sp-1: 4px;
   --sp-2: 8px;
   --sp-3: 12px;
@@ -92,30 +56,24 @@
   --sp-6: 24px;
   --sp-8: 32px;
 
-  /* --- 모서리: 과하게 둥글지 않게 --- */
   --r-sm: 6px;
   --r-md: 10px;
   --r-lg: 14px;
   --r-pill: 999px;
 
-  /* --- 그림자 --- */
-  --shadow-card: none;                          /* 카드는 그림자 없이 테두리로 구분 */
-  --shadow-window: 6px 6px 0 var(--pink-300);   /* 창 프레임만: 다이어리 스티커 느낌 */
-  --shadow-pop: 0 8px 24px rgba(80, 40, 60, .12); /* 떠 있는 창 (모달, 색상 선택) */
-  --shadow-lift: 0 12px 28px rgba(80, 40, 60, .16); /* hover로 떠오른 요소 */
+  --shadow-card: none;
+  --shadow-window: 6px 6px 0 var(--pink-300);
+  --shadow-pop: 0 8px 24px rgba(80, 40, 60, .12);
+  --shadow-lift: 0 12px 28px rgba(80, 40, 60, .16);
+  --lift-shadow: rgba(204, 59, 118, .18);
 
-  /* --- 글꼴 --- */
   --font: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
 
-  /* --- 레이아웃 --- */
   --content-max: 1200px;
   --header-tab-h: 48px;
   --ease: cubic-bezier(.2, .7, .3, 1);
 }
 
-/* =========================================================
-   2. 기본값
-   ========================================================= */
 *, *::before, *::after { box-sizing: border-box; }
 
 html { -webkit-text-size-adjust: 100%; overflow-x: clip; }
@@ -132,9 +90,6 @@ body {
   background-color: var(--bg);
 }
 
-/* 배경: 가장자리에 흐릿하게 떠 있는 별
-   별 모양(00_mystudy_bg_stars.svg)을 마스크로 쓰고 색은 --star-color로 칠함
-   → 테마를 바꾸면 별 색도 따라 바뀜 */
 body::before {
   content: "";
   position: fixed;
@@ -142,11 +97,10 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background-color: var(--star-color);
-  -webkit-mask: url("00_mystudy_bg_stars.svg") center / cover no-repeat;
-  mask: url("00_mystudy_bg_stars.svg") center / cover no-repeat;
+  -webkit-mask: url("../images/9_Songstudy_bg_stars.svg") center / cover no-repeat;
+  mask: url("../images/9_Songstudy_bg_stars.svg") center / cover no-repeat;
 }
 
-/* display를 지정한 요소도 hidden 속성이면 확실히 숨김 */
 [hidden] { display: none !important; }
 
 h1, h2, h3, h4, p { margin: 0; }
@@ -156,12 +110,9 @@ img, svg { display: block; max-width: 100%; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
 
-/* 누를 수 있는 텍스트에는 밑줄 */
-/* 글씨는 검정/흰색만: 링크도 검정 + 밑줄, 마우스를 올리면 밑줄이 굵어짐 */
 a { color: var(--text); text-decoration: underline; text-decoration-color: var(--pink-500); text-underline-offset: 3px; }
 a:hover { color: var(--text); text-decoration-thickness: 2px; }
 
-/* 키보드 초점: 즉시 표시 */
 :focus-visible { outline: 3px solid var(--pink-500); outline-offset: 2px; }
 
 .sr-only {
@@ -175,14 +126,10 @@ a:hover { color: var(--text); text-decoration-thickness: 2px; }
 }
 .skip-link:focus { top: var(--sp-4); }
 
-/* 아이콘: 모두 같은 크기, 선 두께 2 */
 .icon { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
 .num { font-variant-numeric: tabular-nums; }
 
-/* =========================================================
-   3. 내비게이션: 컴퓨터 창 + 파일 탭
-   ========================================================= */
 .window {
   max-width: calc(var(--content-max) + 48px);
   margin: 0 auto;
@@ -216,13 +163,13 @@ a:hover { color: var(--text); text-decoration-thickness: 2px; }
   background: var(--pink-600); color: var(--on-accent);
 }
 .brand-mark .icon { width: 18px; height: 18px; }
-/* 로고 이미지 (Songtudy) */
+
 .brand-logo { display: block; height: 68px; width: auto; }
 
 .tab-nav {
   display: flex;
   align-items: flex-end;
-  gap: var(--sp-3);            /* 메뉴 사이 간격 넓게 */
+  gap: var(--sp-3);
   flex-wrap: wrap;
 }
 
@@ -233,24 +180,23 @@ a:hover { color: var(--text); text-decoration-thickness: 2px; }
   gap: var(--sp-2);
   min-height: var(--header-tab-h);
   padding: 0 var(--sp-6);
-  margin-bottom: -1.5px;       /* 창 테두리와 겹쳐 이어 보이게 */
+  margin-bottom: -1.5px;
   border: 1.5px solid var(--line-strong);
   border-bottom: 0;
   border-radius: var(--r-lg) var(--r-lg) 0 0;
-  background: var(--pink-100);   /* 평소엔 연하게 */
+  background: var(--pink-100);
   color: var(--text-nav);
   font-size: var(--fs-md);
   font-weight: 600;
   text-decoration: none;
   transition: background-color .15s var(--ease);
 }
-.tab-short { display: none; }   /* 좁은 화면에서만 짧은 이름 표시 */
+.tab-short { display: none; }
 .tab { transition: background-color .15s var(--ease), transform .18s var(--ease); }
-/* 마우스를 올리거나 키보드 초점: 탭이 위로 올라옴 */
-/* 마우스를 올리면 진해지면서 위로 올라옴 */
+
 .tab:hover, .tab:focus-visible { background: var(--pink-300); color: var(--text-nav); transform: translateY(-6px); }
 .tab:active { background: var(--pink-300); transform: translateY(-3px); }
-/* 올라간 만큼 아래에 같은 색 받침을 채워 창과 이어 보이게 */
+
 .tab::after {
   content: "";
   position: absolute; left: -1.5px; right: -1.5px; top: 100%;
@@ -263,11 +209,10 @@ a:hover { color: var(--text); text-decoration-thickness: 2px; }
 .tab:hover::after, .tab:focus-visible::after { transform: scaleY(1); }
 .tab[aria-current="page"]:hover, .tab[aria-current="page"]:focus-visible { transform: translateY(-3px); }
 
-/* 현재 페이지 탭: 더 높고, 창 바탕색과 이어짐 + 아이콘이 채워짐 */
 .tab[aria-current="page"] {
   min-height: calc(var(--header-tab-h) + 8px);
   background: var(--pink-50);
-  box-shadow: inset 0 4px 0 var(--pink-500);   /* 지금 보는 탭: 위쪽 핑크 띠 */
+  box-shadow: inset 0 4px 0 var(--pink-500);
   color: var(--text);
   font-weight: 800;
   z-index: 1;
@@ -278,11 +223,10 @@ a:hover { color: var(--text); text-decoration-thickness: 2px; }
   border: 1.5px solid var(--line-strong);
   border-radius: 0 0 var(--r-lg) var(--r-lg);
   background: var(--pink-50);
-  box-shadow: var(--shadow-window); /* 다이어리 창 콘셉트 taste-skill-ignore */
+  box-shadow: var(--shadow-window);
   overflow: hidden;
 }
 
-/* 주소 표시줄: 장식 (눌리는 요소 없음) */
 .window-bar {
   display: flex;
   align-items: center;
@@ -327,9 +271,6 @@ a:hover { color: var(--text); text-decoration-thickness: 2px; }
 }
 .link-btn:hover { color: var(--text); }
 
-/* =========================================================
-   4. 페이지 머리
-   ========================================================= */
 .page-head {
   display: flex;
   align-items: flex-end;
@@ -343,9 +284,6 @@ a:hover { color: var(--text); text-decoration-thickness: 2px; }
 .breadcrumb { display: flex; gap: var(--sp-2); font-size: var(--fs-sm); color: var(--text-sub); }
 .breadcrumb li + li::before { content: "/"; margin-right: var(--sp-2); color: var(--line-strong); }
 
-/* =========================================================
-   5. 버튼 (기본 · hover · active · focus · disabled)
-   ========================================================= */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -370,25 +308,22 @@ a:hover { color: var(--text); text-decoration-thickness: 2px; }
 .btn-primary { background: var(--pink-600); border-color: var(--pink-700); color: var(--on-accent); }
 .btn-primary:hover { background: var(--pink-650); border-color: var(--pink-700); color: var(--on-accent); }
 
-/* 진한 버튼: 카드 안 주요 동작 (할 일 추가 등) */
 .btn-strong { background: var(--pink-strong); border-color: var(--pink-strong); color: var(--on-dark); }
 .btn-strong:hover { background: var(--pink-strong-hover); border-color: var(--pink-strong-hover); color: var(--on-dark); }
-/* 연한 버튼: 덜 중요한 동작 (설정, 삭제하기 등) */
+
 .btn-soft { background: var(--pink-100); border-color: var(--pink-100); color: var(--text-sub); }
 .btn-soft:hover { background: var(--pink-200); color: var(--text); }
 
 .btn-danger { color: var(--danger); border-color: var(--danger-line); }
 .btn-danger:hover { background: var(--danger-bg); color: var(--danger); }
 
-/* 작은 버튼: 시험 추가 · 할 일 추가 · 카테고리 삭제하기 등 모두 같은 크기·모서리·글씨
-   색만 기본 / 진한(btn-strong) / 연한(btn-soft)으로 구분 */
 .btn-sm {
   min-height: 36px; padding: 0 var(--sp-3);
   border-radius: var(--r-md);
   font-size: var(--fs-sm); font-weight: 600;
 }
 .btn-sm .icon { width: 16px; height: 16px; }
-.btn-sm:has(> .icon:first-child) { padding-left: var(--sp-2); gap: var(--sp-1); }  /* + 아이콘 쪽 왼쪽 여백은 좁게 */
+.btn-sm:has(> .icon:first-child) { padding-left: var(--sp-2); gap: var(--sp-1); }
 
 .icon-btn {
   display: inline-flex; align-items: center; justify-content: center;
@@ -403,9 +338,6 @@ a:hover { color: var(--text); text-decoration-thickness: 2px; }
 .icon-btn:disabled { opacity: .45; cursor: not-allowed; }
 .icon-btn .icon { width: 18px; height: 18px; }
 
-/* =========================================================
-   6. 카드, 배지, 진행 막대
-   ========================================================= */
 .card {
   border: 1.5px solid var(--line);
   border-radius: var(--r-lg);
@@ -413,9 +345,8 @@ a:hover { color: var(--text); text-decoration-thickness: 2px; }
   box-shadow: var(--shadow-card);
   padding: var(--sp-5);
 }
-.card-title { font-size: var(--fs-xl); font-weight: 800; }  /* 큰 묶음 제목: 할 일, 내 성적, 다가오는 시험 */
+.card-title { font-size: var(--fs-xl); font-weight: 800; }
 
-/* 과목 색 표시: JS에서 style.setProperty('--subject-color', 색) */
 .subject-dot {
   width: 14px; height: 14px; flex: none;
   border-radius: 4px;
@@ -432,11 +363,10 @@ a:hover { color: var(--text); text-decoration-thickness: 2px; }
   font-variant-numeric: tabular-nums;
 }
 .badge-plain { background: var(--surface); border: 1.5px solid var(--line); color: var(--text-sub); font-weight: 600; }
-/* D-day: 3일 이내는 진하게, 지난 날짜는 회색 */
+
 .dday-soon { background: var(--pink-600); color: var(--on-accent); }
 .dday-past { background: var(--surface-muted); color: var(--text-sub); }
 
-/* 진행 막대: JS가 style="--value: 0.6" 처럼 0~1 값을 넣음 */
 .progress {
   height: 8px; border-radius: 4px;
   background: var(--pink-100); overflow: hidden;
@@ -449,9 +379,6 @@ a:hover { color: var(--text); text-decoration-thickness: 2px; }
   transition: transform .3s var(--ease);
 }
 
-/* =========================================================
-   7. 입력 요소
-   ========================================================= */
 .field { display: flex; flex-direction: column; gap: var(--sp-1); font-size: var(--fs-sm); font-weight: 600; color: var(--text-sub); }
 .input, .select {
   min-height: 44px; width: 100%;
@@ -462,7 +389,7 @@ a:hover { color: var(--text); text-decoration-thickness: 2px; }
   font-size: var(--fs-md); font-weight: 400; color: var(--text);
 }
 .input::placeholder { color: var(--placeholder); }
-/* 날짜 칸 안내 문구 (00_mystudy_common.js의 enhanceDate) */
+
 .date-input { position: relative; display: block; min-width: 0; }
 .date-input .input { cursor: pointer; }
 .date-ph {
@@ -470,8 +397,8 @@ a:hover { color: var(--text); text-decoration-thickness: 2px; }
   max-width: calc(100% - 56px); overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
   color: var(--placeholder); font-size: var(--fs-md); pointer-events: none;
 }
-.date-input.is-empty .input { color: transparent; }              /* 비었을 때 '연도. 월. 일.' 숨김 */
-.date-input.is-empty .input:focus { color: var(--text); }        /* 키보드로 입력할 땐 다시 보이게 */
+.date-input.is-empty .input { color: transparent; }
+.date-input.is-empty .input:focus { color: var(--text); }
 .date-input:not(.is-empty) .date-ph,
 .date-input .input:focus + .date-ph { display: none; }
 .date-input .input:disabled + .date-ph { color: var(--text-sub); }
@@ -483,7 +410,6 @@ a:hover { color: var(--text); text-decoration-thickness: 2px; }
 .form-error { color: var(--danger); font-size: var(--fs-sm); min-height: 1.5em; }
 .form-label { font-size: var(--fs-sm); font-weight: 600; color: var(--text-sub); }
 
-/* 체크박스: 완료 상태를 색이 아니라 체크 아이콘으로 구분 */
 .check { position: relative; display: inline-flex; width: 24px; height: 24px; flex: none; }
 .check input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
 .check .box {
@@ -498,7 +424,6 @@ a:hover { color: var(--text); text-decoration-thickness: 2px; }
 .check input:checked + .box { background: var(--pink-600); border-color: var(--pink-700); color: var(--on-accent); }
 .check input:focus-visible + .box { outline: 3px solid var(--pink-500); outline-offset: 2px; }
 
-/* 색상 선택 (라디오): 체크 아이콘은 어떤 색 위에서도 보이게 흰 원 위에 */
 .swatches { display: flex; gap: var(--sp-2); flex-wrap: wrap; border: 0; margin: 0; padding: 0; min-width: 0; }
 .swatch { position: relative; }
 .swatch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
@@ -518,11 +443,6 @@ a:hover { color: var(--text); text-decoration-thickness: 2px; }
 .swatch input:hover + span { box-shadow: 0 0 0 2.5px var(--pink-500); }
 .swatch input:focus-visible + span { outline: 3px solid var(--pink-500); outline-offset: 2px; }
 
-/* 항목 이름 왼쪽 / 입력칸 오른쪽 폼 (알바몬 경력 입력 방식) — 팀 공용
-   <div class="form-row">
-     <label class="form-row-label" for="x">항목 <span class="req" aria-hidden="true">*</span></label>
-     <div class="form-row-field"> 입력칸 </div>
-   </div> */
 .form-guide { font-size: var(--fs-xs); color: var(--text-sub); }
 .req { color: var(--text); font-weight: 700; }
 .form-row {
@@ -537,7 +457,6 @@ a:hover { color: var(--text); text-decoration-thickness: 2px; }
 .form-row-label { padding-top: 10px; font-size: var(--fs-md); font-weight: 700; color: var(--text); }
 .form-row-field { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
 
-/* 입력칸 + 오른쪽 글자 수 */
 .with-count { display: flex; align-items: center; gap: var(--sp-3); }
 .with-count .input { flex: 1; min-width: 0; }
 .count { font-size: var(--fs-xs); color: var(--text-sub); white-space: nowrap; font-variant-numeric: tabular-nums; font-weight: 500; }
@@ -546,7 +465,6 @@ a:hover { color: var(--text); text-decoration-thickness: 2px; }
 
 .textarea { min-height: 96px; padding: var(--sp-3); resize: vertical; line-height: 1.5; }
 
-/* 라디오: 체크박스와 같은 크기, 선택되면 가운데 점 */
 .radio { display: inline-flex; align-items: center; gap: var(--sp-2); min-height: 44px; font-size: var(--fs-md); cursor: pointer; }
 .radio input {
   appearance: none; -webkit-appearance: none; margin: 0; flex: none;
@@ -559,7 +477,6 @@ a:hover { color: var(--text); text-decoration-thickness: 2px; }
 .radio input:checked::before { transform: scale(1); }
 .radio input:hover { border-color: var(--pink-500); }
 
-/* 글자와 함께 쓰는 체크박스 (예: 날짜 미정) */
 .check-inline { display: inline-flex; align-items: center; gap: var(--sp-2); min-height: 44px; font-size: var(--fs-md); cursor: pointer; white-space: nowrap; }
 
 @media (max-width: 560px) {
@@ -567,9 +484,6 @@ a:hover { color: var(--text); text-decoration-thickness: 2px; }
   .form-row-label { padding-top: 0; }
 }
 
-/* =========================================================
-   8. 모달 (dialog)
-   ========================================================= */
 .modal {
   width: min(520px, calc(100% - 32px));
   padding: 0;
@@ -587,9 +501,6 @@ a:hover { color: var(--text); text-decoration-thickness: 2px; }
 .modal-body { display: flex; flex-direction: column; gap: var(--sp-4); padding: var(--sp-5); }
 .modal-foot { display: flex; justify-content: flex-end; gap: var(--sp-2); padding: var(--sp-4) var(--sp-5); border-top: 1.5px solid var(--line); }
 
-/* =========================================================
-   9. 토스트 (되돌리기 버튼 포함), 빈 상태
-   ========================================================= */
 .toast {
   position: fixed; left: 50%; bottom: var(--sp-8); z-index: 50;
   display: flex; align-items: center; gap: var(--sp-4);
@@ -606,7 +517,6 @@ a:hover { color: var(--text); text-decoration-thickness: 2px; }
 }
 .toast-action:hover { background: var(--pink-650); color: var(--on-accent); }
 
-/* 불러오는 중 자리 표시 (skeleton) */
 .skeleton {
   border-radius: var(--r-lg);
   background: var(--pink-100);
@@ -622,14 +532,11 @@ a:hover { color: var(--text); text-decoration-thickness: 2px; }
   border: 1.5px dashed var(--line-strong); border-radius: var(--r-lg); background: var(--surface);
 }
 
-/* =========================================================
-   10. 좁은 화면, 움직임 줄이기
-   ========================================================= */
 @media (max-width: 860px) {
   .window { padding: var(--sp-4) var(--sp-3) 0; }
   .window-tabs { padding: 0 var(--sp-2); gap: var(--sp-3); }
   .brand { flex-basis: 100%; }
-  /* 탭: 아이콘 아래 짧은 이름 (홈 / 과목 / 플래너 / 타이머 / 리포트) */
+
   .tab-nav { flex: 1; flex-wrap: nowrap; gap: var(--sp-1); }
   .tab {
     flex: 1; flex-direction: column; justify-content: center; gap: 2px;
@@ -637,7 +544,7 @@ a:hover { color: var(--text); text-decoration-thickness: 2px; }
     font-size: var(--fs-xs); line-height: 1.2;
   }
   .tab[aria-current="page"] { min-height: 62px; }
-  /* 전체 이름은 화면 읽기 프로그램용으로 남기고, 화면에는 짧은 이름 */
+
   .tab-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
   .tab-short { display: block; white-space: nowrap; }
   .window-body { padding: var(--sp-5) var(--sp-4); }
