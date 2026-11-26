@@ -129,7 +129,7 @@
 .home-timer-select > span:first-child { min-width: 0; overflow-wrap: anywhere; }
 .home-timer-select:hover:not(:disabled), .home-timer-select[aria-expanded="true"] { border-color: var(--pink-500); }
 .home-timer-select:disabled { cursor: not-allowed; opacity: .55; }
-.home-timer-chevron { display: grid; place-items: center; flex: none; width: 30px; height: 30px; border-radius: var(--r-sm); background: var(--pink-50); color: var(--pink-strong); }
+.home-timer-chevron { display: grid; place-items: center; flex: none; width: 30px; height: 30px; border-radius: var(--r-sm); background: transparent; color: var(--pink-strong); }
 .home-timer-chevron::before { content: ""; width: 8px; height: 8px; border-bottom: 2px solid currentColor; border-right: 2px solid currentColor; transform: translateY(-2px) rotate(45deg); transition: transform .15s var(--ease); }
 .home-timer-select[aria-expanded="true"] .home-timer-chevron::before { transform: translateY(2px) rotate(225deg); }
 .home-timer-menu { position: absolute; z-index: 5; top: calc(100% + var(--sp-2)); right: 0; width: 100%; padding: var(--sp-3); border: 1px solid var(--line-strong); border-radius: var(--r-md); background: var(--surface); box-shadow: var(--shadow-pop); color: var(--text); }

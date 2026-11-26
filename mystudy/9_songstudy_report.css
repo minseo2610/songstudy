@@ -112,21 +112,17 @@
   padding: 0;
   border: 0;
   border-radius: var(--r-sm);
-  color: var(--pink-700);
-  background: var(--pink-100);
+  color: #000;
+  background: transparent;
   cursor: pointer;
 }
-.report-picker-toggle::before {
-  content: "";
-  width: 8px;
-  height: 8px;
-  border-right: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
-  transform: translateY(-2px) rotate(45deg);
+.report-picker-icon {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
 }
-.report-picker-toggle:hover,
 .report-picker-toggle:focus-visible {
-  background: var(--pink-200);
+  background: transparent;
   outline: 2px solid var(--pink-500);
   outline-offset: 1px;
 }
@@ -218,7 +214,7 @@
   padding: var(--sp-6) var(--sp-5);
 }
 .report-donut-wrap {
-  width: min(100%, 256px);
+  width: min(100%, 296px);
   aspect-ratio: 1;
   position: relative;
   justify-self: center;
@@ -230,7 +226,7 @@
 .report-donut-track,
 .report-donut-segment {
   fill: none;
-  stroke-width: 30;
+  stroke-width: 36;
 }
 .report-donut-track {
   stroke: var(--surface-muted);
@@ -243,7 +239,7 @@
     stroke-width 0.18s var(--ease);
 }
 .report-donut-segment.is-highlight {
-  stroke-width: 35;
+  stroke-width: 41;
 }
 .report-donut-segment.is-muted {
   opacity: 0.25;
@@ -371,7 +367,7 @@
   width: 30px;
   height: 30px;
   border-radius: var(--r-sm);
-  background: var(--pink-100);
+  background: transparent;
   color: var(--pink-700);
 }
 .report-subject-chevron::before {
@@ -729,7 +725,7 @@
     padding: var(--sp-5) 0;
   }
   .report-donut-wrap {
-    width: 218px;
+    width: min(100%, 244px);
   }
   .report-ratio-list > li {
     font-size: var(--fs-xs);
