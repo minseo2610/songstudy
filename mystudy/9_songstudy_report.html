@@ -34,7 +34,7 @@
               </div>
             </div>
             <div class="report-date-toolbar">
-              <div class="report-period-navigation"><button class="btn btn-sm" id="previousPeriod" type="button">이전</button><p class="report-period-label" id="periodLabel"></p><button class="btn btn-sm" id="nextPeriod" type="button">다음</button></div>
+              <div class="report-period-navigation"><button class="icon-btn arrow-btn is-prev" id="previousPeriod" type="button" aria-label="이전 기간" title="이전 기간"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></button><p class="report-period-label" id="periodLabel"></p><button class="icon-btn arrow-btn" id="nextPeriod" type="button" aria-label="다음 기간" title="다음 기간"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></button></div>
               <label class="report-date-label" for="reportDate">기준 날짜<input class="input" id="reportDate" type="date" min="1900-01-01"></label>
               <button class="link-btn" id="goToday" type="button">오늘</button>
             </div>
@@ -53,7 +53,7 @@
 
           <section class="card report-calendar-card" aria-labelledby="calendarTitle">
             <div class="report-section-head"><h2 class="card-title" id="calendarTitle">공부 기록 캘린더</h2><div class="report-calendar-filter"><label class="sr-only" for="calendarSubject">캘린더에 표시할 과목</label><span class="report-select"><select class="select" id="calendarSubject"><option value="">전체 과목</option></select></span></div></div>
-            <div class="report-calendar-toolbar"><h3 id="calendarMonth"></h3><div class="report-calendar-navigation"><button class="btn btn-sm" id="previousMonth" type="button">이전 달</button><button class="btn btn-sm" id="thisMonth" type="button">이번 달</button><button class="btn btn-sm" id="nextMonth" type="button">다음 달</button></div></div>
+            <div class="report-calendar-toolbar"><h3 id="calendarMonth"></h3><div class="report-calendar-navigation"><button class="icon-btn arrow-btn is-prev" id="previousMonth" type="button" aria-label="이전 달" title="이전 달"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></button><button class="btn btn-sm" id="thisMonth" type="button">이번 달</button><button class="icon-btn arrow-btn" id="nextMonth" type="button" aria-label="다음 달" title="다음 달"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></button></div></div>
             <div class="report-weekdays" aria-hidden="true"><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span><span>일</span></div>
             <div class="report-calendar-grid" id="calendarGrid" role="group" aria-labelledby="calendarMonth"></div>
             <div class="report-calendar-key"><p id="calendarMonthSummary"></p><div class="report-heat-key" aria-label="배경이 진할수록 공부시간이 많습니다"><span>적게</span><i class="heat-0"></i><i class="heat-1"></i><i class="heat-2"></i><i class="heat-3"></i><i class="heat-4"></i><span>많이</span></div></div>

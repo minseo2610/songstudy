@@ -197,7 +197,7 @@
     $("timerReset").disabled = !ready || storageWarningShown;
     $("timerStartLabel").textContent = timer.running ? "일시정지" : remaining === 0 ? "다시 집중" : inProgress ? "이어서 집중" : "집중 시작";
     const subject = MyStudy.getSubject(timer.subjectId);
-    $("timerState").textContent = !subject ? "과목 관리에서 공부할 과목을 추가해 주세요" : timer.running ? subject.name + "에 집중하고 있어요" : remaining === 0 ? "잘했어요! 오늘의 집중이 차곡차곡 쌓였어요" : inProgress ? "잠시 쉬는 중 · 준비되면 이어서 집중해요" : "공부할 과목을 고르고 시작해 보세요";
+    $("timerState").textContent = !subject ? "과목 관리에서 공부할 과목을 추가해 주세요" : timer.running ? subject.name + "에 집중하고 있어요" : remaining === 0 ? "잘했어요! 오늘의 집중이 차곡차곡 쌓였어요" : inProgress ? "잠시 쉬는 중 · 준비되면 이어서 집중해요" : "";
     document.querySelector(".home-timer-card").classList.toggle("is-running", timer.running);
   }
 

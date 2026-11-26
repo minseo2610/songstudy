@@ -101,7 +101,7 @@
   .report-calendar-toolbar { padding-top: var(--sp-5); }
   .report-calendar-toolbar h3 { font-size: var(--fs-xl); }
   .report-calendar-navigation { gap: var(--sp-1); }
-  .report-calendar-navigation .btn { min-height: 36px; padding: 0 var(--sp-2); font-size: var(--fs-xs); }
+  .report-calendar-navigation .btn:not(.arrow-btn) { min-height: 36px; padding: 0 var(--sp-2); font-size: var(--fs-xs); }
   .report-calendar-date { min-height: 90px; padding: var(--sp-2) var(--sp-1); gap: var(--sp-1); }
   .report-date-number { font-size: var(--fs-xs); min-width: 22px; min-height: 22px; }
   .report-calendar-duration { flex-direction: column; gap: 0; font-size: 12px; line-height: 1.25; }

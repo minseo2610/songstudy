@@ -130,15 +130,17 @@
 }
 .home-timer-state {
   margin-top: var(--sp-5);
+  min-height: 1.6em; /* 안내가 없을 때도 자리를 지켜 숫자가 위아래로 튀지 않게 */
   font-size: var(--fs-sm);
   color: var(--text-sub);
 }
 .home-timer-digits {
-  font-family: ui-monospace, "Cascadia Code", "Consolas", monospace;
+  font-family: var(--font);           /* 사이트 전체와 같은 Pretendard */
+  font-variant-numeric: tabular-nums; /* 숫자 폭을 같게 해서 초가 바뀔 때 흔들리지 않게 */
   font-size: clamp(80px, 12vw, 144px);
   font-weight: 800;
-  line-height: 1.25;
-  letter-spacing: -0.055em;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
   color: var(--text);
   position: relative;
   z-index: 1;
@@ -721,11 +723,6 @@
   }
 }
 
-/* 주 이동: < > 화살표 버튼 (같은 > 아이콘을 왼쪽은 뒤집어 사용) */
-.week-arrow { width: 36px; height: 36px; border: 1.5px solid var(--line-strong); border-radius: var(--r-md); background: var(--surface); color: var(--text); }
-.week-arrow:hover { background: var(--pink-100); }
-#prevWeek .icon { transform: scaleX(-1); }
-.week-arrow:disabled { opacity: .45; cursor: not-allowed; }
 
 /* 할 일 요약: 글씨 + 막대 */
 #taskSummary { display: flex; flex-direction: column; gap: var(--sp-2); flex: 1; min-width: 0; max-width: 320px; }
