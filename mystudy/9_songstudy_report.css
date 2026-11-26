@@ -10,12 +10,35 @@
 .report-period { display: inline-flex; padding: var(--sp-1); gap: var(--sp-1); border: 1px solid var(--line); border-radius: var(--r-md); background: var(--pink-50); }
 .report-period button { min-height: 38px; padding: var(--sp-2) var(--sp-4); border: 0; border-radius: var(--r-sm); background: transparent; color: var(--text-sub); font-size: var(--fs-sm); font-weight: 600; }
 .report-period button[aria-pressed="true"] { background: var(--pink-200); color: var(--text); }
-.report-date-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: var(--sp-3); padding-top: var(--sp-5); }
+.report-date-toolbar { position: relative; display: flex; align-items: center; flex-wrap: wrap; gap: var(--sp-3); padding-top: var(--sp-5); }
 .report-period-navigation { display: flex; align-items: center; gap: var(--sp-3); }
 .report-period-label { font-size: var(--fs-md); font-weight: 700; }
 .report-date-label { display: flex; align-items: center; gap: var(--sp-2); margin-left: auto; font-size: var(--fs-xs); color: var(--text-sub); }
 .report-date-label .input { width: 156px; min-height: 38px; padding: var(--sp-1) var(--sp-2); font-size: var(--fs-xs); }
-.report-date-toolbar > .link-btn { font-size: var(--fs-xs); min-height: 38px; }
+.report-date-toolbar > .link-btn, .report-calendar-toolbar > .link-btn { font-size: var(--fs-xs); min-height: 38px; }
+.report-calendar-toolbar > .link-btn { margin-left: auto; }
+.report-calendar-toolbar > .link-btn:disabled { opacity: .45; cursor: not-allowed; }
+/* 기준 날짜 선택창만 weekly의 날짜 선택 디자인을 재사용합니다. */
+.report-picker-control { position: relative; }
+.report-date-label .report-picker-input { padding-right: 42px; cursor: pointer; }
+.report-picker-toggle { position: absolute; top: 50%; right: 8px; width: 30px; height: 30px; transform: translateY(-50%); display: flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: var(--r-sm); color: var(--pink-700); background: var(--pink-100); cursor: pointer; }
+.report-picker-toggle::before { content: ""; width: 8px; height: 8px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: translateY(-2px) rotate(45deg); }
+.report-picker-toggle:hover, .report-picker-toggle:focus-visible { background: var(--pink-200); outline: 2px solid var(--pink-500); outline-offset: 1px; }
+.report-picker-popover { position: absolute; z-index: 5; top: calc(100% + var(--sp-2)); right: 0; width: min(100%, 300px); padding: var(--sp-4); border: 1px solid var(--line-strong); border-radius: var(--r-md); background: var(--surface); box-shadow: var(--shadow-pop); color: var(--text); }
+.report-picker-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--sp-3); }
+.report-picker-head strong { font-size: var(--fs-sm); }
+.report-picker-head .icon-btn { width: 30px; height: 30px; color: var(--pink-700); background: var(--pink-50); font-size: 22px; }
+.report-picker-weekdays, .report-picker-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); text-align: center; }
+.report-picker-weekdays { margin-bottom: var(--sp-1); color: var(--text-sub); font-size: var(--fs-xs); }
+.report-picker-grid { row-gap: 2px; }
+.report-picker-day { width: 30px; max-width: 100%; height: 30px; padding: 0; justify-self: center; border: 0; border-radius: 50%; color: var(--text); background: transparent; font-size: var(--fs-xs); cursor: pointer; }
+.report-picker-day:hover:not(:disabled), .report-picker-day:focus-visible { background: var(--pink-100); outline: 2px solid var(--pink-300); outline-offset: 1px; }
+.report-picker-day.is-other-month { color: var(--placeholder); opacity: .65; }
+.report-picker-day.is-today { color: var(--pink-700); font-weight: 800; box-shadow: inset 0 0 0 1px var(--pink-300); }
+.report-picker-day.is-selected { color: var(--text); background: var(--pink-300); font-weight: 800; }
+.report-picker-day:disabled { opacity: .4; cursor: not-allowed; }
+.report-picker-today { width: 100%; margin-top: var(--sp-3); padding-top: var(--sp-3); border: 0; border-top: 1px dashed var(--line-strong); color: var(--pink-700); background: transparent; font-size: var(--fs-xs); cursor: pointer; }
+.report-picker-today:hover { text-decoration: underline; }
 .report-ratio-body { display: grid; grid-template-columns: minmax(230px, .9fr) minmax(0, 1.1fr); align-items: center; gap: var(--sp-8); padding: var(--sp-6) var(--sp-5); }
 .report-donut-wrap { width: min(100%, 256px); aspect-ratio: 1; position: relative; justify-self: center; }
 .report-donut { width: 100%; height: 100%; }
@@ -45,6 +68,10 @@
 .report-calendar-toolbar { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); flex-wrap: wrap; padding: var(--sp-6) 0 var(--sp-4); }
 .report-calendar-toolbar h3 { font-size: var(--fs-2xl); font-weight: 700; letter-spacing: -.02em; }
 .report-calendar-navigation { display: flex; align-items: center; gap: var(--sp-2); }
+.report-calendar-navigation h3 { white-space: nowrap; }
+.report-month-step { flex: none; width: 40px; height: 40px; }
+.report-month-step .icon { width: 18px; height: 18px; }
+.report-month-step:first-child .icon { transform: rotate(180deg); }
 .report-weekdays, .report-calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
 .report-weekdays { font-size: var(--fs-xs); text-align: center; color: var(--text-sub); padding: var(--sp-2) 0 var(--sp-3); }
 .report-calendar-grid { border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
@@ -61,11 +88,11 @@
 .report-calendar-duration { display: flex; gap: var(--sp-1); font-size: var(--fs-xs); white-space: nowrap; font-weight: 600; }
 .report-calendar-dots { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-1); min-height: 9px; margin-top: auto; }
 .report-calendar-more { font-size: 12px; line-height: 1; }
-.heat-0 { background: var(--surface); }
-.heat-1 { background: var(--pink-50); }
-.heat-2 { background: var(--pink-100); }
-.heat-3 { background: var(--pink-200); }
-.heat-4 { background: var(--pink-300); }
+.heat-0 { background: var(--bg); }
+.heat-1 { background: var(--pink-100); }
+.heat-2 { background: var(--pink-200); }
+.heat-3 { background: var(--pink-300); }
+.heat-4 { background: var(--pink-500); }
 .report-calendar-key { display: flex; justify-content: space-between; align-items: center; gap: var(--sp-3); flex-wrap: wrap; margin-top: var(--sp-3); font-size: var(--fs-xs); color: var(--text-sub); }
 .report-heat-key { display: flex; align-items: center; gap: var(--sp-1); }
 .report-heat-key i { width: 12px; height: 12px; display: inline-block; border: 1px solid var(--line); border-radius: 2px; }
@@ -105,10 +132,11 @@
   .report-ratio-list > li { font-size: var(--fs-xs); gap: var(--sp-2); }
   .report-calendar-card .report-section-head { flex-direction: column; }
   .report-calendar-filter, .report-select select { width: 100%; }
-  .report-calendar-toolbar { padding-top: var(--sp-5); }
-  .report-calendar-toolbar h3 { font-size: var(--fs-xl); }
+  .report-calendar-toolbar { padding-top: var(--sp-5); gap: var(--sp-2); }
+  .report-calendar-toolbar h3 { font-size: var(--fs-lg); }
   .report-calendar-navigation { gap: var(--sp-1); }
-  .report-calendar-navigation .btn { min-height: 36px; padding: 0 var(--sp-2); font-size: var(--fs-xs); }
+  .report-month-step { width: 32px; }
+
   .report-calendar-date { min-height: 90px; padding: var(--sp-2) var(--sp-1); gap: var(--sp-1); }
   .report-date-number { font-size: var(--fs-xs); min-width: 22px; min-height: 22px; }
   .report-calendar-duration { flex-direction: column; gap: 0; font-size: 12px; line-height: 1.25; }

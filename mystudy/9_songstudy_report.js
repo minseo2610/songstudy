@@ -27,6 +27,8 @@
   let ratioParts = [];
   let ratioTotal = 0;
   let hoveredSubjectId = "";
+  let pickerMonth = anchor.slice(0, 7);
+  let pickerFocusDate = anchor;
   const fallbackColor = getComputedStyle(document.documentElement).getPropertyValue("--pink-700").trim();
 
   function readJSON(key, fallback) {
@@ -151,7 +153,6 @@
     const endLabel = range.start.slice(0, 4) === range.end.slice(0, 4) ? `${parseDate(range.end).getMonth() + 1}. ${parseDate(range.end).getDate()}` : fullDate(range.end);
     $("periodLabel").textContent = period === "day" ? `${fullDate(anchor)} (${DAY_NAMES[date.getDay()]})` : period === "week" ? `${fullDate(range.start)} – ${endLabel}` : `${date.getFullYear()}년 ${date.getMonth() + 1}월`;
     $("reportDate").value = anchor;
-    $("reportDate").max = todayKey();
     $("previousPeriod").disabled = range.start <= MIN_DATE;
     $("nextPeriod").disabled = range.end >= todayKey();
     document.querySelectorAll("[data-period]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.period === period)));
@@ -225,7 +226,10 @@
       const key = shiftDate(start, index);
       const parts = breakdown(calendarRecords(key));
       const sum = total(parts);
-      const level = !sum ? 0 : sum < 3600000 ? 1 : sum < 7200000 ? 2 : sum < 14400000 ? 3 : 4;
+      // 흰색을 포함한 총 5단계: 0시간 / 0~2시간 / 2~5시간 / 5~8시간 / 8시간 초과.
+      // 각 구간의 상한(2·5·8시간)은 해당 구간에 포함합니다.
+      const hours = sum / 3600000;
+      const level = !sum ? 0 : hours <= 2 ? 1 : hours <= 5 ? 2 : hours <= 8 ? 3 : 4;
       const inMonth = key.startsWith(month);
       const label = `${fullDate(key)} (${DAY_NAMES[parseDate(key).getDay()]}), ${sum ? exactDuration(sum) + ", " + parts.map((subject) => `${subject.name} ${exactDuration(subject.durationMs)}`).join(", ") : "공부 기록 없음"}`;
       const dots = parts.slice(0, 3).map((subject) => `<i class="report-swatch" data-subject-color="${esc(subject.color)}"></i>`).join("");
@@ -264,6 +268,46 @@
   function stepMonth(direction) {
     const next = moveMonth(anchor, direction);
     chooseDate(next < MIN_DATE ? MIN_DATE : next > todayKey() ? todayKey() : next);
+  }
+  // weekly의 날짜 선택창과 같은 일요일 시작·원형 날짜 버튼을 사용합니다.
+  // 아래 공부 기록 캘린더의 표시와 이벤트는 기존 구현을 그대로 둡니다.
+  function renderDatePicker(focusDay = false) {
+    const first = `${pickerMonth}-01`;
+    const start = shiftDate(first, -parseDate(first).getDay());
+    const date = parseDate(first);
+    $("pickerMonthTitle").textContent = `${date.getFullYear()}년 ${date.getMonth() + 1}월`;
+    $("pickerPreviousMonth").disabled = pickerMonth <= MIN_DATE.slice(0, 7);
+    $("pickerNextMonth").disabled = pickerMonth >= todayKey().slice(0, 7);
+    $("pickerDateGrid").innerHTML = Array.from({ length: 42 }, (_, index) => {
+      const key = shiftDate(start, index);
+      const day = parseDate(key);
+      const disabled = key < MIN_DATE || key > todayKey();
+      const classes = ["report-picker-day", !key.startsWith(pickerMonth) ? "is-other-month" : "", key === todayKey() ? "is-today" : "", key === anchor ? "is-selected" : ""].filter(Boolean).join(" ");
+      return `<button class="${classes}" type="button" data-picker-date="${key}" tabindex="${!disabled && key === pickerFocusDate ? 0 : -1}" aria-label="${fullDate(key)} (${DAY_NAMES[day.getDay()]})" aria-pressed="${key === anchor}"${key === todayKey() ? ' aria-current="date"' : ""}${disabled ? " disabled" : ""}>${day.getDate()}</button>`;
+    }).join("");
+    if (focusDay) $("pickerDateGrid").querySelector(`[data-picker-date="${pickerFocusDate}"]`)?.focus({ preventScroll: true });
+  }
+  function openDatePicker() {
+    pickerMonth = anchor.slice(0, 7);
+    pickerFocusDate = anchor;
+    $("reportDateCalendar").hidden = false;
+    $("reportDate").setAttribute("aria-expanded", "true");
+    $("reportDateToggle").setAttribute("aria-expanded", "true");
+    renderDatePicker(true);
+  }
+  function closeDatePicker(restoreFocus = false) {
+    $("reportDateCalendar").hidden = true;
+    $("reportDate").setAttribute("aria-expanded", "false");
+    $("reportDateToggle").setAttribute("aria-expanded", "false");
+    if (restoreFocus) $("reportDate").focus({ preventScroll: true });
+  }
+  function movePickerMonth(direction, focusDay = false) {
+    const nextMonth = moveMonth(`${pickerMonth}-01`, direction).slice(0, 7);
+    if (nextMonth < MIN_DATE.slice(0, 7) || nextMonth > todayKey().slice(0, 7)) return;
+    const next = moveMonth(pickerFocusDate, direction);
+    pickerFocusDate = next > todayKey() ? todayKey() : next < MIN_DATE ? MIN_DATE : next;
+    pickerMonth = nextMonth;
+    renderDatePicker(focusDay);
   }
   function refresh(force = false) {
     if (!ready) return;
@@ -336,6 +380,45 @@
     const key = $("reportDate").value;
     if (!validDate(key) || key < MIN_DATE || key > todayKey()) { $("reportDate").value = anchor; MyUI.toast("오늘 또는 이전 날짜를 선택해 주세요."); return; }
     chooseDate(key);
+  });
+  $("reportDate").addEventListener("click", openDatePicker);
+  $("reportDateToggle").addEventListener("click", () => $("reportDateCalendar").hidden ? openDatePicker() : closeDatePicker(true));
+  $("reportDate").addEventListener("keydown", (event) => {
+    if (["ArrowDown", "Enter", " "].includes(event.key)) { event.preventDefault(); openDatePicker(); }
+  });
+  $("pickerPreviousMonth").addEventListener("click", () => movePickerMonth(-1));
+  $("pickerNextMonth").addEventListener("click", () => movePickerMonth(1));
+  $("pickerDateGrid").addEventListener("click", (event) => {
+    const day = event.target.closest("[data-picker-date]");
+    if (!day || day.disabled) return;
+    chooseDate(day.dataset.pickerDate);
+    closeDatePicker(true);
+  });
+  $("pickerToday").addEventListener("click", () => { chooseDate(todayKey()); closeDatePicker(true); });
+  $("pickerDateGrid").addEventListener("keydown", (event) => {
+    const day = event.target.closest("[data-picker-date]");
+    if (!day) return;
+    if (["PageUp", "PageDown"].includes(event.key)) {
+      event.preventDefault(); movePickerMonth(event.key === "PageUp" ? -1 : 1, true); return;
+    }
+    const offset = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 }[event.key];
+    const weekday = parseDate(day.dataset.pickerDate).getDay();
+    const next = offset ? shiftDate(day.dataset.pickerDate, offset) : event.key === "Home" ? shiftDate(day.dataset.pickerDate, -weekday) : event.key === "End" ? shiftDate(day.dataset.pickerDate, 6 - weekday) : "";
+    if (!next) return;
+    event.preventDefault();
+    if (next < MIN_DATE || next > todayKey()) return;
+    pickerFocusDate = next;
+    pickerMonth = next.slice(0, 7);
+    renderDatePicker(true);
+  });
+  document.addEventListener("pointerdown", (event) => {
+    if (!event.target.closest('#reportDatePicker, label[for="reportDate"]')) closeDatePicker();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !$("reportDateCalendar").hidden) { event.preventDefault(); closeDatePicker(true); }
+  });
+  $("reportDatePicker").addEventListener("focusout", () => {
+    requestAnimationFrame(() => { if (!$("reportDatePicker").contains(document.activeElement)) closeDatePicker(); });
   });
   $("calendarSubject").addEventListener("change", () => {
     filterId = $("calendarSubject").value;
