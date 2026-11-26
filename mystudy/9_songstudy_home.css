@@ -72,72 +72,85 @@
 }
 .home-timer-card {
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: var(--sp-6) var(--sp-8);
-  background: linear-gradient(
-    135deg,
-    var(--surface),
-    var(--pink-100),
-    var(--surface)
-  );
+  background: var(--surface);
   border-color: var(--line-strong);
 }
-.home-timer-card::before,
-.home-timer-card::after {
-  content: "✦";
-  position: absolute;
-  top: 42%;
-  color: var(--pink-300);
-  font-size: 44px;
-  pointer-events: none;
+.home-timer-card.has-open-menu { z-index: 5; }
+.home-timer-focus-title {
+  font-size: var(--fs-2xl);
+  text-align: center;
+  margin: var(--sp-2) 0 var(--sp-5);
 }
-.home-timer-card::before {
-  left: 9%;
-  transform: rotate(-12deg);
-}
-.home-timer-card::after {
-  right: 9%;
-  top: 57%;
-  font-size: 28px;
-  transform: rotate(12deg);
+.home-timer-settings {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: var(--sp-5);
+  width: min(100%, 640px);
 }
 .home-timer-options {
-  display: flex;
-  justify-content: center;
-  gap: var(--sp-5);
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: 100%;
+  gap: var(--sp-3);
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 .home-option {
   display: flex;
-  align-items: center;
-  gap: var(--sp-3);
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  gap: var(--sp-2);
   color: var(--text-sub);
   font-size: var(--fs-sm);
   font-weight: 600;
 }
-.home-option .select {
-  width: auto;
-  min-width: 100px;
-  background: var(--surface);
-}
-#timerSubject {
-  max-width: 230px;
-}
+/* 통계 페이지의 과목 선택창과 같은 스타일. 홈 목록은 이름만 표시합니다. */
+.home-timer-picker { position: relative; width: 100%; min-width: 0; }
+.home-timer-select { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); width: 100%; min-height: 44px; padding: var(--sp-1) var(--sp-2) var(--sp-1) var(--sp-3); border: 1px solid var(--line-strong); border-radius: var(--r-md); background: var(--surface); text-align: left; font-size: var(--fs-md); font-weight: 400; color: var(--text); }
+.home-timer-select > span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.home-timer-select:hover:not(:disabled), .home-timer-select[aria-expanded="true"] { border-color: var(--pink-500); }
+.home-timer-select:disabled { cursor: not-allowed; opacity: .55; }
+.home-timer-chevron { display: grid; place-items: center; flex: none; width: 30px; height: 30px; border-radius: var(--r-sm); background: var(--pink-100); color: var(--pink-700); }
+.home-timer-chevron::before { content: ""; width: 8px; height: 8px; border-bottom: 2px solid currentColor; border-right: 2px solid currentColor; transform: translateY(-2px) rotate(45deg); transition: transform .15s var(--ease); }
+.home-timer-select[aria-expanded="true"] .home-timer-chevron::before { transform: translateY(2px) rotate(225deg); }
+.home-timer-menu { position: absolute; z-index: 5; top: calc(100% + var(--sp-2)); right: 0; width: 100%; padding: var(--sp-3); border: 1px solid var(--line-strong); border-radius: var(--r-md); background: var(--surface); box-shadow: var(--shadow-pop); color: var(--text); }
+.home-timer-menu-options { display: flex; flex-direction: column; gap: var(--sp-1); max-height: min(280px, 50vh); overflow-y: auto; padding: var(--sp-1); margin: 0 calc(-1 * var(--sp-1)); }
+.home-timer-menu-option { width: 100%; min-height: 40px; padding: var(--sp-2); border: 0; border-radius: var(--r-sm); background: transparent; color: var(--text); text-align: left; font-size: var(--fs-md); font-weight: 400; overflow-wrap: anywhere; }
+.home-timer-menu-option:hover, .home-timer-menu-option:focus-visible { background: var(--pink-100); outline: 2px solid var(--pink-300); outline-offset: -2px; }
+.home-timer-menu-option[aria-selected="true"] { background: var(--pink-200); font-weight: 700; }
+@media (prefers-reduced-motion: reduce) { .home-timer-chevron::before { transition: none; } }
+@media (max-width: 600px) { .home-timer-options { grid-template-columns: minmax(0, 1fr); } }
+.home-timer-mode-settings { display: flex; flex-direction: column; align-items: center; min-width: 0; }
+.home-timer-mode { display: inline-flex; gap: var(--sp-1); padding: var(--sp-1); border: 1px solid var(--line); background: var(--pink-50); border-radius: var(--r-md); }
+.home-timer-mode button { min-height: 38px; padding: var(--sp-2) var(--sp-5); border: 0; border-radius: var(--r-sm); background: transparent; color: var(--text-sub); font-size: var(--fs-sm); font-weight: 600; }
+.home-timer-mode button[aria-pressed="true"] { background: var(--pink-200); color: var(--text); }
+.home-timer-mode button:disabled { cursor: not-allowed; opacity: .55; }
 .home-timer-state {
   margin-top: var(--sp-5);
   min-height: 1.6em; /* 안내가 없을 때도 자리를 지켜 숫자가 위아래로 튀지 않게 */
   font-size: var(--fs-sm);
   color: var(--text-sub);
 }
+.home-timer-clock { position: relative; }
+.home-timer-adjust { position: absolute; left: calc(100% + var(--sp-3)); top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: var(--sp-1); }
+.home-timer-step { display: grid; place-items: center; width: 40px; height: 36px; padding: 0; border: 0; border-radius: var(--r-sm); background: transparent; color: var(--pink-700); font-size: var(--fs-xl); line-height: 1; }
+.home-timer-step:disabled { opacity: .4; cursor: not-allowed; }
+.home-timer-step > span { display: inline-block; transition: transform .15s var(--ease); }
+.home-timer-step:hover:not(:disabled) > span, .home-timer-step:focus-visible:not(:disabled) > span { transform: scale(1.18); }
+.home-timer-step:active:not(:disabled) > span { transform: scale(1.35); }
+@media (prefers-reduced-motion: reduce) { .home-timer-step > span { transition: none; } }
+@media (max-width: 600px) { .home-timer-adjust { left: calc(100% + var(--sp-2)); } .home-timer-step { width: 32px; height: 32px; } }
 .home-timer-digits {
   font-family: var(--font);           /* 사이트 전체와 같은 Pretendard */
   font-variant-numeric: tabular-nums; /* 숫자 폭을 같게 해서 초가 바뀔 때 흔들리지 않게 */
-  font-size: clamp(80px, 12vw, 144px);
+  font-size: clamp(96px, 14vw, 168px);
   font-weight: 800;
   line-height: 1.2;
   letter-spacing: -0.02em;
@@ -145,6 +158,8 @@
   position: relative;
   z-index: 1;
 }
+
+
 .home-timer-track {
   width: min(260px, 75%);
   height: 6px;
@@ -165,11 +180,12 @@
   display: flex;
   justify-content: center;
   gap: var(--sp-3);
-  margin-top: var(--sp-5);
+  margin-top: var(--sp-8);
 }
 .home-timer-actions .btn {
+  font-size: var(--fs-md);
   min-width: 140px;
-  min-height: 46px;
+  min-height: 48px;
 }
 .home-timer-help {
   margin-top: var(--sp-4);
@@ -640,20 +656,12 @@
   .home-timer-card {
     padding: var(--sp-5) var(--sp-4);
   }
-  .home-timer-card::before {
-    left: 4%;
-    font-size: 26px;
-  }
-  .home-timer-card::after {
-    right: 4%;
-    font-size: 20px;
-  }
   .home-timer-options {
     gap: var(--sp-3);
   }
   .home-option {
     gap: var(--sp-2);
-    font-size: var(--fs-xs);
+    font-size: var(--fs-sm);
   }
   .home-timer-actions .btn {
     min-width: 116px;
@@ -699,9 +707,6 @@
     align-items: flex-start;
     gap: var(--sp-1);
   }
-  #timerSubject {
-    max-width: 180px;
-  }
   .home-section-note {
     font-size: var(--fs-xs);
   }
@@ -718,9 +723,6 @@
   .home-day {
     border-right: 0;
   }
-  .home-timer-digits {
-    font-size: 80px;
-  }
 }
 
 
@@ -730,3 +732,11 @@
 .home-sum-text b { font-size: var(--fs-lg); font-weight: 800; }
 .home-sum-text small { margin-left: auto; color: var(--text-sub); font-size: var(--fs-xs); }
 .home-sum-bar { width: 100%; }
+
+/* 완료한 할 일 보기: 마우스를 올려도 배경과 글자 색을 유지합니다. */
+#toggleDone:hover { background: transparent; color: var(--text-sub); }
+
+/* 두 측정 방식은 같은 숫자 크기를 쓰며, 작은 화면에서는 긴 시:분:초 표시도 들어가게 조정합니다. */
+@media (max-width: 600px) {
+  .home-timer-digits { font-size: clamp(44px, 14vw, 84px); }
+}

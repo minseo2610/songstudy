@@ -8,7 +8,7 @@
      [{ id, subjectId, subjectName, color, date: 'YYYY-MM-DD', durationMs }]
    홈 타이머 상태: songstudy.home.timer.v1 / 완료 숨기기: songstudy.home.hideDone
    통계 페이지에서도 같은 학습 기록 키를 읽으면 타이머 기록을 재사용할 수 있습니다.
-   새로고침·탭 이동 중에도 실행한 타이머는 종료 시각까지 계속 진행합니다.
+   새로고침·탭 이동 중에도 스톱워치는 계속 측정하고, 타이머는 설정한 종료 시각까지 진행합니다.
    기존 파일은 수정하지 않고 이 페이지의 메뉴 링크만 DOM에서 연결합니다. */
 
 (function () {
@@ -19,6 +19,10 @@
     timer: "songstudy.home.timer.v1",
     hideDone: "songstudy.home.hideDone"
   };
+  const FOCUS_MINUTES = 25;
+  const MIN_FOCUS_MINUTES = 5;
+  const MAX_FOCUS_MINUTES = 180;
+  const FOCUS_STEP_MINUTES = 5;
   const tabId = "home-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
   const $ = (id) => document.getElementById(id);
   const esc = MyUI.escapeHTML;
@@ -28,8 +32,8 @@
   let tickId = null;
   let viewedDate = new Date();
   let openedSubjects = new Set();
-  let initialSubjects = true;
   let storageWarningShown = false;
+  const timerPickerSignatures = {};
 
   function readJSON(key, fallback) {
     try {
@@ -94,9 +98,14 @@
     if (brand) brand.setAttribute("href", routes.home);
   }
 
-  function createTimer(subjectId, minutes) {
+  function createTimer(subjectId, taskId, mode, selectedMinutes) {
+    const subject = MyStudy.getSubject(subjectId);
+    const task = MyStudy.getTasksOf(subjectId).find(function (item) { return item.id === taskId; });
+    const minutes = Number.isInteger(selectedMinutes) && selectedMinutes >= MIN_FOCUS_MINUTES && selectedMinutes <= MAX_FOCUS_MINUTES ? selectedMinutes : FOCUS_MINUTES;
     return {
       version: 1, id: MyStudy.uid("focus-"), subjectId: subjectId || "",
+      mode: mode === "stopwatch" ? "stopwatch" : "focus", elapsedMs: 0,
+      subjectName: subject ? subject.name : "", taskId: task ? task.id : "", taskTitle: task ? task.title : "",
       durationMinutes: minutes, totalMs: minutes * 60000, remainingMs: minutes * 60000,
       running: false, endAt: 0, accountedAt: 0, updatedAt: Date.now(), owner: tabId
     };
@@ -104,11 +113,21 @@
 
   function validTimer(value) {
     return value && value.version === 1 && typeof value.id === "string" &&
-      typeof value.subjectId === "string" && [15, 25, 50].includes(value.durationMinutes) &&
+      typeof value.subjectId === "string" && Number.isInteger(value.durationMinutes) && value.durationMinutes >= 1 && value.durationMinutes <= 180 &&
+      (value.mode === undefined || ["focus", "stopwatch"].includes(value.mode)) &&
+      (value.mode !== "stopwatch" || (Number.isFinite(value.elapsedMs) && value.elapsedMs >= 0)) &&
       value.totalMs === value.durationMinutes * 60000 && Number.isFinite(value.remainingMs) &&
       value.remainingMs >= 0 && value.remainingMs <= value.totalMs &&
       typeof value.running === "boolean" && Number.isFinite(value.endAt) &&
       Number.isFinite(value.accountedAt) && (!value.running || (value.accountedAt > 0 && value.endAt >= value.accountedAt));
+  }
+
+  function timerMode() { return timer.mode === "stopwatch" ? "stopwatch" : "focus"; }
+
+  function timerElapsed() {
+    if (timerMode() === "stopwatch") return timer.elapsedMs + (timer.running ? Math.max(0, Date.now() - timer.accountedAt) : 0);
+    const remaining = timer.running ? Math.max(0, timer.endAt - Date.now()) : timer.remainingMs;
+    return Math.max(0, timer.totalMs - remaining);
   }
 
   function sessions() {
@@ -138,7 +157,8 @@
       let record = records.find(function (item) { return item.id === id; });
       if (!record) {
         record = {
-          id: id, subjectId: timer.subjectId, subjectName: subject ? subject.name : "이전 과목",
+          id: id, subjectId: timer.subjectId, subjectName: subject ? subject.name : timer.subjectName || "이전 과목",
+          taskId: timer.taskId || "", taskTitle: timer.taskTitle || "",
           color: subject ? subject.color : "", date: key, durationMs: 0
         };
         records.push(record);
@@ -157,13 +177,16 @@
       timer = shared;
       return;
     }
-    const end = Math.min(Date.now(), timer.endAt);
+    const stopwatch = timerMode() === "stopwatch";
+    const end = stopwatch ? Date.now() : Math.min(Date.now(), timer.endAt);
     if (end > timer.accountedAt) {
       recordTime(timer.accountedAt, end);
+      if (stopwatch) timer.elapsedMs += end - timer.accountedAt;
       timer.accountedAt = end;
     }
-    timer.remainingMs = Math.max(0, timer.endAt - Date.now());
-    if (timer.remainingMs === 0) {
+    if (stopwatch) timer.endAt = timer.accountedAt;
+    else timer.remainingMs = Math.max(0, timer.endAt - Date.now());
+    if (!stopwatch && timer.remainingMs === 0) {
       timer.running = false;
       $("timerAnnouncement").textContent = "집중 시간이 끝났어요. 공부한 시간을 리포트에 저장했어요.";
       MyUI.toast("집중 완료! 잠깐 쉬어 가도 좋아요.");
@@ -184,21 +207,27 @@
 
   function renderTimer() {
     if (!timer) return;
+    const stopwatch = timerMode() === "stopwatch";
+    const elapsed = timerElapsed();
     const remaining = timer.running ? Math.max(0, timer.endAt - Date.now()) : timer.remainingMs;
-    const seconds = Math.ceil(remaining / 1000);
-    $("timerDisplay").textContent = String(Math.floor(seconds / 60)).padStart(2, "0") + ":" + String(seconds % 60).padStart(2, "0");
-    $("timerTrack").style.setProperty("--value", Math.max(0, Math.min(1, 1 - remaining / timer.totalMs)));
-    $("timerSubject").value = timer.subjectId;
-    $("timerDuration").value = timer.durationMinutes;
-    const inProgress = timer.running || (remaining > 0 && remaining < timer.totalMs);
-    $("timerSubject").disabled = !ready || inProgress;
-    $("timerDuration").disabled = !ready || inProgress;
+    const seconds = stopwatch ? Math.floor(elapsed / 1000) : Math.ceil(remaining / 1000);
+    const minutes = stopwatch ? Math.floor(seconds / 60) % 60 : Math.floor(seconds / 60);
+    const display = (stopwatch ? String(Math.floor(seconds / 3600)).padStart(2, "0") + ":" : "") + String(minutes).padStart(2, "0") + ":" + String(seconds % 60).padStart(2, "0");
+    $("timerDisplay").textContent = display;
+    $("timerDisplay").classList.toggle("is-stopwatch", stopwatch);
+    $("timerDisplay").setAttribute("aria-label", (stopwatch ? "측정한 공부시간 " : "남은 집중 시간 ") + display);
+    $("timerTrack").style.setProperty("--value", stopwatch ? (elapsed % 3600000) / 3600000 : Math.max(0, Math.min(1, 1 - remaining / timer.totalMs)));
+    const inProgress = timer.running || elapsed > 0;
     $("timerStart").disabled = !ready || !timer.subjectId || storageWarningShown;
-    $("timerReset").disabled = !ready || storageWarningShown;
-    $("timerStartLabel").textContent = timer.running ? "일시정지" : remaining === 0 ? "다시 집중" : inProgress ? "이어서 집중" : "집중 시작";
+    $("timerFinish").disabled = !ready || storageWarningShown || elapsed < 1000;
+    $("timerStartLabel").textContent = timer.running ? "일시정지" : inProgress ? "다시 시작" : "시작하기";
+    $("timerStartIcon").innerHTML = timer.running ? '<path d="M8 5v14M16 5v14"></path>' : '<path d="m9 5 10 7-10 7z"></path>';
     const subject = MyStudy.getSubject(timer.subjectId);
-    $("timerState").textContent = !subject ? "과목 관리에서 공부할 과목을 추가해 주세요" : timer.running ? subject.name + "에 집중하고 있어요" : remaining === 0 ? "잘했어요! 오늘의 집중이 차곡차곡 쌓였어요" : inProgress ? "잠시 쉬는 중 · 준비되면 이어서 집중해요" : "";
+    $("timerFocusTitle").textContent = subject ? subject.name : timer.subjectName || "과목 관리에서 과목을 먼저 추가해 주세요.";
+    $("timerState").textContent = !subject ? "과목 관리에서 공부할 과목을 추가해 주세요" : !timer.running && !stopwatch && remaining === 0 ? "잘했어요! 오늘의 집중이 차곡차곡 쌓였어요" : "";
     document.querySelector(".home-timer-card").classList.toggle("is-running", timer.running);
+    renderTimerPickers();
+    renderTimerSettings();
   }
 
   function adoptTimer() {
@@ -217,37 +246,203 @@
         saveTimer();
         $("timerAnnouncement").textContent = "타이머를 일시정지하고 집중 시간을 저장했어요.";
       } else {
-        if (timer.remainingMs === 0) timer = createTimer($("timerSubject").value, Number($("timerDuration").value));
-        if (!MyStudy.getSubject(timer.subjectId)) return;
+        if (timerMode() === "focus" && timer.remainingMs === 0) timer = createTimer(timer.subjectId, timer.taskId, timerMode(), timer.durationMinutes);
+        if (!MyStudy.getSubject(timer.subjectId) && timerElapsed() === 0) return;
         timer.running = true;
-        timer.endAt = Date.now() + timer.remainingMs;
         timer.accountedAt = Date.now();
+        timer.endAt = timerMode() === "stopwatch" ? timer.accountedAt : timer.accountedAt + timer.remainingMs;
         saveTimer();
-        $("timerAnnouncement").textContent = "집중 타이머를 시작했어요.";
+        $("timerAnnouncement").textContent = timerMode() === "stopwatch" ? "스톱워치를 시작했어요." : "타이머를 시작했어요.";
       }
       renderTimer();
       renderReport();
     } catch (error) { storageFailure(error); renderTimer(); }
   }
 
-  function resetTimer() {
+  function finishTimer() {
     try {
       adoptTimer();
       settleTimer();
-      timer = createTimer(timer.subjectId, timer.durationMinutes);
+      const elapsed = timerElapsed();
+      if (elapsed < 1000) return;
+      timer = createTimer(timer.subjectId, timer.taskId, timerMode(), timer.durationMinutes);
       saveTimer();
       renderTimer();
       renderReport();
-      MyUI.toast("타이머를 다시 설정했어요. 공부한 기록은 그대로 남아요.");
+      const message = studyDuration(elapsed) + "의 공부 기록을 저장했어요.";
+      $("timerAnnouncement").textContent = message;
+      MyUI.toast(message);
     } catch (error) { storageFailure(error); renderTimer(); }
   }
 
-  function changeTimerOptions() {
+  function changeTimerOptions(kind, value) {
     try {
-      timer = createTimer($("timerSubject").value, Number($("timerDuration").value));
+      adoptTimer();
+      if (timer.running) { renderTimer(); return; }
+      if (kind === "subject" && (!MyStudy.getSubject(value) || timer.subjectId === value)) return;
+      if (kind === "task" && ((timer.taskId || "") === value || (value && !MyStudy.getTasksOf(timer.subjectId).some(function (task) { return task.id === value; })))) return;
+      timer = createTimer(kind === "subject" ? value : timer.subjectId, kind === "task" ? value : "", timerMode(), timer.durationMinutes);
       saveTimer();
       renderTimer();
     } catch (error) { storageFailure(error); }
+  }
+
+  function renderTimerSettings() {
+    const locked = !ready || storageWarningShown || timer.running;
+    document.querySelectorAll("[data-home-timer-mode]").forEach(function (button) {
+      button.disabled = locked;
+      button.setAttribute("aria-pressed", String(button.dataset.homeTimerMode === timerMode()));
+    });
+    $("timerAdjust").hidden = timerMode() !== "focus";
+    $("timerIncrease").disabled = locked || timer.durationMinutes + FOCUS_STEP_MINUTES > MAX_FOCUS_MINUTES;
+    $("timerDecrease").disabled = locked || timer.durationMinutes - FOCUS_STEP_MINUTES < MIN_FOCUS_MINUTES || timer.remainingMs < FOCUS_STEP_MINUTES * 60000;
+  }
+
+  function adjustTimerMinutes(direction) {
+    if (!ready || storageWarningShown) return;
+    try {
+      adoptTimer();
+      if (timer.running || timerMode() !== "focus") { renderTimer(); return; }
+      const difference = direction * FOCUS_STEP_MINUTES;
+      const nextMinutes = timer.durationMinutes + difference;
+      const nextRemaining = timer.remainingMs + difference * 60000;
+      if (nextMinutes < MIN_FOCUS_MINUTES || nextMinutes > MAX_FOCUS_MINUTES || nextRemaining < 0) { renderTimer(); return; }
+      // 남은 시간과 전체 시간을 함께 바꾸어 이미 공부한 시간은 그대로 유지합니다.
+      timer.durationMinutes = nextMinutes;
+      timer.totalMs = nextMinutes * 60000;
+      timer.remainingMs = nextRemaining;
+      saveTimer();
+      renderTimer();
+      $("timerAnnouncement").textContent = "남은 시간을 5분 " + (direction > 0 ? "늘렸어요. " : "줄였어요. ") + $("timerDisplay").textContent;
+    } catch (error) { storageFailure(error); renderTimer(); }
+  }
+
+  function changeTimerSettings(mode) {
+    if (!ready || storageWarningShown) return;
+    try {
+      adoptTimer();
+      if (timer.running) { renderTimer(); return; }
+      if (!["focus", "stopwatch"].includes(mode)) return;
+      if (mode !== timerMode()) {
+        timer = createTimer(timer.subjectId, timer.taskId, mode, timer.durationMinutes);
+        saveTimer();
+      }
+      renderTimer();
+    } catch (error) { storageFailure(error); renderTimer(); }
+  }
+
+  function bindTimerSettings() {
+    $("timerIncrease").addEventListener("click", function () { adjustTimerMinutes(1); });
+    $("timerDecrease").addEventListener("click", function () { adjustTimerMinutes(-1); });
+    document.querySelectorAll("[data-home-timer-mode]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        changeTimerSettings(button.dataset.homeTimerMode);
+      });
+    });
+  }
+
+  function updateTimerPopupLayer() {
+    document.querySelector(".home-timer-card").classList.toggle("has-open-menu", !$("timerSubjectMenu").hidden || !$("timerTaskMenu").hidden);
+  }
+
+  // 홈 타이머의 두 선택창은 통계 페이지 스타일을 쓰되 이름만 표시합니다.
+  function timerPickerId(kind) { return kind === "subject" ? "timerSubject" : "timerTask"; }
+
+  function renderTimerPickers() {
+    const subjects = MyStudy.getSubjects().map(function (subject) { return { id: subject.id, label: subject.name }; });
+    if (timer.subjectId && !subjects.some(function (subject) { return subject.id === timer.subjectId; })) {
+      subjects.push({ id: timer.subjectId, label: timer.subjectName || "삭제된 과목" });
+    }
+    const tasks = MyStudy.getTasksOf(timer.subjectId).map(function (task) {
+      return { id: task.id, label: task.title + (task.done ? " (완료)" : "") };
+    });
+    if (timer.taskId && !tasks.some(function (task) { return task.id === timer.taskId; })) {
+      tasks.push({ id: timer.taskId, label: timer.taskTitle || "삭제된 할 일" });
+    }
+    const locked = !ready || storageWarningShown || timer.running;
+    renderTimerPicker("subject", subjects.length ? subjects : [{ id: "", label: "등록된 과목이 없어요" }], timer.subjectId, locked || !subjects.length);
+    renderTimerPicker("task", [{ id: "", label: "과목만 기록하기" }].concat(tasks), timer.taskId || "", locked || !timer.subjectId);
+  }
+
+  function renderTimerPicker(kind, options, selectedId, disabled) {
+    const id = timerPickerId(kind);
+    const trigger = $(id);
+    trigger.disabled = disabled;
+    trigger.value = selectedId;
+    trigger.title = timer.running ? "일시정지하면 바꿀 수 있어요" : "";
+    if (disabled) closeTimerPicker(kind);
+    const signature = JSON.stringify([options, selectedId, disabled]);
+    if (timerPickerSignatures[kind] === signature) return;
+    timerPickerSignatures[kind] = signature;
+    const active = document.activeElement;
+    const focusedId = $(id + "Options").contains(active) ? active.dataset.timerOption : undefined;
+    const selected = options.find(function (option) { return option.id === selectedId; }) || options[0];
+    $(id + "Value").textContent = selected ? selected.label : "";
+    $(id + "Options").innerHTML = options.map(function (option) {
+      return '<button class="home-timer-menu-option" type="button" role="option" data-timer-option="' + esc(option.id) + '" tabindex="' + (option.id === selectedId ? 0 : -1) + '" aria-selected="' + (option.id === selectedId) + '">' + esc(option.label) + '</button>';
+    }).join("");
+    if (focusedId !== undefined && !$(id + "Menu").hidden) focusTimerOption(kind, focusedId);
+  }
+
+  function focusTimerOption(kind, value) {
+    const id = timerPickerId(kind);
+    const options = Array.from($(id + "Options").children);
+    const target = options.find(function (option) { return option.dataset.timerOption === value; }) || options.find(function (option) { return option.getAttribute("aria-selected") === "true"; }) || options[0];
+    options.forEach(function (option) { option.tabIndex = option === target ? 0 : -1; });
+    if (target) { target.focus({ preventScroll: true }); target.scrollIntoView({ block: "nearest" }); }
+  }
+
+  function closeTimerPicker(kind, restoreFocus) {
+    const id = timerPickerId(kind);
+    $(id + "Menu").hidden = true;
+    $(id).setAttribute("aria-expanded", "false");
+    updateTimerPopupLayer();
+    if (restoreFocus && !$(id).disabled) $(id).focus({ preventScroll: true });
+  }
+
+  function openTimerPicker(kind) {
+    renderTimerPickers();
+    const id = timerPickerId(kind);
+    if ($(id).disabled) return;
+    ["subject", "task"].forEach(function (other) { if (other !== kind) closeTimerPicker(other); });
+    $(id + "Menu").hidden = false;
+    $(id).setAttribute("aria-expanded", "true");
+    document.querySelector(".home-timer-card").classList.add("has-open-menu");
+    focusTimerOption(kind, $(id).value);
+  }
+
+  function bindTimerPickers() {
+    ["subject", "task"].forEach(function (kind) {
+      const id = timerPickerId(kind);
+      $(id).addEventListener("click", function () { if ($(id + "Menu").hidden) openTimerPicker(kind); else closeTimerPicker(kind, true); });
+      $(id).addEventListener("keydown", function (event) {
+        if (["ArrowDown", "ArrowUp"].includes(event.key)) { event.preventDefault(); openTimerPicker(kind); }
+      });
+      $(id + "Options").addEventListener("click", function (event) {
+        const option = event.target.closest("[data-timer-option]");
+        if (!option) return;
+        closeTimerPicker(kind, true);
+        changeTimerOptions(kind, option.dataset.timerOption);
+      });
+      $(id + "Options").addEventListener("keydown", function (event) {
+        const options = Array.from($(id + "Options").children);
+        const index = options.indexOf(event.target.closest("[data-timer-option]"));
+        const next = event.key === "ArrowDown" ? Math.min(index + 1, options.length - 1) : event.key === "ArrowUp" ? Math.max(0, index - 1) : event.key === "Home" ? 0 : event.key === "End" ? options.length - 1 : -1;
+        if (next >= 0) { event.preventDefault(); focusTimerOption(kind, options[next].dataset.timerOption); }
+      });
+      $(id + "Picker").addEventListener("focusout", function () {
+        requestAnimationFrame(function () { if (!$(id + "Picker").contains(document.activeElement)) closeTimerPicker(kind); });
+      });
+    });
+    document.addEventListener("pointerdown", function (event) {
+      if (!event.target.closest(".home-timer-picker")) { closeTimerPicker("subject"); closeTimerPicker("task"); }
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key !== "Escape") return;
+      ["subject", "task"].forEach(function (kind) {
+        if (!$(timerPickerId(kind) + "Menu").hidden) { event.preventDefault(); closeTimerPicker(kind, true); }
+      });
+    });
   }
 
   function tick() {
@@ -270,17 +465,11 @@
     const options = subjects.map(function (subject) {
       return '<option value="' + esc(subject.id) + '">' + esc(subject.name) + '</option>';
     }).join("");
-    $("timerSubject").innerHTML = options || '<option value="">등록된 과목 없음</option>';
     $("taskSubject").innerHTML = options;
     $("addTask").disabled = !subjects.length;
-    if (timer && !subjects.some(function (subject) { return subject.id === timer.subjectId; })) {
-      if (timer.running && timer.owner === tabId) settleTimer();
-      timer = createTimer(subjects[0] ? subjects[0].id : "", timer.durationMinutes);
+    if (timer && !timer.running && timerElapsed() === 0 && !subjects.some(function (subject) { return subject.id === timer.subjectId; })) {
+      timer = createTimer(subjects[0] ? subjects[0].id : "", "", timerMode(), timer.durationMinutes);
       saveTimer();
-    }
-    if (initialSubjects && subjects.length) {
-      openedSubjects.add(timer.subjectId || subjects[0].id);
-      initialSubjects = false;
     }
   }
 
@@ -452,7 +641,7 @@
       $("loadError").hidden = true;
       const stored = readJSON(KEYS.timer, null);
       const subjects = MyStudy.getSubjects();
-      timer = validTimer(stored) ? stored : createTimer(subjects[0] ? subjects[0].id : "", 25);
+      timer = validTimer(stored) ? stored : createTimer(subjects[0] ? subjects[0].id : "");
       adoptTimer();
       settleTimer();
       populateSubjects();
@@ -471,9 +660,9 @@
 
   function bindEvents() {
     $("timerStart").addEventListener("click", toggleTimer);
-    $("timerReset").addEventListener("click", resetTimer);
-    $("timerSubject").addEventListener("change", changeTimerOptions);
-    $("timerDuration").addEventListener("change", changeTimerOptions);
+    $("timerFinish").addEventListener("click", finishTimer);
+    bindTimerPickers();
+    bindTimerSettings();
     $("retryLoad").addEventListener("click", loadData);
     $("subjectList").addEventListener("change", changeTask);
     $("weekGrid").addEventListener("change", changeTask);

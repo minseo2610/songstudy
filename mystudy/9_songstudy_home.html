@@ -48,24 +48,25 @@
               </h2>
             </div>
             <div class="card home-timer-card">
-              <div class="home-timer-options">
-                <label class="home-option" for="timerSubject"
-                  >공부할 과목
-                  <select class="select" id="timerSubject" disabled>
-                    <option value="">과목 불러오는 중</option>
-                  </select>
-                </label>
-                <label class="home-option" for="timerDuration"
-                  >집중 시간
-                  <select class="select" id="timerDuration" disabled>
-                    <option value="15">15분</option>
-                    <option value="25" selected>25분</option>
-                    <option value="50">50분</option>
-                  </select>
-                </label>
+              <h3 class="home-timer-focus-title" id="timerFocusTitle">어떤 과목을 공부할까요?</h3>
+              <div class="home-timer-settings">
+                <div class="home-timer-options">
+                <div class="home-option"><span id="timerSubjectLabel">과목</span><div class="home-timer-picker" id="timerSubjectPicker">
+                  <button class="home-timer-select" id="timerSubject" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="timerSubjectOptions" aria-labelledby="timerSubjectLabel timerSubjectValue" disabled><span id="timerSubjectValue">과목 불러오는 중</span><span class="home-timer-chevron" aria-hidden="true"></span></button>
+                  <div class="home-timer-menu" id="timerSubjectMenu" hidden><div class="home-timer-menu-options" id="timerSubjectOptions" role="listbox" aria-labelledby="timerSubjectLabel"></div></div>
+                </div></div>
+                <div class="home-option"><span id="timerTaskLabel">할 일</span><div class="home-timer-picker" id="timerTaskPicker">
+                  <button class="home-timer-select" id="timerTask" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="timerTaskOptions" aria-labelledby="timerTaskLabel timerTaskValue" disabled><span id="timerTaskValue">과목만 기록하기</span><span class="home-timer-chevron" aria-hidden="true"></span></button>
+                  <div class="home-timer-menu" id="timerTaskMenu" hidden><div class="home-timer-menu-options" id="timerTaskOptions" role="listbox" aria-labelledby="timerTaskLabel"></div></div>
+                </div></div>
+                </div>
+                <div class="home-timer-mode-settings" id="homeTimerSettings">
+                  <div class="home-timer-mode" role="group" aria-label="시간 측정 방식"><button type="button" data-home-timer-mode="stopwatch" aria-pressed="false" disabled>스톱워치</button><button type="button" id="homeTimerMode" data-home-timer-mode="focus" aria-pressed="true" disabled>타이머</button></div>
+                </div>
               </div>
               <p class="home-timer-state" id="timerState">
               </p>
+              <div class="home-timer-clock">
               <div
                 class="home-timer-digits num"
                 id="timerDisplay"
@@ -74,6 +75,8 @@
                 aria-live="off"
               >
                 25:00
+              </div>
+              <div class="home-timer-adjust" id="timerAdjust" role="group" aria-label="타이머 시간 조절"><button class="home-timer-step" id="timerIncrease" type="button" aria-label="5분 늘리기" title="5분 늘리기" aria-controls="timerDisplay" disabled><span aria-hidden="true">△</span></button><button class="home-timer-step" id="timerDecrease" type="button" aria-label="5분 줄이기" title="5분 줄이기" aria-controls="timerDisplay" disabled><span aria-hidden="true">▽</span></button></div>
               </div>
               <div class="home-timer-track" aria-hidden="true">
                 <span id="timerTrack"></span>
@@ -85,10 +88,10 @@
                   type="button"
                   disabled
                 >
-                  <span id="timerStartLabel">집중 시작</span>
+                  <svg class="icon" id="timerStartIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 10 7-10 7z"></path></svg><span id="timerStartLabel">시작하기</span>
                 </button>
-                <button class="btn" id="timerReset" type="button" disabled>
-                  다시 설정
+                <button class="btn" id="timerFinish" type="button" disabled>
+                  <svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg>기록하기
                 </button>
               </div>
               <p class="sr-only" id="timerAnnouncement" role="status"></p>
