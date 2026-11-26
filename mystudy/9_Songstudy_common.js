@@ -22,6 +22,7 @@ const MyUI = (() => {
     x: '<path d="M6 6l12 12M18 6L6 18"/>',
     check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
     "chevron-right": '<path d="M9 5l7 7-7 7"/>',
+    undo: '<path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
     star: '<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>',
     heart: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
   };
@@ -96,7 +97,7 @@ const MyUI = (() => {
       toastEl = document.createElement("div");
       toastEl.className = "toast";
       toastEl.setAttribute("role", "status");
-      toastEl.innerHTML = `<span class="toast-msg"></span><button class="toast-action" type="button" hidden></button>`;
+      toastEl.innerHTML = `<span class="toast-icon" aria-hidden="true">${icon("check")}</span><span class="toast-msg"></span><button class="toast-action" type="button" hidden></button>`;
       document.body.append(toastEl);
 
       toastEl.addEventListener("mouseenter", pauseToastTimer);
@@ -110,13 +111,16 @@ const MyUI = (() => {
     btn.hidden = !actionLabel;
     btn.onclick = null;
     if (actionLabel) {
-      btn.textContent = actionLabel;
+      // 되돌리기는 구부러진 뒤로 화살표와 함께
+      btn.innerHTML = `${/되돌리기/.test(actionLabel) ? icon("undo") : ""}<span>${escapeHTML(actionLabel)}</span>`;
       btn.onclick = () => {
         hideToast();
         onAction();
       };
     }
 
+    toastEl.classList.remove("is-show");
+    void toastEl.offsetWidth; // 연달아 떠도 다시 떠오르게
     toastEl.classList.add("is-show");
     toastDuration = actionLabel ? 9000 : 2500;
     startToastTimer();

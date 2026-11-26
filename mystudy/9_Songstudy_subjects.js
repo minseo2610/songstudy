@@ -79,7 +79,7 @@ function cardHTML(subject, tasks) {
 
       <div class="subject-end">
         ${exam ? `<span class="${exam.dd.className}">${exam.dd.label}</span>` : ""}
-        <a class="icon-btn subject-more" href="${detailURL}" aria-label="${esc(subject.name)} 자세히 보기" title="자세히 보기">${icon("chevron-right")}</a>
+        <a class="icon-btn subject-more" href="${detailURL}" aria-label="${esc(subject.name)} 자세히 보기">${icon("chevron-right")}</a>
       </div>
 
     </li>`;
@@ -295,9 +295,9 @@ function askDeleteSubject(subjectId) {
   if (!subject) return;
   const count = MyStudy.getTasksOf(subjectId).length;
   openConfirm({
-    title: "과목 삭제",
-    text: `'${subject.name}' 과목과 할 일 ${count}개, 시험 ${subject.exams.length}개가 함께 삭제돼요.`,
-    okLabel: "삭제",
+    title: "정말 삭제하시겠어요?",
+    text: `'${subject.name}' 과목과 할 일 ${count}개, 시험 ${subject.exams.length}개가 삭제돼요.`,
+    okLabel: "삭제하기",
     onOk: () => {
       MyStudy.saveSubjects(MyStudy.getSubjects().filter((s) => s.id !== subjectId));
       MyStudy.saveTasks(MyStudy.getTasks().filter((t) => t.subjectId !== subjectId));
@@ -310,9 +310,9 @@ function askDeleteSubject(subjectId) {
 
 function askReset() {
   openConfirm({
-    title: "예시 데이터로 초기화",
+    title: "예시 데이터로 되돌릴까요?",
     text: "지금까지 입력한 과목과 할 일이 모두 지워지고 예시 데이터로 바뀌어요.",
-    okLabel: "초기화",
+    okLabel: "초기화하기",
     onOk: async () => {
       await MyStudy.reset();
       render();

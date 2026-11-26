@@ -109,7 +109,8 @@
               <h2 class="card-title" id="taskTitle">할 일</h2>
 
               <ul class="urgency-legend" aria-label="마감 색 띠 안내">
-                <li><span class="urgency-swatch urg-high" aria-hidden="true"></span>1일 이내·지남</li>
+                <li><span class="urgency-swatch urg-over" aria-hidden="true"></span>지남</li>
+                <li><span class="urgency-swatch urg-high" aria-hidden="true"></span>1일 이내</li>
                 <li><span class="urgency-swatch urg-mid" aria-hidden="true"></span>3일 이내</li>
                 <li><span class="urgency-swatch urg-low" aria-hidden="true"></span>여유</li>
               </ul>
@@ -135,6 +136,7 @@
               </button>
             </div>
             <div id="scoreView"></div>
+            <p class="sr-only" id="scoreLive" aria-live="polite"></p>
           </section>
         </div>
       </main>
@@ -210,6 +212,15 @@
         <button class="btn btn-primary" type="submit">추가</button>
       </div>
     </form>
+  </dialog>
+
+  <dialog class="modal modal-confirm" id="confirmModal" aria-labelledby="confirmTitle" aria-describedby="confirmText">
+    <h2 class="confirm-title" id="confirmTitle">정말 삭제하시겠어요?</h2>
+    <p class="confirm-text" id="confirmText"></p>
+    <div class="confirm-actions">
+      <button class="btn confirm-cancel" type="button" data-close>취소하기</button>
+      <button class="btn btn-strong confirm-ok" type="button" id="confirmOk">삭제하기</button>
+    </div>
   </dialog>
 
   <dialog class="modal" id="catModal" aria-labelledby="catModalTitle">

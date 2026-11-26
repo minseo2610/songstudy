@@ -29,7 +29,17 @@ const MySubjectForm = (() => {
           </div>
         </div>
 
-        <p class="form-section-title">수업 정보 <span>선택</span></p>
+        <div class="form-row">
+          <label class="form-row-label" for="editMemo">메모</label>
+          <div class="form-row-field">
+            <textarea class="input textarea" id="editMemo" name="memo" maxlength="100" rows="2"
+                      placeholder="예: 출석은 전자출결, 교재 3판" aria-describedby="editMemoCount"></textarea>
+            <span class="count count-end" id="editMemoCount" aria-live="polite"><b>0</b>/100</span>
+          </div>
+        </div>
+
+        <details class="form-section" id="infoSection">
+          <summary class="form-section-title">수업 정보 <span>교수님 · 강의실 · 시간 · 학점 (선택)</span></summary>
 
         <div class="form-row">
           <label class="form-row-label" for="editProf">교수님</label>
@@ -109,16 +119,10 @@ const MySubjectForm = (() => {
           </div>
         </div>
 
-        <div class="form-row">
-          <label class="form-row-label" for="editMemo">메모</label>
-          <div class="form-row-field">
-            <textarea class="input textarea" id="editMemo" name="memo" maxlength="100" rows="2"
-                      placeholder="예: 출석은 전자출결, 교재 3판" aria-describedby="editMemoCount"></textarea>
-            <span class="count count-end" id="editMemoCount" aria-live="polite"><b>0</b>/100</span>
-          </div>
-        </div>
+        </details>
 
-        <p class="form-section-title" id="gradingSection">성적 기준 <span>선택</span></p>
+        <details class="form-section" id="gradingSection">
+          <summary class="form-section-title">성적 기준 <span>평가 비율 · 감점 기준 (선택)</span></summary>
 
         <div class="form-row">
           <span class="form-row-label" id="gradeLabel">평가 비율</span>
@@ -149,6 +153,7 @@ const MySubjectForm = (() => {
             <span class="count count-end" id="editRulesCount" aria-live="polite"><b>0</b>/200</span>
           </div>
         </div>
+        </details>
       </div>
 
       <div class="modal-foot">
@@ -175,6 +180,7 @@ const MySubjectForm = (() => {
       gradeSum: modal.querySelector("#gradeSum"),
       gradeError: modal.querySelector("#gradeError"),
       gradingSection: modal.querySelector("#gradingSection"),
+      infoSection: modal.querySelector("#infoSection"),
     };
     MyUI.enhanceDates(modal);
     bind();
@@ -229,6 +235,7 @@ const MySubjectForm = (() => {
   }
 
   function showGradeError(message, field) {
+    els.gradingSection.open = true;
     els.gradeError.textContent = message;
     if (field) {
       field.setAttribute("aria-invalid", "true");
@@ -269,6 +276,9 @@ const MySubjectForm = (() => {
     els.nameError.textContent = "";
     els.gradeError.textContent = "";
     form.querySelectorAll("[aria-invalid]").forEach((el) => el.removeAttribute("aria-invalid"));
+    const hasInfo = Boolean(info.professor || info.building || info.room || info.days?.length || info.start || info.end || info.credits);
+    els.infoSection.open = hasInfo;
+    els.gradingSection.open = focusGrading || Boolean(grading.items?.length || grading.rules);
     els.modal.showModal();
     if (focusGrading) {
       els.gradingSection.scrollIntoView({ block: "start" });

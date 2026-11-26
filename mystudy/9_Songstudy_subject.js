@@ -29,6 +29,9 @@ const els = {
   examForm: document.querySelector("#examForm"),
   examError: document.querySelector("#examError"),
   catModal: document.querySelector("#catModal"),
+  confirmModal: document.querySelector("#confirmModal"),
+  confirmText: document.querySelector("#confirmText"),
+  confirmOk: document.querySelector("#confirmOk"),
   catForm: document.querySelector("#catForm"),
   catNameCount: document.querySelector("#catNameCount"),
   catError: document.querySelector("#catError"),
@@ -183,7 +186,16 @@ function onScoreChange(e) {
   items[i] = { ...items[i], score };
   updateSubject({ grading: { ...subject.grading, items } });
   renderGrading(MyStudy.getSubject(subjectId));
-  els.scoreView.querySelector(`[data-score="${i}"]`)?.focus();
+  const again = els.scoreView.querySelector(`[data-score="${i}"]`);
+  again?.focus();
+  // 저장됐다는 표시: 입력칸 옆에 잠깐 '✓ 저장됨', 화면 읽기 프로그램에도 알림
+  const mark = document.createElement("span");
+  mark.className = "score-saved";
+  mark.setAttribute("aria-hidden", "true");
+  mark.innerHTML = `${icon("check")}저장했어요`;
+  again?.closest(".score-input").append(mark);
+  setTimeout(() => mark.remove(), 1800);
+  document.querySelector("#scoreLive").textContent = `${items[i].name} 점수를 저장했어요.`;
 }
 
 const MAX_WALK_DOTS = 12;
@@ -241,20 +253,18 @@ function prepCategoryOf(exam, subject) {
   return subject.categories.find((c) => c.id === exam.catId) || null;
 }
 
+// 시험별 준비 진행률. 준비할 일이 없어도 '준비 0/0' + 빈 회색 막대로 같은 줄 높이를 유지
 function examPrepHTML(exam, tasks, subject) {
   const cat = prepCategoryOf(exam, subject);
-  if (!cat) return "";
-  const catKey = cat.id;
-  const p = MyStudy.progress(tasks.filter((t) => t.category === catKey));
-  if (p.total === 0) {
-    return `<button class="link-btn exam-prep-add" type="button" data-prep="${esc(catKey)}">준비할 일 추가하기</button>`;
-  }
-  const doneMark = p.left === 0 ? `<svg class="icon" aria-hidden="true"><use href="#i-star"></use></svg>` : "";
+  const p = MyStudy.progress(cat ? tasks.filter((t) => t.category === cat.id) : []);
+  const complete = p.total > 0 && p.left === 0;
+  const doneMark = complete ? `<svg class="icon" aria-hidden="true"><use href="#i-star"></use></svg>` : "";
   return `
-    <span class="exam-prep${p.left === 0 ? " is-complete" : ""}">
+    <span class="exam-prep${complete ? " is-complete" : ""}${p.total ? "" : " is-empty"}">
       <span class="exam-prep-text num">${doneMark}준비 ${p.done}/${p.total}</span>
       <span class="progress" role="progressbar" aria-label="${esc(exam.name)} 준비 진행률"
-            aria-valuemin="0" aria-valuemax="100" aria-valuenow="${p.percent}"><span style="--value: ${p.percent / 100}"></span></span>
+            aria-valuemin="0" aria-valuemax="100" aria-valuenow="${p.percent}"
+            ${p.total ? "" : `aria-valuetext="준비할 일 없음"`}><span style="--value: ${p.percent / 100}"></span></span>
     </span>`;
 }
 
@@ -269,7 +279,7 @@ function renderExams(subject, tasks) {
   els.examChips.innerHTML = exams.length === 0
     ? `<li class="exam-empty">등록된 시험이 없어요.</li>`
     : exams.map((e) => {
-      const dd = e.date ? MyStudy.dday(e.date) : { className: "badge badge-plain", label: "미정" };
+      const dd = e.date ? ddayOf(e.date) : { className: "badge badge-plain", label: "미정" };
       return `
         <li class="exam-chip" data-id="${esc(e.id)}">
           <span class="${dd.className}">${dd.label}</span>
@@ -292,9 +302,16 @@ function showExamError(message, field) {
   }
 }
 
+// 지난 날짜는 'D+3' 대신 '3일 지남'으로
+function ddayOf(dateStr) {
+  const dd = MyStudy.dday(dateStr);
+  return dd.diff < 0 ? { ...dd, label: `${-dd.diff}일 지남`, className: "badge dday-past" } : dd;
+}
+
 function urgencyClass(task) {
   if (task.done || !task.dueDate) return "";
   const { diff } = MyStudy.dday(task.dueDate);
+  if (diff < 0) return "urg-over";
   if (diff <= 1) return "urg-high";
   if (diff <= 3) return "urg-mid";
   return "urg-low";
@@ -303,13 +320,13 @@ function urgencyClass(task) {
 function taskHTML(task) {
   let due = "";
   if (task.dueDate) {
-    const dd = MyStudy.dday(task.dueDate);
-    const urgent = !task.done && dd.diff <= 1;
+    const dd = ddayOf(task.dueDate);
+    const state = task.done ? "" : dd.diff < 0 ? "is-overdue" : dd.diff <= 1 ? "is-urgent" : "";
 
     due = `
       <span class="task-meta">
         <span>${MyStudy.formatDate(task.dueDate, false)}</span>
-        ${task.done ? "" : `<span class="${urgent ? "is-urgent" : ""}">${dd.label}</span>`}
+        ${task.done ? "" : `<span class="${state}">${dd.label}</span>`}
       </span>`;
   }
   const checkId = `chk-${esc(task.id)}`;
@@ -476,12 +493,6 @@ function onExamSubmit(e) {
 }
 
 function onExamClick(e) {
-
-  const prepBtn = e.target.closest("[data-prep]");
-  if (prepBtn) {
-    openTaskModal(prepBtn.dataset.prep, prepBtn);
-    return;
-  }
   const btn = e.target.closest('[data-action="remove-exam"]');
   if (!btn) return;
   const id = btn.closest(".exam-chip").dataset.id;
@@ -533,10 +544,31 @@ function onCatSubmit(e) {
   MyUI.toast(`'${name}' 카테고리를 만들었어요.`);
 }
 
+// 할 일이 들어 있는 카테고리는 확인 창을 거친 뒤 삭제
+let confirmAction = null;
+function openConfirm(text, onOk, opener) {
+  els.confirmText.textContent = text;
+  confirmAction = onOk;
+  els.confirmModal.showModal();
+  els.confirmModal.querySelector("[data-close]").focus(); // 위험한 동작이라 '취소'에 먼저 초점
+  els.confirmModal.onclose = () => { if (confirmAction && opener?.isConnected) opener.focus(); confirmAction = null; };
+}
+
 function onCatRemove(e) {
   const btn = e.target.closest("[data-remove-cat]");
   if (!btn) return;
   const catId = btn.dataset.removeCat;
+  const subject = MyStudy.getSubject(subjectId);
+  const cat = subject.categories.find((c) => c.id === catId);
+  const count = MyStudy.getTasksOf(subjectId).filter((t) => t.category === catId).length;
+  if (count === 0) {
+    removeCategory(catId);
+    return;
+  }
+  openConfirm(`'${cat.name}' 카테고리와 할 일 ${count}개가 삭제돼요.`, () => removeCategory(catId), btn);
+}
+
+function removeCategory(catId) {
   const subject = MyStudy.getSubject(subjectId);
   const index = subject.categories.findIndex((c) => c.id === catId);
   const cat = subject.categories[index];
@@ -726,7 +758,13 @@ function bindEvents() {
   els.groupGrid.addEventListener("click", onCatRemove);
   document.querySelector("#addCatBtn").addEventListener("click", openCatModal);
 
-  [els.examModal, els.catModal, els.taskModal].forEach((dialog) => {
+  els.confirmOk.addEventListener("click", () => {
+    const action = confirmAction;
+    confirmAction = null;
+    els.confirmModal.close();
+    action?.();
+  });
+  [els.examModal, els.catModal, els.taskModal, els.confirmModal].forEach((dialog) => {
     dialog.addEventListener("click", (e) => {
       if (e.target.closest("[data-close]") || e.target === dialog) dialog.close();
     });
@@ -748,7 +786,7 @@ function bindEvents() {
   els.taskModal.addEventListener("close", () => {
 
     if (!taskModalOpener) return;
-    const key = taskModalOpener.dataset.addTask || taskModalOpener.dataset.prep;
+    const key = taskModalOpener.dataset.addTask;
     if (taskModalOpener.isConnected) taskModalOpener.focus();
     else focusFirst(`[data-add-task="${CSS.escape(key)}"]`);
   });

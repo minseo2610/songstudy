@@ -132,16 +132,12 @@
     </form>
   </dialog>
 
-  <dialog class="modal" id="confirmModal" aria-labelledby="confirmTitle" aria-describedby="confirmText">
-    <div class="modal-head">
-      <h2 class="modal-title" id="confirmTitle">과목 삭제</h2>
-    </div>
-    <div class="modal-body">
-      <p id="confirmText"></p>
-    </div>
-    <div class="modal-foot">
-      <button class="btn" type="button" data-close>취소</button>
-      <button class="btn btn-danger" type="button" id="confirmOk">삭제</button>
+  <dialog class="modal modal-confirm" id="confirmModal" aria-labelledby="confirmTitle" aria-describedby="confirmText">
+    <h2 class="confirm-title" id="confirmTitle">정말 삭제하시겠어요?</h2>
+    <p class="confirm-text" id="confirmText"></p>
+    <div class="confirm-actions">
+      <button class="btn confirm-cancel" type="button" data-close>취소하기</button>
+      <button class="btn btn-strong confirm-ok" type="button" id="confirmOk">삭제하기</button>
     </div>
   </dialog>
 
