@@ -1,7 +1,7 @@
 /* Songtudy · 통계 리포트
    수업 내용: Date·배열·객체·함수, DOM, addEventListener, JSON·Fetch·웹 스토리지.
    공통 MyStudy.init()으로 과목 JSON을 불러옵니다. 별도 서버나 라이브러리는 쓰지 않습니다.
-   기존 홈 타이머와 timer.html의 기록을 읽기만 하며 원본 기록은 수정하지 않습니다.
+   기존 홈 타이머와 9_Songstudy_timer.html의 기록을 읽기만 하며 원본 기록은 수정하지 않습니다.
    추가로 학습한 SVG path의 원호로 도넛을 그립니다. */
 (() => {
   "use strict";
@@ -120,7 +120,7 @@
       }
     }
 
-    // timer.html과 같은 기준: 기록하기를 누른 종료 날짜에 공부시간을 집계합니다.
+    // 9_Songstudy_timer.html과 같은 기준: 기록하기를 누른 종료 날짜에 공부시간을 집계합니다.
     const sessions = readJSON(KEYS.timerSessions, []);
     if (Array.isArray(sessions)) sessions.forEach((row) => {
       if (!row || typeof row.id !== "string" || typeof row.subjectId !== "string" || !Number.isFinite(row.durationSeconds) || row.durationSeconds <= 0 || typeof row.endedAt !== "string" || Number.isNaN(Date.parse(row.endedAt))) return;

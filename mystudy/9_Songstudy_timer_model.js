@@ -1,4 +1,3 @@
-/* DOM에서 분리한 시간 계산. 경과 시간은 실제 시각 차이로 계산합니다. */
 const TimerModel = (() => {
   function create({ mode = "stopwatch", durationSeconds = 1500, subjectId = "", taskId = "", subjectName = "", taskTitle = "" } = {}) {
     return { mode, durationSeconds, subjectId, taskId, subjectName, taskTitle, accumulatedMs: 0, runningSince: null, startedAt: null, pausedAt: null, sessionId: null };

@@ -1,9 +1,6 @@
 @charset "UTF-8";
 /* 타이머·주간 플래너와 같은 공통 바탕, 종이 카드, 분홍 포인트를 사용합니다.
    body와 window-frame의 배경은 공통 CSS의 값을 그대로 따릅니다. */
-.report-page {
-  --berry-choco: #6d4936;
-}
 .report-loading {
   height: 460px;
 }
@@ -17,7 +14,6 @@
 }
 .report-page .card-title {
   font-size: var(--fs-lg);
-  color: var(--berry-choco);
 }
 .report-section-head {
   display: flex;
@@ -528,10 +524,10 @@
   line-height: 1;
 }
 .report-calendar-date[aria-current="date"] .report-date-number {
-  background: var(--text);
-  color: var(--surface);
+  background: var(--pink-300);
+  color: var(--text);
   border-radius: var(--r-sm);
-  font-weight: 700;
+  font-weight: 800;
 }
 .report-calendar-date.is-other-month,
 .report-calendar-date:disabled {

@@ -88,7 +88,7 @@
   function connectNavigation() {
     const routes = {
       home: "9_songstudy_home.html", subjects: "9_Songstudy_subjects.html",
-      planner: "weekly.html", timer: "timer.html", report: "9_songstudy_report.html"
+      planner: "9_Songstudy_weekly.html", timer: "9_Songstudy_timer.html", report: "9_songstudy_report.html"
     };
     document.querySelectorAll("[data-nav] .tab").forEach(function (tab, index) {
       const page = MyUI.PAGES[index];

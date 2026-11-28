@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 const context = vm.createContext({});
-vm.runInContext(fs.readFileSync(path.join(__dirname, "../mystudy/timer-model.js"), "utf8"), context);
+vm.runInContext(fs.readFileSync(path.join(__dirname, "../mystudy/9_Songstudy_timer_model.js"), "utf8"), context);
 const timer = vm.runInContext("TimerModel", context);
 const start = Date.parse("2026-11-25T01:00:00Z");
 const settings = { subjectId: "subject-web", subjectName: "웹프로그래밍", taskId: "task-web-final-project", taskTitle: "기말 프로젝트 과제" };

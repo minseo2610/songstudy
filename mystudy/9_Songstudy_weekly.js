@@ -1,4 +1,3 @@
-/* Songtudy · B 담당 주간 플래너. 과목/할 일은 공통 MyStudy 모듈을 사용합니다. */
 (() => {
   const PREF_KEY = "myStudy.planner.preferences";
   const NOTE_KEY = "myStudy.planner.notes";
@@ -19,7 +18,6 @@
   let ready = false;
   let selectedDay = null;
   let selectedTaskId = null;
-  let hoveredTaskId = null;
   let datePickerMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
   function readJSON(key, fallback) {
@@ -112,16 +110,15 @@
     const subject = getSubject(task);
     return `<li class="planner-task ${task.done ? "is-done" : ""}" data-task-card="${esc(task.id)}" data-subject-color="${esc(subject.color)}">
       <label class="check"><input type="checkbox" data-complete-task="${esc(task.id)}" aria-label="${esc(task.title)} 완료" ${task.done ? "checked" : ""}><span class="box" aria-hidden="true">${MyUI.icon("check")}</span></label>
-      <button class="task-open" type="button" data-select-task="${esc(task.id)}" aria-label="${esc(subject.name)} ${esc(task.title)} 선택" aria-expanded="false" aria-controls="task-actions-${esc(task.id)}"><span class="planner-task-subject">${esc(subject.name)}</span><span class="planner-task-title">${esc(task.title)}</span></button>
-      <div class="planner-task-actions" id="task-actions-${esc(task.id)}" hidden>
-        <button class="btn btn-sm" type="button" data-edit-task="${esc(task.id)}" aria-label="${esc(task.title)} 수정">${MyUI.icon("edit")}수정</button>
-        <button class="btn btn-sm btn-danger" type="button" data-delete-task="${esc(task.id)}" aria-label="${esc(task.title)} 삭제">${MyUI.icon("trash")}삭제</button>
-      </div>
+      <button class="task-open" type="button" data-select-task="${esc(task.id)}" aria-label="${esc(subject.name)} ${esc(task.title)} 선택"><span class="planner-task-title">${esc(task.title)}</span><span class="planner-task-subject">${esc(subject.name)}</span></button>
+      <span class="planner-task-tools">
+        <button class="icon-btn" type="button" data-edit-task="${esc(task.id)}" aria-label="${esc(task.title)} 수정" title="수정">${MyUI.icon("edit")}</button>
+        <button class="icon-btn" type="button" data-delete-task="${esc(task.id)}" aria-label="${esc(task.title)} 삭제" title="삭제">${MyUI.icon("trash")}</button>
+      </span>
     </li>`;
   }
 
-  // 선택 상태만 갱신해 메모·키보드 초점이 불필요하게 다시 그려지지 않게 합니다.
-  function syncSelection(focusedElement = document.activeElement) {
+  function syncSelection() {
     els.grid.querySelectorAll("[data-planner-date]").forEach((day) => {
       const selected = day.dataset.plannerDate === selectedDay;
       day.classList.toggle("is-selected", selected);
@@ -129,11 +126,7 @@
       day.querySelector(".day-actions").hidden = !selected;
     });
     els.app.querySelectorAll("[data-task-card]").forEach((card) => {
-      const selected = card.dataset.taskCard === selectedTaskId;
-      const showActions = selected || card.dataset.taskCard === hoveredTaskId || card.contains(focusedElement);
-      card.classList.toggle("is-selected", selected);
-      card.querySelector("[data-select-task]").setAttribute("aria-expanded", showActions);
-      card.querySelector(".planner-task-actions").hidden = !showActions;
+      card.classList.toggle("is-selected", card.dataset.taskCard === selectedTaskId);
     });
   }
 
@@ -186,7 +179,7 @@
   function renderCalendar(week) {
     const year = state.month.getFullYear();
     const month = state.month.getMonth();
-    els.calendarTitle.textContent = `${year}. ${String(month + 1).padStart(2, "0")}`;
+    els.calendarTitle.textContent = `${year}년 ${month + 1}월`;
     const start = new Date(year, month, 1);
     start.setDate(start.getDate() - (start.getDay() + 6) % 7);
     const today = dateKey(new Date());
@@ -201,7 +194,6 @@
 
   function render() {
     if (!ready) return;
-    hoveredTaskId = null;
     const subjects = MyStudy.getSubjects();
     if (state.subjectId !== "all" && !subjects.some((subject) => subject.id === state.subjectId)) state.subjectId = "all";
     const week = MyStudy.getWeek(state.date);
@@ -211,12 +203,16 @@
     const start = toDate(week.startDate);
     const end = toDate(week.endDate);
     els.month.textContent = `${start.getFullYear()}년 ${start.getMonth() + 1}월`;
-    els.title.textContent = `${start.getMonth() + 1}.${String(start.getDate()).padStart(2, "0")} – ${end.getMonth() + 1}.${String(end.getDate()).padStart(2, "0")}`;
+    els.title.textContent = `${start.getMonth() + 1}월 ${start.getDate()}일 – ${end.getMonth() + 1}월 ${end.getDate()}일`;
+    const today = dateKey(new Date());
+    const thisWeekButton = $("thisWeekBtn");
+    const isThisWeek = today >= week.startDate && today <= week.endDate;
+    if (isThisWeek && document.activeElement === thisWeekButton) els.title.focus({ preventScroll: true });
+    thisWeekButton.disabled = isThisWeek;
     els.progress.style.setProperty("--value", progress.percent / 100);
     els.progress.setAttribute("aria-valuenow", progress.percent);
     els.progress.setAttribute("aria-valuetext", `${progress.done}개 / ${progress.total}개 완료`);
     els.progressText.textContent = `(${progress.done}/${progress.total})`;
-    const today = dateKey(new Date());
     const weekdays = ["월", "화", "수", "목", "금", "토", "일"];
     const notes = readJSON(NOTE_KEY, {});
     const note = typeof notes?.[week.startDate] === "string" ? notes[week.startDate] : "";
@@ -262,21 +258,6 @@
   }
 
   $("thisWeekBtn").addEventListener("click", () => selectDate(dateKey(new Date())));
-  els.app.addEventListener("pointerover", (event) => {
-    if (event.pointerType === "touch") return;
-    const card = event.target.closest("[data-task-card]");
-    if (!card || card.contains(event.relatedTarget)) return;
-    hoveredTaskId = card.dataset.taskCard;
-    syncSelection();
-  });
-  els.app.addEventListener("pointerout", (event) => {
-    const card = event.target.closest("[data-task-card]");
-    if (!card || card.contains(event.relatedTarget)) return;
-    if (hoveredTaskId === card.dataset.taskCard) hoveredTaskId = null;
-    syncSelection();
-  });
-  els.app.addEventListener("focusin", () => syncSelection());
-  els.app.addEventListener("focusout", (event) => syncSelection(event.relatedTarget));
   els.app.addEventListener("click", (event) => {
     const button = event.target.closest("button");
     if (!button) {
@@ -309,12 +290,11 @@
   });
   document.addEventListener("keydown", (event) => {
     const focusedTask = document.activeElement?.closest("[data-task-card]");
-    if (event.key !== "Escape" || els.dialog.open || (!selectedDay && !selectedTaskId && !hoveredTaskId && !focusedTask)) return;
+    if (event.key !== "Escape" || els.dialog.open || (!selectedDay && !selectedTaskId && !focusedTask)) return;
     const day = focusedTask?.closest("[data-planner-date]") || Array.from(els.grid.querySelectorAll("[data-planner-date]")).find((item) => item.dataset.plannerDate === selectedDay);
     opener = null;
     selectedDay = null;
     selectedTaskId = null;
-    hoveredTaskId = null;
     (day?.querySelector("[data-select-day]") || els.title).focus({ preventScroll: true });
     syncSelection();
   });

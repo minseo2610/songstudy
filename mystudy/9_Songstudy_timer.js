@@ -1,4 +1,3 @@
-/* Songtudy · B 담당 학습 타이머 */
 (() => {
   const STATE_KEY = "myStudy.timerState";
   const SESSION_KEY = "myStudy.studySessions";
@@ -39,7 +38,7 @@
     soundAudio.play().catch(() => MyUI.toast("사운드를 재생하려면 선택 버튼을 다시 눌러 주세요."));
     els.soundToggle.classList.add("is-playing");
     document.querySelectorAll("[data-sound]").forEach((button) => button.setAttribute("aria-pressed", button.dataset.sound === key));
-    try { localStorage.setItem("myStudy.timerSound", key); } catch { /* 저장 공간이 없는 환경에서도 재생은 계속한다. */ }
+    try { localStorage.setItem("myStudy.timerSound", key); } catch {}
   }
 
   els.soundToggle.addEventListener("click", () => {
@@ -96,7 +95,6 @@
     return `${hours ? `${hours}시간 ` : ""}${minutes}분`;
   }
 
-  // 오늘의 총 공부 시간: hh시간 mm분 ss초
   function totalLabel(seconds) {
     const whole = Math.max(0, Math.floor(seconds));
     const pad = (value) => String(value).padStart(2, "0");
@@ -118,7 +116,7 @@
 
   function renderTimeline(records) {
     const container = ensureTimeline();
-    $("timelineTitle").textContent = `${lastDay.slice(5).replace("-", "/")} \uD0C0\uC784\uD14C\uC774\uBE14`;
+    $("timelineTitle").textContent = `${Number(lastDay.slice(5, 7))}\uC6D4 ${Number(lastDay.slice(8, 10))}\uC77C \uD0C0\uC784\uD14C\uC774\uBE14`;
     const dayStart = new Date(`${lastDay}T00:00:00`).getTime();
     const dayEnd = dayStart + 24 * 60 * 60 * 1000;
     const intervals = records.map((record) => ({
@@ -160,7 +158,6 @@
     els.empty.hidden = records.length > 0;
     els.sessions.innerHTML = records.map((record) => {
       const subject = subjectFor(record);
-      // 과목 색 · 과목명 · 공부한 시간, 정해 둔 할 일이 있으면 아랫줄에 'ㄴ 할 일'
       return `<li class="session-item" data-subject-color="${esc(subject.color)}"><div class="session-head"><span class="subject-dot" aria-hidden="true"></span><span>${esc(subject.name)}</span><strong class="num">${durationLabel(record.durationSeconds)}</strong></div>${record.taskTitle ? `<p class="session-task"><span class="session-task-mark" aria-hidden="true">ㄴ</span><span>${esc(record.taskTitle)}</span></p>` : ""}</li>`;
     }).join("");
     const totals = new Map();
@@ -179,7 +176,6 @@
 
   function renderControls() {
     const subjects = MyStudy.getSubjects();
-    // 측정 중일 때만 설정을 잠근다. 일시정지 중에는 바꿀 수 있고, 바꾸기 전에 측정한 시간을 기록한다.
     const started = state.startedAt !== null;
     const locked = state.runningSince !== null;
     const lockHint = locked ? "일시정지하면 바꿀 수 있어요" : "";
@@ -249,7 +245,6 @@
     }
   }
 
-  // 과목·할 일·측정 방식·집중 시간 변경. 일시정지 중이던 시간은 먼저 기록하고 새 측정으로 바꾼다.
   function changeSettings(patch) {
     if (state.runningSince !== null) { renderControls(); return; }
     if (Object.entries(patch).every(([key, value]) => state[key] === value)) { renderControls(); return; }
