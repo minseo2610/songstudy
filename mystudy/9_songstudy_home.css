@@ -503,7 +503,7 @@
 }
 .home-week-step.is-prev .icon { transform: rotate(180deg); }
 .home-week-controls > .link-btn {
-  min-height: 38px;
+  min-height: 36px;
   font-size: var(--fs-xs);
 }
 .home-week-controls > .link-btn:disabled {
@@ -635,12 +635,6 @@
   flex-wrap: wrap;
   font-size: var(--fs-xs);
   color: var(--text-sub);
-}
-.home-footer {
-  justify-content: space-between;
-}
-.home-footer > span {
-  font-size: var(--fs-xs);
 }
 .home-error {
   display: flex;

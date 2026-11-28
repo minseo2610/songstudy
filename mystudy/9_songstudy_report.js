@@ -365,7 +365,6 @@
       ready = true;
       refresh(true);
       $("reportApp").hidden = false;
-      $("storageNote").hidden = false;
     } catch (error) {
       console.warn("통계 불러오기 실패", error);
       $("loadError").hidden = false;

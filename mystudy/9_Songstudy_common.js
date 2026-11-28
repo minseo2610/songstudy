@@ -68,6 +68,12 @@ const MyUI = (() => {
     bar.innerHTML = `<span class="addr">${icon("heart")}<span>songtudy/<strong data-addr-current>${escapeHTML(path)}</strong></span></span>`;
   }
 
+  function renderFooter() {
+    const footer = document.querySelector("[data-footer]");
+    if (!footer) return;
+    footer.insertAdjacentHTML("afterbegin", "<p>Songtudy · 웹프로그래밍 기말 프로젝트 · 김규린 김민서 이예랑</p>");
+  }
+
   function setAddr(text) {
     const el = document.querySelector("[data-addr-current]");
     if (el) el.textContent = text;
@@ -162,6 +168,7 @@ const MyUI = (() => {
   injectSprite();
   renderNav();
   renderAddrBar();
+  renderFooter();
   enhanceDates();
 
   return { PAGES, icon, escapeHTML, toast, setAddr, enhanceDates, syncDate };

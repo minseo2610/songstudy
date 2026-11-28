@@ -124,7 +124,7 @@ function renderGrading(subject) {
     <ul class="grade-legend">
       ${items.map((it, i) => `<li><i class="tone-${i % GRADE_TONES}" aria-hidden="true"></i>${esc(it.name)} <b class="num">${it.percent}%</b></li>`).join("")}
     </ul>`
-    : `<p class="exam-empty">시험·과제·출석 비율을 적어 두면 어디에 힘을 쏟을지 정하기 쉬워요.</p>`;
+    : `<p class="exam-empty">아직 성적 기준이 없어요.</p>`;
 
   els.scoreSection.hidden = !items.length && !rules;
   if (els.scoreSection.hidden) return;
@@ -396,7 +396,7 @@ function renderGroups(tasks, subject) {
   });
 
   if (subject.categories.length === 0) {
-    els.groupGrid.innerHTML = `<p class="group-empty">과제, 퀴즈 준비처럼 카테고리를 만들고 그 안에 할 일을 넣어 보세요. 오른쪽 위 <b>카테고리 추가</b>를 눌러 시작해요.</p>`;
+    els.groupGrid.innerHTML = `<p class="group-empty">아직 카테고리가 없어요.</p>`;
   }
 }
 

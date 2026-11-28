@@ -75,14 +75,14 @@
 }
 .report-date-label .input {
   width: 156px;
-  min-height: 38px;
+  min-height: 36px;
   padding: var(--sp-1) var(--sp-2);
   font-size: var(--fs-xs);
 }
 .report-date-toolbar > .link-btn,
 .report-calendar-toolbar > .link-btn {
   font-size: var(--fs-xs);
-  min-height: 38px;
+  min-height: 36px;
 }
 .report-calendar-toolbar > .link-btn {
   margin-left: auto;
@@ -669,11 +669,6 @@
   color: var(--text-sub);
   font-size: var(--fs-sm);
 }
-.report-storage-note {
-  color: var(--text-sub);
-  font-size: var(--fs-xs);
-  text-align: center;
-}
 @media (prefers-reduced-motion: reduce) {
   .report-donut-segment,
   .report-ratio-list > li {
@@ -786,9 +781,6 @@
   .report-day-subjects {
     grid-template-columns: minmax(0, 1fr);
     gap: 0;
-  }
-  .report-storage-note {
-    text-align: left;
   }
 }
 @media (max-width: 360px) {
