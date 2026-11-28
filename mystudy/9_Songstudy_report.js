@@ -376,11 +376,11 @@
 
   // 보고서 안의 메뉴만 실제 파일로 연결합니다. 공통 파일은 수정하지 않습니다.
   document.querySelectorAll("[data-nav] .tab").forEach((tab, index) => {
-    if (MyUI.PAGES[index]?.key === "home") tab.href = "9_songstudy_home.html";
-    if (MyUI.PAGES[index]?.key === "report") tab.href = "9_songstudy_report.html";
+    if (MyUI.PAGES[index]?.key === "home") tab.href = "9_Songstudy_home.html";
+    if (MyUI.PAGES[index]?.key === "report") tab.href = "9_Songstudy_report.html";
   });
   const brand = document.querySelector("[data-nav] .brand");
-  if (brand) brand.href = "9_songstudy_home.html";
+  if (brand) brand.href = "9_Songstudy_home.html";
   const ratioBody = document.querySelector(".report-ratio-body");
   ratioBody.addEventListener("pointerover", (event) => {
     if (event.pointerType === "touch") return;
