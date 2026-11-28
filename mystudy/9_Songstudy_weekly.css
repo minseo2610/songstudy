@@ -56,7 +56,7 @@
 .planner-day.is-today .day-number { font-weight: 800; }
 .day-list { display: flex; flex: 1; flex-direction: column; gap: var(--sp-2); padding: var(--sp-3) var(--sp-2); background: repeating-linear-gradient(to bottom, transparent 0, transparent 31px, var(--line) 31px, var(--line) 32px); }
 .day-empty { padding: var(--sp-6) var(--sp-1) 0; color: var(--text-sub); font-size: var(--fs-xs); line-height: 28px; }
-.planner-task { min-width: 0; display: flex; align-items: flex-start; gap: var(--sp-2); padding: var(--sp-2); border: 1px solid var(--line); border-left: 3px solid var(--subject-color, var(--pink-300)); border-radius: var(--r-sm); background: var(--surface); transition: background-color .15s var(--ease), border-color .15s var(--ease); }
+.planner-task { min-width: 0; display: flex; align-items: flex-start; gap: var(--sp-2); padding: var(--sp-2); border: 1px solid var(--line); border-left: 7.5px solid var(--subject-color, var(--pink-300)); border-radius: var(--r-sm); background: var(--surface); transition: background-color .15s var(--ease), border-color .15s var(--ease); }
 .planner-task:hover, .planner-task:focus-within, .planner-task.is-selected { background: var(--pink-100); border-color: var(--pink-500); border-left-color: var(--subject-color, var(--pink-300)); }
 .planner-task-tools { display: flex; flex-shrink: 0; gap: 2px; margin: -3px -3px 0 auto; }
 .planner-task-tools .icon-btn { width: 28px; height: 28px; color: var(--text-sub); transition: background-color .15s var(--ease), color .15s var(--ease); }
